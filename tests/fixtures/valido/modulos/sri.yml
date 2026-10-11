@@ -1,0 +1,9 @@
+nombre: Servicios de red e internet
+codigo: "0375"
+ciclo: ASIR
+curso: 2
+activo: false
+unidades:
+  - id: ut1
+    titulo: DHCP
+    piezas: [procesos-concepto]

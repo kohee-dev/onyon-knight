@@ -1,0 +1,8 @@
+nombre: Tutoría SECRETO-PRIVADO-123
+codigo: "T"
+ciclo: SMR
+curso: 1
+unidades:
+  - id: notas
+    titulo: Notas
+    piezas: [notas-tutoria, procesos-concepto]

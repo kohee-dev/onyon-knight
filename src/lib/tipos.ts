@@ -32,3 +32,45 @@ export interface Ficha {
   cambios?: string;
   titular?: string;
 }
+
+import type { CabeceraModulo, CabeceraPieza } from './esquemas';
+export type { CabeceraModulo, CabeceraPieza };
+
+export type Modo = 'desarrollo' | 'publicacion';
+
+export interface PiezaFuente {
+  id: string;
+  /** Ruta para mensajes: relativa al repo, o `privado:<ruta>`. */
+  archivo: string;
+  rutaAbs: string;
+  datos: CabeceraPieza;
+  cuerpo: string;
+  privado: boolean;
+}
+
+export interface ModuloFuente {
+  id: string;
+  archivo: string;
+  rutaAbs: string;
+  datos: CabeceraModulo;
+  privado: boolean;
+}
+
+export interface Aparicion {
+  modulo: string;
+  unidad: string;
+  tituloModulo: string;
+  tituloUnidad: string;
+}
+
+export interface Catalogo {
+  /** Piezas publicables en el modo dado. */
+  piezas: Map<string, PiezaFuente>;
+  /** Todas las piezas cargadas (incluye borradores), para enlaces y avisos. */
+  todas: Map<string, PiezaFuente>;
+  /** Módulos activos; en publicación, sus unidades ya no contienen borradores. */
+  modulos: ModuloFuente[];
+  apariciones: Map<string, Aparicion[]>;
+  avisos: string[];
+  informe: string[];
+}

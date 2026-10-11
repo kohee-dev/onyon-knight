@@ -1,0 +1,9 @@
+nombre: Administración de sistemas operativos
+codigo: "0374"
+ciclo: ASIR
+curso: 2
+color: "#2f6f9f"
+unidades:
+  - id: ut1
+    titulo: Gestión de procesos
+    piezas: [procesos-concepto, procesos-estados, procesos-linux]

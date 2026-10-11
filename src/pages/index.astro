@@ -1,6 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
+import { cargarFuentes } from '../lib/fuentes';
+// Provisional (Task 3): se sustituye por la portada real en la Task 9.
+const { piezas, modulos } = await cargarFuentes();
 ---
 <Base titulo="Inicio">
   <h1>Onyon Knight</h1>
+  <ul>{modulos.map((m) => <li>{m.datos.nombre}</li>)}</ul>
+  <ul>{piezas.map((p) => <li>{p.datos.titulo}</li>)}</ul>
 </Base>
