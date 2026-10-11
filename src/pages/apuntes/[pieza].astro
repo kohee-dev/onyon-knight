@@ -1,0 +1,32 @@
+---
+import Distintivo from '../../components/Distintivo.astro';
+import Fecha from '../../components/Fecha.astro';
+import Recursos from '../../components/Recursos.astro';
+import Base from '../../layouts/Base.astro';
+import { creditosDe } from '../../lib/creditos';
+import { cargarSitio } from '../../lib/sitio';
+
+export async function getStaticPaths() {
+  const sitio = await cargarSitio();
+  return [...sitio.sueltas.keys()].map((pieza) => ({ params: { pieza } }));
+}
+
+const sitio = await cargarSitio();
+const p = sitio.sueltas.get(Astro.params.pieza!)!;
+const apariciones = sitio.catalogo.apariciones.get(p.fuente.id) ?? [];
+---
+<Base titulo={p.fuente.datos.titulo} descripcion={p.fuente.datos.resumen}>
+  <p class="migas"><a href={sitio.base}>Inicio</a></p>
+  <h1>{p.fuente.datos.titulo} <Distintivo pieza={p.fuente} /></h1>
+  <Fecha fecha={p.fecha} />
+  {apariciones.length > 0 && (
+    <p class="aparece">
+      Aparece en:
+      {apariciones.map((a, i) => (
+        <>{i > 0 && ', '}<a href={`${sitio.base}${a.modulo}/${a.unidad}/`}>{a.modulo.toUpperCase()} · {a.tituloUnidad}</a></>
+      ))}
+    </p>
+  )}
+  <article class="pieza contenido" set:html={p.render.html} />
+  <Recursos creditos={creditosDe([p])} />
+</Base>

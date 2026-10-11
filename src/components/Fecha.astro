@@ -1,0 +1,8 @@
+---
+import { formatearFecha } from '../lib/fechas';
+interface Props { fecha: Date | null }
+const { fecha } = Astro.props;
+---
+{fecha
+  ? <time class="fecha" datetime={fecha.toISOString()}>{formatearFecha(fecha)}</time>
+  : <span class="fecha fecha-pendiente">{formatearFecha(null)}</span>}

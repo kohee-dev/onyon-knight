@@ -1,9 +1,9 @@
 import { basename, extname, relative, resolve } from 'node:path';
 import { getCollection } from 'astro:content';
+import { raizPrivada as privado } from './raices';
 import type { ModuloFuente, PiezaFuente } from './tipos';
 
 const raiz = process.cwd();
-const privado = process.env.ONYON_PRIVADO ? resolve(process.env.ONYON_PRIVADO) : null;
 
 function rutas(filePath: string | undefined, esPrivado: boolean) {
   const rutaAbs = resolve(raiz, filePath ?? '');

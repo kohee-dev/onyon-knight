@@ -1,0 +1,40 @@
+---
+import Recursos from '../components/Recursos.astro';
+import Base from '../layouts/Base.astro';
+import { licenciaPorId } from '../licencias';
+import { creditosDe } from '../lib/creditos';
+import { cargarSitio } from '../lib/sitio';
+
+const sitio = await cargarSitio();
+const creditos = creditosDe([...sitio.sueltas.values()]);
+---
+<Base titulo="Licencias">
+  <h1>Licencias y fuentes</h1>
+  <p>
+    Salvo indicación expresa, los contenidos de este sitio son © Alejandro Bartolomé y se publican bajo
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es">CC BY-SA 4.0</a>. Cada imagen o recurso de
+    terceros indica su autor, su licencia y su fuente junto a él y en esta página.
+  </p>
+  <Recursos creditos={creditos} titulo="Contenidos" />
+
+  <section class="licencias">
+    <h2>Con qué está hecho este sitio</h2>
+    <div class="tabla">
+      <table>
+        <thead><tr><th>Recurso</th><th>Autor</th><th>Licencia</th></tr></thead>
+        <tbody>
+          {sitio.creditosSitio.map((c) => {
+            const l = licenciaPorId(c.licencia);
+            return (
+              <tr>
+                <td><a href={c.url}>{c.nombre}</a></td>
+                <td>{c.autor}</td>
+                <td>{l?.url ? <a href={l.url}>{l.nombre}</a> : (l?.nombre ?? c.licencia)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</Base>

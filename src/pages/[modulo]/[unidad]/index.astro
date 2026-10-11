@@ -1,0 +1,43 @@
+---
+import Distintivo from '../../../components/Distintivo.astro';
+import Fecha from '../../../components/Fecha.astro';
+import Recursos from '../../../components/Recursos.astro';
+import Base from '../../../layouts/Base.astro';
+import { cargarSitio } from '../../../lib/sitio';
+
+export async function getStaticPaths() {
+  const sitio = await cargarSitio();
+  return sitio.unidades.map((u) => ({ params: { modulo: u.modulo.id, unidad: u.id } }));
+}
+
+const sitio = await cargarSitio();
+const u = sitio.unidades.find((x) => x.modulo.id === Astro.params.modulo && x.id === Astro.params.unidad)!;
+const m = u.modulo;
+---
+<Base titulo={`${u.titulo} · ${m.id.toUpperCase()}`} color={m.datos.color}>
+  <p class="migas"><a href={sitio.base}>Inicio</a> › <a href={`${sitio.base}${m.id}/`}>{m.datos.nombre}</a></p>
+  <header class="unidad-cabecera">
+    <p class="meta">{m.datos.nombre} · {u.id.toUpperCase()}</p>
+    <h1>{u.titulo}</h1>
+    <Fecha fecha={u.fecha} />
+    <a class="boton" href={u.urlPdf} download>Descargar PDF</a>
+  </header>
+
+  <nav class="indice" aria-label="Índice de la unidad">
+    <h2>Índice</h2>
+    <ol>
+      {u.piezas.map((p) => <li><a href={`#${p.fuente.id}`}>{p.fuente.datos.titulo}</a></li>)}
+      <li><a href="#licencias-y-fuentes">Licencias y fuentes</a></li>
+    </ol>
+  </nav>
+
+  {u.piezas.map((p) => (
+    <section class="pieza" id={p.fuente.id}>
+      <h2>{p.fuente.datos.titulo} <Distintivo pieza={p.fuente} /></h2>
+      <Fecha fecha={p.fecha} />
+      <div class="contenido" set:html={p.render.html} />
+    </section>
+  ))}
+
+  <Recursos creditos={u.creditos} />
+</Base>

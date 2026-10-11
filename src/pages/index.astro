@@ -1,11 +1,34 @@
 ---
+import Fecha from '../components/Fecha.astro';
 import Base from '../layouts/Base.astro';
-import { cargarFuentes } from '../lib/fuentes';
-// Provisional (Task 3): se sustituye por la portada real en la Task 9.
-const { piezas, modulos } = await cargarFuentes();
+import { cargarSitio } from '../lib/sitio';
+
+const sitio = await cargarSitio();
+const modulos = sitio.catalogo.modulos.map((m) => {
+  const unidades = sitio.unidades.filter((u) => u.modulo.id === m.id);
+  const fechas = unidades.map((u) => u.fecha).filter((f): f is Date => !!f);
+  return { m, n: unidades.length, fecha: fechas.length ? new Date(Math.max(...fechas.map(Number))) : null };
+});
 ---
-<Base titulo="Inicio">
-  <h1>Onyon Knight</h1>
-  <ul>{modulos.map((m) => <li>{m.datos.nombre}</li>)}</ul>
-  <ul>{piezas.map((p) => <li>{p.datos.titulo}</li>)}</ul>
+<Base titulo="Inicio" descripcion="Apuntes de Formación Profesional de informática">
+  <h1>Apuntes</h1>
+  <ul class="tarjetas">
+    {modulos.map(({ m, n, fecha }) => (
+      <li class="tarjeta" style={m.datos.color ? `--color-modulo: ${m.datos.color}` : undefined}>
+        <a href={`${sitio.base}${m.id}/`}>
+          <span class="tarjeta-sigla">{m.id.toUpperCase()}{m.privado && <span class="distintivo distintivo-privado">Privado</span>}</span>
+          <span class="tarjeta-nombre">{m.datos.nombre}</span>
+        </a>
+        <span class="tarjeta-meta">{m.datos.ciclo} · {m.datos.curso}.º · {n} {n === 1 ? 'unidad' : 'unidades'}</span>
+        <Fecha fecha={fecha} />
+      </li>
+    ))}
+  </ul>
+
+  <h2>Últimos cambios</h2>
+  <ol class="cambios">
+    {sitio.ultimosCambios.map((c) => (
+      <li><a href={c.url}>{c.titulo}</a> <span class="contexto">{c.contexto}</span> <Fecha fecha={c.fecha} /></li>
+    ))}
+  </ol>
 </Base>

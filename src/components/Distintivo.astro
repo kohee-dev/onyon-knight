@@ -1,0 +1,7 @@
+---
+import type { PiezaFuente } from '../lib/tipos';
+interface Props { pieza: PiezaFuente }
+const { pieza } = Astro.props;
+---
+{pieza.privado && <span class="distintivo distintivo-privado">Privado</span>}
+{pieza.datos.borrador && <span class="distintivo distintivo-borrador">Borrador</span>}

@@ -1,0 +1,31 @@
+---
+import Fecha from '../../components/Fecha.astro';
+import Base from '../../layouts/Base.astro';
+import { cargarSitio } from '../../lib/sitio';
+
+export async function getStaticPaths() {
+  const sitio = await cargarSitio();
+  return sitio.catalogo.modulos.map((m) => ({ params: { modulo: m.id } }));
+}
+
+const sitio = await cargarSitio();
+const modulo = sitio.catalogo.modulos.find((m) => m.id === Astro.params.modulo)!;
+const unidades = sitio.unidades.filter((u) => u.modulo.id === modulo.id);
+---
+<Base titulo={modulo.datos.nombre} color={modulo.datos.color}>
+  <p class="migas"><a href={sitio.base}>Inicio</a></p>
+  <h1>{modulo.datos.nombre}</h1>
+  <p class="meta">{modulo.id.toUpperCase()} · {modulo.datos.codigo} · {modulo.datos.ciclo} · {modulo.datos.curso}.º</p>
+  <ol class="unidades">
+    {unidades.map((u) => (
+      <li class="unidad">
+        <div>
+          <a class="unidad-titulo" href={u.url}>{u.titulo}</a>
+          <Fecha fecha={u.fecha} />
+        </div>
+        <ul class="unidad-piezas">{u.piezas.map((p) => <li>{p.fuente.datos.titulo}</li>)}</ul>
+        <a class="boton" href={u.urlPdf} download>PDF</a>
+      </li>
+    ))}
+  </ol>
+</Base>

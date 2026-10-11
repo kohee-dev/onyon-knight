@@ -1,0 +1,50 @@
+---
+import type { Creditos } from '../lib/creditos';
+interface Props { creditos: Creditos; titulo?: string }
+const { creditos, titulo = 'Licencias y fuentes' } = Astro.props;
+const { licenciaTexto: l } = creditos;
+---
+<section class="licencias" id="licencias-y-fuentes">
+  <h2>{titulo}</h2>
+  <p>
+    Texto: © Alejandro Bartolomé, bajo licencia <a href={l.url}>{l.nombre}</a>.
+    Puedes copiarlo y adaptarlo citando la autoría y compartiendo con la misma licencia.
+  </p>
+  {creditos.piezasConOtraLicencia.length > 0 && (
+    <ul>
+      {creditos.piezasConOtraLicencia.map((p) => (
+        <li>«{p.titulo}»: {p.licencia.url ? <a href={p.licencia.url}>{p.licencia.nombre}</a> : p.licencia.nombre}</li>
+      ))}
+    </ul>
+  )}
+  {creditos.bibliografia.length > 0 && (
+    <>
+      <h3>Bibliografía</h3>
+      <ul class="bibliografia">{creditos.bibliografia.map((b) => <li>{b}</li>)}</ul>
+    </>
+  )}
+  {creditos.recursos.length > 0 && (
+    <>
+      <h3>Recursos de terceros</h3>
+      <div class="tabla">
+        <table>
+          <thead><tr><th>Recurso</th><th>Autor</th><th>Licencia</th><th>Fuente</th><th>Cambios</th></tr></thead>
+          <tbody>
+            {creditos.recursos.map(({ alt, ficha: f }) => (
+              <tr>
+                <td>{alt}</td>
+                <td>{f.autor}{f.titular && ` (© ${f.titular})`}</td>
+                <td>
+                  {f.licencia.url ? <a href={f.licencia.url}>{f.licencia.nombre}</a> : f.licencia.nombre}
+                  {f.licencia.noComercial && ' · uso no comercial'}
+                </td>
+                <td>{f.fuente && (/^https?:\/\//.test(f.fuente) ? <a href={f.fuente}>{new URL(f.fuente).hostname}</a> : f.fuente)}</td>
+                <td>{f.cambios ?? '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )}
+</section>
