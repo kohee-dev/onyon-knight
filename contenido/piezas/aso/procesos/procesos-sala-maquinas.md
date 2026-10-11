@@ -1,5 +1,7 @@
 ---
 titulo: "Sala de máquinas"
+tipo: caso
+horas: 4
 borrador: true
 ---
 

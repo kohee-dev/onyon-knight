@@ -1,5 +1,7 @@
 ---
 titulo: "El Espectro de la Máquina"
+tipo: caso
+horas: 9
 borrador: true
 ---
 
