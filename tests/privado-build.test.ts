@@ -27,16 +27,27 @@ import { entornoLimpio } from './util';
 
 async function portadaDev(extra: Record<string, string>): Promise<string> {
   const env = entornoLimpio({ ONYON_CONTENIDO: resolve('tests/fixtures/valido'), ...extra });
-  ejecutar('npx', ['astro', 'dev', '--background', '--port', '4397'], { env, stdio: 'ignore', timeout: 60_000 });
+  const astro = (...args: string[]) => ejecutar('npx', ['astro', 'dev', ...args], { env, encoding: 'utf8', timeout: 60_000 });
+  astro('--background', '--host', '127.0.0.1', '--port', '4397');
   try {
-    for (let i = 0; i < 60; i++) {
-      const html = await fetch('http://localhost:4397/').then((r) => (r.ok ? r.text() : ''), () => '');
+    for (let i = 0; i < 180; i++) {
+      const html = await fetch('http://127.0.0.1:4397/').then((r) => (r.ok ? r.text() : ''), () => '');
       if (html.includes('Onyon Knight')) return html;
       await new Promise((r) => setTimeout(r, 500));
     }
-    throw new Error('astro dev no respondió');
+    let registro = '';
+    try {
+      registro = astro('logs');
+    } catch (e) {
+      registro = String(e);
+    }
+    throw new Error(`astro dev no respondió en 90 s. Registro:\n${registro.slice(-3000)}`);
   } finally {
-    ejecutar('npx', ['astro', 'dev', 'stop'], { env, stdio: 'ignore' });
+    try {
+      astro('stop');
+    } catch {
+      /* ya parado */
+    }
   }
 }
 
