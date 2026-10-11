@@ -1,0 +1,67 @@
+---
+export interface EntradaIndice {
+  id: string;
+  texto: string;
+  /** 0 = título de pieza; 1, 2 = títulos internos. */
+  nivel: number;
+}
+interface Props {
+  entradas: EntradaIndice[];
+}
+const { entradas } = Astro.props;
+---
+<nav class="indice" id="indice" aria-label="Índice">
+  <div class="indice-cabecera">
+    <p class="indice-titulo">Índice</p>
+    <button class="indice-cerrar" type="button" aria-label="Cerrar el índice">×</button>
+  </div>
+  <ol>
+    {entradas.map((e) => <li class={`indice-n${e.nivel}`}><a href={`#${e.id}`}>{e.texto}</a></li>)}
+  </ol>
+</nav>
+<div class="indice-capa" hidden></div>
+
+<script>
+  const nav = document.getElementById('indice');
+  const boton = document.querySelector<HTMLButtonElement>('.indice-boton');
+  const capa = document.querySelector<HTMLElement>('.indice-capa');
+  if (nav && boton && capa) {
+    // Con JavaScript, el índice pasa a lateral (≥ 1280 px) o a panel con botón.
+    document.documentElement.classList.add('con-indice');
+    boton.hidden = false;
+    const abrir = (si: boolean) => {
+      nav.classList.toggle('indice-abierto', si);
+      capa.hidden = !si;
+      boton.setAttribute('aria-expanded', String(si));
+      if (si) nav.querySelector<HTMLElement>('a')?.focus();
+      else boton.focus();
+    };
+    boton.addEventListener('click', () => abrir(!nav.classList.contains('indice-abierto')));
+    capa.addEventListener('click', () => abrir(false));
+    nav.querySelector('.indice-cerrar')?.addEventListener('click', () => abrir(false));
+    nav.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a') && nav.classList.contains('indice-abierto')) abrir(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && nav.classList.contains('indice-abierto')) abrir(false);
+    });
+
+    // Sección actual resaltada.
+    const enlaces = new Map<string, HTMLAnchorElement>();
+    nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => enlaces.set(decodeURIComponent(a.hash.slice(1)), a));
+    const observador = new IntersectionObserver(
+      (vistas) => {
+        for (const v of vistas) {
+          if (!v.isIntersecting) continue;
+          nav.querySelectorAll('a.activa').forEach((a) => a.classList.remove('activa'));
+          enlaces.get(v.target.id)?.classList.add('activa');
+        }
+      },
+      { rootMargin: '0px 0px -70% 0px' },
+    );
+    for (const id of enlaces.keys()) {
+      const el = document.getElementById(id);
+      if (el) observador.observe(el);
+    }
+  }
+</script>

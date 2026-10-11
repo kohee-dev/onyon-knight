@@ -1,9 +1,13 @@
 ---
+import BotonIndice from '../../../components/BotonIndice.astro';
 import Distintivo from '../../../components/Distintivo.astro';
+import Indice from '../../../components/Indice.astro';
+import TarjetaCaso from '../../../components/TarjetaCaso.astro';
 import Fecha from '../../../components/Fecha.astro';
 import Recursos from '../../../components/Recursos.astro';
 import { categoriaDe } from '../../../categorias';
 import Base from '../../../layouts/Base.astro';
+import { formatearHoras } from '../../../lib/formato';
 import { cargarSitio } from '../../../lib/sitio';
 
 export async function getStaticPaths() {
@@ -15,8 +19,18 @@ const sitio = await cargarSitio();
 const u = sitio.unidades.find((x) => x.modulo.id === Astro.params.modulo && x.id === Astro.params.unidad)!;
 const m = u.modulo;
 const cat = categoriaDe(m.datos.ciclo)!;
+const absoluta = (ruta: string) => new URL(ruta, sitio.sitioUrl).href;
+const entradas = [
+  ...u.teoria.flatMap((p) => [
+    { id: p.fuente.id, texto: p.fuente.datos.titulo, nivel: 0 },
+    ...p.render.titulos.filter((t) => t.nivel === 1).map((t) => ({ id: t.id, texto: t.texto, nivel: 1 })),
+  ]),
+  ...(u.casos.length ? [{ id: 'casos-practicos', texto: 'Casos prácticos', nivel: 0 }] : []),
+  { id: 'licencias-y-fuentes', texto: 'Licencias y fuentes', nivel: 0 },
+];
 ---
 <Base titulo={`${u.titulo} · ${m.id.toUpperCase()}`}>
+  {u.teoria.length > 0 && <BotonIndice slot="cabecera-extra" />}
   <section class={`portada ${cat.clase}`} aria-hidden="true">
     <p class="portada-modulo">{m.datos.nombre}</p>
     <p class="portada-meta">{m.id.toUpperCase()} · {m.datos.codigo} · {m.datos.ciclo} · {m.datos.curso}.º</p>
@@ -33,13 +47,7 @@ const cat = categoriaDe(m.datos.ciclo)!;
     {u.urlPdf && <a class="boton" href={u.urlPdf} download>PDF de teoría</a>}
   </header>
 
-  <nav class="indice" aria-label="Índice de la unidad">
-    <h2>Índice</h2>
-    <ol>
-      {u.teoria.map((p) => <li><a href={`#${p.fuente.id}`}>{p.fuente.datos.titulo}</a></li>)}
-      <li><a href="#licencias-y-fuentes">Licencias y fuentes</a></li>
-    </ol>
-  </nav>
+  {u.teoria.length > 0 && <Indice entradas={entradas} />}
 
   {u.teoria.map((p) => (
     <section class="pieza" id={p.fuente.id}>
@@ -48,6 +56,30 @@ const cat = categoriaDe(m.datos.ciclo)!;
       <div class="contenido" set:html={p.render.html} />
     </section>
   ))}
+
+  {u.casos.length > 0 && (
+    <section class="casos" id="casos-practicos">
+      <h2>Casos prácticos</h2>
+      <ul class="tarjetas-casos">
+        {u.casos.map((c) => <TarjetaCaso caso={c} modulo={m} />)}
+      </ul>
+    </section>
+  )}
+
+  {u.casos.length > 0 && (
+    <section class="solo-impresion lista-casos">
+      <h2>Casos prácticos de esta unidad</h2>
+      <ul>
+        {u.casos.map((c) => (
+          <li>
+            <strong>{c.pieza.fuente.datos.titulo}</strong> ({formatearHoras(c.pieza.fuente.datos.horas!)})<br />
+            Página: <a href={absoluta(c.url)}>{absoluta(c.url)}</a><br />
+            PDF: <a href={absoluta(c.urlPdf)}>{absoluta(c.urlPdf)}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 
   <Recursos creditos={u.creditos} />
 </Base>

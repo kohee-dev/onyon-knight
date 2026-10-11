@@ -1,0 +1,20 @@
+---
+import { categoriaDe } from '../categorias';
+import { svgIcono } from '../lib/iconos';
+import type { ImagenUsada } from '../lib/markdown';
+import type { ModuloFuente } from '../lib/tipos';
+
+interface Props {
+  imagen?: ImagenUsada;
+  /** Módulo de referencia para la imagen genérica (categoría + icono). */
+  modulo?: ModuloFuente;
+  proporcion: 'portada' | 'cabecera';
+  titulo: string;
+}
+const { imagen, modulo, proporcion, titulo } = Astro.props;
+const cat = modulo ? categoriaDe(modulo.datos.ciclo) : undefined;
+const icono = modulo?.datos.icono ?? 'casco';
+---
+{imagen
+  ? <img class={`imagen-caso imagen-${proporcion}`} src={imagen.url} alt={imagen.alt} loading="lazy" />
+  : <div class={`imagen-generica imagen-${proporcion} ${cat?.clase ?? ''}`} role="img" aria-label={titulo} set:html={svgIcono(icono)} />}

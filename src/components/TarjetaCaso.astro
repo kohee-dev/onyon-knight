@@ -1,0 +1,26 @@
+---
+import { formatearHoras } from '../lib/formato';
+import type { CasoSitio } from '../lib/sitio';
+import type { ModuloFuente } from '../lib/tipos';
+import Distintivo from './Distintivo.astro';
+import Fecha from './Fecha.astro';
+import ImagenCaso from './ImagenCaso.astro';
+
+interface Props {
+  caso: CasoSitio;
+  modulo: ModuloFuente;
+}
+const { caso, modulo } = Astro.props;
+const { fuente, render, fecha } = caso.pieza;
+---
+<li class="tarjeta-caso">
+  <a href={caso.url}>
+    <ImagenCaso imagen={render.portada} modulo={modulo} proporcion="portada" titulo={fuente.datos.titulo} />
+    <span class="tarjeta-caso-cuerpo">
+      <span class="tarjeta-meta"><span class="chip-caso">Caso práctico</span><span>{formatearHoras(fuente.datos.horas!)}</span></span>
+      <span class="tarjeta-nombre">{fuente.datos.titulo}<Distintivo pieza={fuente} /></span>
+      {fuente.datos.resumen && <span class="tarjeta-resumen">{fuente.datos.resumen}</span>}
+      <Fecha fecha={fecha} />
+    </span>
+  </a>
+</li>

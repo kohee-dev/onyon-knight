@@ -47,6 +47,11 @@
   .migas,
   .boton,
   .tema-boton,
+  .indice-boton,
+  .indice-capa,
+  .indice-cerrar,
+  .banner,
+  .casos,
   .unidad-cabecera {
     display: none !important;
   }
@@ -91,9 +96,24 @@
     font-size: 0.85rem;
   }
 
-  .indice {
+  .indice,
+  .con-indice .indice {
+    position: static !important;
+    transform: none !important;
+    visibility: visible !important;
+    width: auto !important;
+    max-height: none !important;
     border: 0;
     padding: 0;
+  }
+  .solo-impresion {
+    display: block;
+    break-before: page;
+  }
+  .portada-caso .portada-imagen {
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    overflow: hidden;
   }
   .pieza,
   .licencias {
@@ -101,7 +121,7 @@
     margin-top: 0;
   }
   /* La primera pieza sigue al índice en su misma página. */
-  .indice + .pieza {
+  .indice-capa + .pieza {
     break-before: auto;
     margin-top: 2rem;
   }

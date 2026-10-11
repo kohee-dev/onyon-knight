@@ -63,6 +63,71 @@ describe('páginas', () => {
     expect(h).toContain('href="#procesos-concepto"'); // enlace wiki dentro de la unidad
   });
 
+  describe('teoría y casos', () => {
+    const tarjetas = (h: string) => h.slice(h.indexOf('class="casos"'));
+
+    it('la unidad muestra la teoría y las tarjetas de casos en orden', () => {
+      const h = leer('aso/ut1/index.html');
+      expect(h).not.toContain('id="caso-ldap"'); // el caso no se renderiza como teoría
+      const t = tarjetas(h);
+      expect(t).toContain('Casos prácticos');
+      expect(t.indexOf('/ok/aso/ut1/casos/caso-ldap/')).toBeGreaterThan(0);
+      expect(t.indexOf('/ok/aso/ut1/casos/caso-sin-imagenes/')).toBeGreaterThan(t.indexOf('/ok/aso/ut1/casos/caso-ldap/'));
+      expect(t).toContain('2 h');
+      expect(t).toContain('1,5 h');
+      expect(t).toContain('Directorio para Elpis');
+      expect(t).toMatch(/class="fecha/);
+      expect(t).toMatch(/<img[^>]*-portada\.png/);
+      expect(t).toMatch(/imagen-generica[^"]*cat-asir/);
+      expect(h).not.toContain('caso-borrador');
+    });
+
+    it('la unidad enlaza su PDF de teoría y lista los casos para imprimir', () => {
+      const h = leer('aso/ut1/index.html');
+      expect(h).toMatch(/href="\/ok\/pdf\/aso-ut1\.pdf"[^>]*>PDF de teoría/);
+      const imp = h.slice(h.indexOf('class="solo-impresion'));
+      expect(imp).toContain('Casos prácticos de esta unidad');
+      expect(imp).toContain('https://ej.es/ok/aso/ut1/casos/caso-ldap/');
+      expect(imp).toContain('https://ej.es/ok/pdf/aso-ut1/caso-ldap.pdf');
+    });
+
+    it('una unidad solo con casos no tiene PDF de teoría ni botón de índice', () => {
+      const h = leer('aso/ut2/index.html');
+      expect(h).not.toContain('PDF de teoría');
+      expect(h).not.toContain('indice-boton');
+      expect(h).toContain('/ok/aso/ut2/casos/caso-solo/');
+    });
+
+    it('página del caso: banner, datos, PDF, licencias e índice', () => {
+      const h = leer('aso/ut1/casos/caso-ldap/index.html');
+      expect(h).toMatch(/class="banner[^"]*"[\s\S]*?-cabecera\.png/);
+      expect(h).toContain('Caso práctico');
+      expect(h).toContain('2 h');
+      expect(h).toMatch(/href="\/ok\/pdf\/aso-ut1\/caso-ldap\.pdf"[^>]*>PDF del caso/);
+      expect(h).toContain('Autora portada');
+      expect(h).toContain('Autora cabecera');
+      expect(h).toContain('href="/ok/aso/"');
+      expect(h).toContain('href="/ok/aso/ut1/"');
+      expect(h).toContain('href="#caso-ldap--tareas"'); // segundo nivel en el índice del caso
+      expect(h).toContain('href="https://ej.es/ok/aso/ut1/#procesos-concepto"'); // enlace a la teoría
+    });
+
+    it('apuntes de un caso: banner, duración y genérica según su primer módulo', () => {
+      expect(leer('apuntes/caso-ldap/index.html')).toMatch(/class="banner[\s\S]*?2 h/);
+      expect(leer('apuntes/caso-sin-imagenes/index.html')).toMatch(/imagen-generica[^"]*cat-asir/);
+    });
+
+    it('índice de la unidad y botón accesible oculto sin JavaScript', () => {
+      const h = leer('aso/ut1/index.html');
+      const nav = h.slice(h.indexOf('<nav class="indice" id="indice"'));
+      expect(nav).toContain('href="#procesos-concepto"');
+      expect(nav).toContain('href="#procesos-concepto--que-es-un-proceso"');
+      expect(h).toMatch(/<button class="indice-boton"[^>]*hidden[^>]*>/);
+      expect(h).toMatch(/<button class="indice-boton"[^>]*aria-expanded="false"/);
+      expect(h).toMatch(/<button class="indice-boton"[^>]*aria-controls="indice"/);
+    });
+  });
+
   it('pieza: aparece en', () => {
     const h = leer('apuntes/procesos-concepto/index.html');
     expect(h).toContain('Aparece en');

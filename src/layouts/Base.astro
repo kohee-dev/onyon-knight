@@ -44,6 +44,7 @@ const cssCategorias = Object.values(CATEGORIAS)
     <header class="cabecera">
       <a class="marca" href={base}>Onyon Knight</a>
       <nav>
+        <slot name="cabecera-extra" />
         <button class="tema-boton" type="button" aria-label="Cambiar a modo oscuro">
           <span class="tema-icono" set:html={svgIcono('casco')} />
           <span class="tema-a-oscuro">Modo oscuro</span>
