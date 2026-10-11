@@ -7,3 +7,5 @@ fuentes:
 # Qué es un proceso
 
 Un proceso es un programa en ejecución.
+
+Más en [la pieza suelta](/ok/apuntes/suelta/).

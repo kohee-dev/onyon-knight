@@ -62,3 +62,26 @@ describe('enlaces wiki', () => {
     expect(html).not.toContain('<a');
   });
 });
+
+describe('enlaces Markdown normales', () => {
+  it('permite http(s), mailto y anclas', async () => {
+    const { html } = await render('[a](https://x.es) [b](mailto:a@b.es) [c](#sec)');
+    expect(html).toContain('href="https://x.es"');
+    expect(html).toContain('href="mailto:a@b.es"');
+    expect(html).toContain('href="#sec"');
+  });
+
+  it('convierte las rutas absolutas del sitio en URL completas dentro de una unidad', async () => {
+    expect((await render('[s](/ok/apuntes/b/)', { unidad: ['a'] })).html).toContain('href="https://ej.es/ok/apuntes/b/"');
+  });
+
+  it('rechaza rutas relativas sugiriendo [[id]]', async () => {
+    const m = await error('Intro\n\n[x](../b.md)');
+    expect(m).toContain('a.md:3');
+    expect(m).toContain('[[id]]');
+  });
+
+  it('rechaza esquemas no permitidos', async () => {
+    expect(await error('[js](javascript:alert(1))')).toContain('enlace no permitido «javascript:alert(1)»');
+  });
+});

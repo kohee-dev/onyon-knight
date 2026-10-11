@@ -10,7 +10,7 @@ import { VFile } from 'vfile';
 import { ErrorContenido, type Catalogo, type Ficha, type Modo, type PiezaFuente } from '../tipos';
 import type { EstadoRender } from './comun';
 import { remarkEncabezados } from './encabezados';
-import { remarkEnlaces } from './enlaces';
+import { remarkEnlaces, remarkEnlacesNormales } from './enlaces';
 import { remarkImagenes } from './imagenes';
 import { remarkSinHtml } from './html';
 import { remarkMermaid } from './mermaid';
@@ -48,6 +48,7 @@ const procesador = unified()
   .use(remarkRecuadros)
   .use(remarkEncabezados)
   .use(remarkMermaid)
+  .use(remarkEnlacesNormales)
   .use(remarkEnlaces)
   .use(remarkImagenes)
   .use(remarkRehype)

@@ -48,3 +48,26 @@ export function remarkEnlaces() {
     });
   };
 }
+
+/**
+ * Enlaces Markdown normales: solo http(s), mailto y anclas. Las rutas del sitio (/…) se hacen absolutas
+ * dentro de una unidad (el PDF se imprime desde 127.0.0.1); las relativas se rechazan en favor de [[id]].
+ */
+export function remarkEnlacesNormales() {
+  return (arbol: Root, file: VFile) => {
+    const e = estado(file);
+    visit(arbol, (nodo: any) => {
+      if (nodo.type !== 'link' && nodo.type !== 'definition') return;
+      const url: string = nodo.url;
+      const fallo = (mensaje: string) =>
+        e.problemas.push({ archivo: e.pieza.archivo, linea: nodo.position ? nodo.position.start.line + e.desplazamiento : undefined, mensaje });
+      if (/^(https?:|mailto:|#)/i.test(url)) return;
+      if (url.startsWith('/') && !url.startsWith('//')) {
+        if (e.ctx.unidad) nodo.url = new URL(url, e.ctx.sitioUrl).href;
+        return;
+      }
+      if (/^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith('//')) fallo(`enlace no permitido «${url}» (usa http, https o mailto)`);
+      else fallo(`enlace relativo «${url}»: para enlazar otra pieza usa [[id]]`);
+    });
+  };
+}
