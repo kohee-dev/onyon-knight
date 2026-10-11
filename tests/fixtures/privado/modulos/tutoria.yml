@@ -2,6 +2,7 @@ nombre: Tutoría SECRETO-PRIVADO-123
 codigo: "T"
 ciclo: SMR
 curso: 1
+icono: maletin
 unidades:
   - id: notas
     titulo: Notas

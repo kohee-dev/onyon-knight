@@ -20,7 +20,8 @@ export const esquemaModulo = z.strictObject({
   codigo: z.string().min(1),
   ciclo: z.string().min(1),
   curso: z.number().int().positive(),
-  color: z.string().regex(/^#[0-9a-f]{6}$/i, 'debe ser un color hexadecimal como #2f6f9f').optional(),
+  /** Nombre de un icono de src/iconos (obligatorio: un módulo sin icono no está listo). */
+  icono: z.string().min(1),
   activo: z.boolean().default(true),
   unidades: z.array(esquemaUnidad),
 });

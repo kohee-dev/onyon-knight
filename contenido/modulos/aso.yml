@@ -2,7 +2,7 @@ nombre: Administración de sistemas operativos
 codigo: "0374"
 ciclo: ASIR
 curso: 2
-color: "#2f6f9f"
+icono: terminal
 unidades:
   - id: ut0
     titulo: Linux

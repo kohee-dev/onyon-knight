@@ -1,0 +1,28 @@
+---
+import { categoriaDe } from '../categorias';
+import { svgIcono } from '../lib/iconos';
+import type { ModuloFuente } from '../lib/tipos';
+import Fecha from './Fecha.astro';
+
+interface Props {
+  modulo: ModuloFuente;
+  unidades: number;
+  fecha: Date | null;
+  href: string;
+}
+const { modulo: m, unidades, fecha, href } = Astro.props;
+const cat = categoriaDe(m.datos.ciclo)!;
+---
+<li class={`tarjeta ${cat.clase}`}>
+  <a href={href}>
+    <span class="tarjeta-icono" set:html={svgIcono(m.datos.icono)} />
+    <span class="tarjeta-cuerpo">
+      <span class="tarjeta-meta">
+        <span class="chip">{cat.nombre}</span>
+        <span>{m.datos.curso}.º · {unidades} {unidades === 1 ? 'unidad' : 'unidades'}</span>
+      </span>
+      <span class="tarjeta-nombre">{m.datos.nombre}{m.privado && <span class="distintivo distintivo-privado">Privado</span>}</span>
+      <Fecha fecha={fecha} />
+    </span>
+  </a>
+</li>

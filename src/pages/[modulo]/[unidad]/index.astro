@@ -2,6 +2,7 @@
 import Distintivo from '../../../components/Distintivo.astro';
 import Fecha from '../../../components/Fecha.astro';
 import Recursos from '../../../components/Recursos.astro';
+import { categoriaDe } from '../../../categorias';
 import Base from '../../../layouts/Base.astro';
 import { cargarSitio } from '../../../lib/sitio';
 
@@ -13,9 +14,10 @@ export async function getStaticPaths() {
 const sitio = await cargarSitio();
 const u = sitio.unidades.find((x) => x.modulo.id === Astro.params.modulo && x.id === Astro.params.unidad)!;
 const m = u.modulo;
+const cat = categoriaDe(m.datos.ciclo)!;
 ---
-<Base titulo={`${u.titulo} · ${m.id.toUpperCase()}`} color={m.datos.color}>
-  <section class="portada" aria-hidden="true">
+<Base titulo={`${u.titulo} · ${m.id.toUpperCase()}`}>
+  <section class={`portada ${cat.clase}`} aria-hidden="true">
     <p class="portada-modulo">{m.datos.nombre}</p>
     <p class="portada-meta">{m.id.toUpperCase()} · {m.datos.codigo} · {m.datos.ciclo} · {m.datos.curso}.º</p>
     <h1 class="portada-titulo">{u.titulo}</h1>

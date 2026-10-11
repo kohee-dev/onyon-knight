@@ -1,16 +1,26 @@
 ---
-import '@fontsource-variable/inter';
+import '@fontsource-variable/nunito';
 import '@fontsource/jetbrains-mono';
 import '../styles/global.css';
 import '../styles/print.css';
+import { CATEGORIAS } from '../categorias';
+import { svgIcono } from '../lib/iconos';
 
 interface Props {
   titulo: string;
-  color?: string;
   descripcion?: string;
 }
-const { titulo, color, descripcion } = Astro.props;
+const { titulo, descripcion } = Astro.props;
 const base = import.meta.env.BASE_URL;
+
+// Colores de categoría generados desde src/categorias.ts (única fuente).
+const cssCategorias = Object.values(CATEGORIAS)
+  .map(
+    (c) =>
+      `.${c.clase}{--cat-fondo:${c.claro.fondo};--cat-texto:${c.claro.texto}}` +
+      `:root[data-tema="caballero"] .${c.clase}{--cat-fondo:${c.oscuro.fondo};--cat-texto:${c.oscuro.texto}}`,
+  )
+  .join('');
 ---
 <!doctype html>
 <html lang="es">
@@ -19,11 +29,28 @@ const base = import.meta.env.BASE_URL;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo} · Onyon Knight</title>
     {descripcion && <meta name="description" content={descripcion} />}
+    <script is:inline>
+      // Tema antes de pintar: elección guardada, o la preferencia del sistema. Paladín = claro; Caballero Oscuro = oscuro.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('onyon-tema'); } catch (e) {}
+        if (t !== 'paladin' && t !== 'caballero') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'caballero' : 'paladin';
+        document.documentElement.setAttribute('data-tema', t);
+      })();
+    </script>
+    <style set:html={cssCategorias}></style>
   </head>
-  <body style={color ? `--color-modulo: ${color}` : undefined}>
+  <body>
     <header class="cabecera">
       <a class="marca" href={base}>Onyon Knight</a>
-      <nav><a href={`${base}licencias/`}>Licencias</a></nav>
+      <nav>
+        <button class="tema-boton" type="button" aria-label="Cambiar a modo oscuro (Caballero Oscuro)">
+          <span class="tema-icono" set:html={svgIcono('casco')} />
+          <span class="tema-a-caballero">Modo oscuro · Caballero Oscuro</span>
+          <span class="tema-a-paladin">Modo claro · Paladín</span>
+        </button>
+        <a href={`${base}licencias/`}>Licencias</a>
+      </nav>
     </header>
     <main>
       <slot />
@@ -32,6 +59,24 @@ const base = import.meta.env.BASE_URL;
       <p>© Alejandro Bartolomé · CC BY-SA 4.0, salvo indicación expresa</p>
     </footer>
     <script>
+      // Botón de tema: alterna Paladín / Caballero Oscuro y recuerda la elección.
+      const boton = document.querySelector<HTMLButtonElement>('.tema-boton');
+      const etiqueta = (t: string | null) =>
+        t === 'caballero' ? 'Cambiar a modo claro (Paladín)' : 'Cambiar a modo oscuro (Caballero Oscuro)';
+      if (boton) {
+        boton.setAttribute('aria-label', etiqueta(document.documentElement.dataset.tema ?? null));
+        boton.addEventListener('click', () => {
+          const nuevo = document.documentElement.dataset.tema === 'caballero' ? 'paladin' : 'caballero';
+          document.documentElement.dataset.tema = nuevo;
+          boton.setAttribute('aria-label', etiqueta(nuevo));
+          try {
+            localStorage.setItem('onyon-tema', nuevo);
+          } catch {
+            /* sin almacenamiento: el tema dura hasta recargar */
+          }
+        });
+      }
+
       // Señal para scripts/pdf.mjs: tipografías, imágenes y diagramas listos.
       async function prepararPagina() {
         const w = window as any;

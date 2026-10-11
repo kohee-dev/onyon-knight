@@ -2,7 +2,7 @@ nombre: Sistemas operativos en red
 codigo: "0224"
 ciclo: SMR
 curso: 2
-color: "#2e8b57"
+icono: red
 unidades:
   - id: ut0
     titulo: Configuración del software de base

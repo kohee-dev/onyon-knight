@@ -3,10 +3,6 @@
   autor: The Astro Technology Company
   url: https://astro.build
   licencia: MIT
-- nombre: Inter
-  autor: Rasmus Andersson
-  url: https://rsms.me/inter/
-  licencia: OFL-1.1
 - nombre: JetBrains Mono
   autor: JetBrains
   url: https://www.jetbrains.com/lp/mono/
@@ -19,3 +15,15 @@
   autor: Pine Wu, Anthony Fu y colaboradores
   url: https://shiki.style
   licencia: MIT
+- nombre: Nunito
+  autor: Vernon Adams, Cyreal y Jacques Le Bailly
+  url: https://github.com/googlefonts/nunito
+  licencia: OFL-1.1
+- nombre: Feather Icons (iconos de los módulos)
+  autor: Cole Bemis
+  url: https://feathericons.com
+  licencia: MIT
+- nombre: Casco de caballero (botón de tema)
+  autor: Colección «Middle Age Monocolor», SVG Repo
+  url: https://www.svgrepo.com/svg/307023/knight-helmet
+  licencia: CC0-1.0

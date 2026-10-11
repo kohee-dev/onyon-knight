@@ -1,6 +1,8 @@
 ---
 import Fecha from '../../components/Fecha.astro';
+import { categoriaDe } from '../../categorias';
 import Base from '../../layouts/Base.astro';
+import { svgIcono } from '../../lib/iconos';
 import { cargarSitio } from '../../lib/sitio';
 
 export async function getStaticPaths() {
@@ -11,11 +13,17 @@ export async function getStaticPaths() {
 const sitio = await cargarSitio();
 const modulo = sitio.catalogo.modulos.find((m) => m.id === Astro.params.modulo)!;
 const unidades = sitio.unidades.filter((u) => u.modulo.id === modulo.id);
+const cat = categoriaDe(modulo.datos.ciclo)!;
 ---
-<Base titulo={modulo.datos.nombre} color={modulo.datos.color}>
+<Base titulo={modulo.datos.nombre}>
   <p class="migas"><a href={sitio.base}>Inicio</a></p>
-  <h1>{modulo.datos.nombre}</h1>
-  <p class="meta">{modulo.id.toUpperCase()} · {modulo.datos.codigo} · {modulo.datos.ciclo} · {modulo.datos.curso}.º</p>
+  <div class={`franja-modulo ${cat.clase}`}>
+    <span class="franja-icono" set:html={svgIcono(modulo.datos.icono)} />
+    <div>
+      <h1>{modulo.datos.nombre}</h1>
+      <p class="meta"><span class="chip">{cat.nombre}</span> {modulo.id.toUpperCase()} · {modulo.datos.codigo} · {modulo.datos.curso}.º</p>
+    </div>
+  </div>
   <ol class="unidades">
     {unidades.map((u) => (
       <li class="unidad">

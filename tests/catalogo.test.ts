@@ -26,6 +26,7 @@ function modulo(id: string, unidades: { id: string; titulo?: string; piezas: str
       codigo: '0000',
       ciclo: 'ASIR',
       curso: 2,
+      icono: 'terminal',
       unidades: unidades.map((u) => ({ titulo: u.id.toUpperCase(), ...u })),
       ...extra,
     }),
@@ -139,6 +140,18 @@ describe('construirCatalogo', () => {
     expect(c.informe).toContain('pieza sin módulo: suelta');
   });
 
+  it('rechaza ciclos sin categoría', () => {
+    expect(problemas(() => construirCatalogo([], [modulo('aso', [], { ciclo: 'XYZ' })], 'desarrollo'))).toContain(
+      'ciclo desconocido «XYZ»',
+    );
+  });
+
+  it('rechaza iconos inexistentes', () => {
+    expect(problemas(() => construirCatalogo([], [modulo('aso', [], { icono: 'dragon' })], 'desarrollo'))).toContain(
+      'icono desconocido «dragon»',
+    );
+  });
+
   it('reúne todos los problemas en un solo error', () => {
     const m = problemas(() =>
       construirCatalogo([pieza('Mal')], [modulo('aso', [{ id: 'ut1', piezas: ['falta'] }])], 'desarrollo'),
@@ -159,8 +172,14 @@ describe('esquemas', () => {
     expect(esquemaPieza.parse({ titulo: 'x' })).toEqual({ titulo: 'x', borrador: false, fuentes: [], licencia: 'CC-BY-SA-4.0' });
   });
 
-  it('valida el color del módulo', () => {
-    expect(esquemaModulo.safeParse({ nombre: 'a', codigo: '1', ciclo: 'c', curso: 1, color: 'rojo', unidades: [] }).success).toBe(false);
+  it('exige un icono en el módulo', () => {
+    const r = esquemaModulo.safeParse({ nombre: 'a', codigo: '1', ciclo: 'SMR', curso: 1, unidades: [] });
+    expect(r.success).toBe(false);
+    expect(JSON.stringify(r.error?.issues)).toContain('icono');
+  });
+
+  it('ya no admite el campo color (lo da la categoría)', () => {
+    expect(esquemaModulo.safeParse({ nombre: 'a', codigo: '1', ciclo: 'SMR', curso: 1, icono: 'red', color: '#ffffff', unidades: [] }).success).toBe(false);
   });
 });
 

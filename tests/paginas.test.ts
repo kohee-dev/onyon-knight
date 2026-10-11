@@ -20,6 +20,26 @@ describe('páginas', () => {
     expect(h).toContain('Últimos cambios');
   });
 
+  it('portada: tarjetas por categoría con su icono', () => {
+    const h = leer('index.html');
+    expect(h).toMatch(/<li class="tarjeta cat-asir"[\s\S]*?<svg[^>]*aria-hidden="true"[\s\S]*?ASIR/);
+    expect(h).toMatch(/<li class="tarjeta cat-smr"/);
+  });
+
+  it('botón de tema con el nombre exacto de cada modo', () => {
+    const h = leer('index.html');
+    expect(h).toContain('class="tema-boton"');
+    expect(h).toContain('Modo oscuro · Caballero Oscuro');
+    expect(h).toContain('Modo claro · Paladín');
+    expect(h).toContain('aria-label="Cambiar a modo oscuro (Caballero Oscuro)"');
+    // El tema se aplica antes de pintar: script en línea en <head>.
+    expect(h).toMatch(/<head>[\s\S]*data-tema[\s\S]*<\/head>/);
+  });
+
+  it('módulo: franja de su categoría', () => {
+    expect(leer('aso/index.html')).toMatch(/class="franja-modulo cat-asir"/);
+  });
+
   it('módulo: unidades con fecha y PDF', () => {
     const h = leer('aso/index.html');
     expect(h).toContain('Gestión de procesos');

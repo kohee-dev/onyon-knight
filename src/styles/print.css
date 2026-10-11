@@ -5,19 +5,31 @@
 }
 
 @media print {
-  :root {
+  /* Siempre Paladín al imprimir. */
+  :root,
+  :root[data-tema='caballero'] {
     color-scheme: light;
     --fondo: #fff;
     --superficie: #fff;
-    --texto: #1d1f23;
+    --superficie-2: #f2f2f2;
+    --texto: #1a1a1a;
     --texto-suave: #555b66;
     --borde: #d9d6cf;
-    --enlace: #1f5fa8;
+    --acento: #35689b;
+    --oro: #c2a14d;
     --codigo-fondo: #f4f3ef;
-    --ejercicio: #2e8b57;
-    --nota: #3b6ea5;
-    --aviso: #c0582b;
-    --tip: #8a5cb8;
+    --tip: #35689b;
+    --tip-fondo: #e6eef7;
+    --tip-etiqueta: #35689b;
+    --nota: #c2a14d;
+    --nota-fondo: #f8f1de;
+    --nota-etiqueta: #8a6a14;
+    --aviso: #c0392b;
+    --aviso-fondo: #fbe7e3;
+    --aviso-etiqueta: #c0392b;
+    --ejercicio: #287044;
+    --ejercicio-fondo: #e5f3e8;
+    --ejercicio-etiqueta: #287044;
   }
   html {
     font-size: 10.5pt;
@@ -34,11 +46,14 @@
   .pie,
   .migas,
   .boton,
+  .tema-boton,
   .unidad-cabecera {
     display: none !important;
   }
   .shiki,
-  .shiki span {
+  .shiki span,
+  :root[data-tema='caballero'] .shiki,
+  :root[data-tema='caballero'] .shiki span {
     color: var(--shiki-light) !important;
     background-color: var(--codigo-fondo) !important;
   }
@@ -48,7 +63,7 @@
     flex-direction: column;
     justify-content: center;
     min-height: 240mm;
-    border-left: 8px solid var(--color-modulo);
+    border-left: 14px solid var(--cat-fondo);
     padding-left: 12mm;
     break-after: page;
   }
@@ -63,7 +78,7 @@
   }
   .portada-titulo {
     font-size: 2.6rem;
-    color: var(--color-modulo);
+    color: var(--acento);
     margin: 1.5rem 0 0.5rem;
   }
   .portada-unidad {

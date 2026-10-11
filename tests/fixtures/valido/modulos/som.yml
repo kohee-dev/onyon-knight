@@ -2,6 +2,7 @@ nombre: Sistemas operativos monopuesto
 codigo: "0222"
 ciclo: SMR
 curso: 1
+icono: disco
 unidades:
   - id: ut3
     titulo: Procesos

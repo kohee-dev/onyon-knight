@@ -1,4 +1,6 @@
+import { categoriaDe } from '../categorias';
 import { licenciaPorId } from '../licencias';
+import { ICONOS } from './iconos';
 import { ErrorContenido, type Aparicion, type Catalogo, type Modo, type ModuloFuente, type PiezaFuente, type Problema } from './tipos';
 
 export const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -31,6 +33,10 @@ export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[]
   const referenciadas = new Set<string>();
 
   for (const m of modulos) {
+    if (!categoriaDe(m.datos.ciclo))
+      problemas.push({ archivo: m.archivo, mensaje: `ciclo desconocido «${m.datos.ciclo}» (categorías: GB, SMR, ASIR, DAM)` });
+    if (!ICONOS.has(m.datos.icono))
+      problemas.push({ archivo: m.archivo, mensaje: `icono desconocido «${m.datos.icono}» (disponibles: ${[...ICONOS].join(', ')})` });
     const ids = new Set<string>();
     for (const u of m.datos.unidades) {
       if (!SLUG.test(u.id)) problemas.push({ archivo: m.archivo, mensaje: `id de unidad no válido «${u.id}»` });

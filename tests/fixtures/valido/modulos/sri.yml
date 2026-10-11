@@ -2,6 +2,7 @@ nombre: Servicios de red e internet
 codigo: "0375"
 ciclo: ASIR
 curso: 2
+icono: globo
 activo: false
 unidades:
   - id: ut1

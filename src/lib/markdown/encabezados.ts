@@ -20,8 +20,12 @@ export function remarkEncabezados() {
     const desplazar = (ctx.unidad ? 3 : 2) - minimo;
     const slugger = new GithubSlugger();
     for (const h of encabezados) {
+      const relativo = h.depth - minimo + 1;
       h.depth = Math.min(6, h.depth + desplazar) as Heading['depth'];
-      h.data = { ...h.data, hProperties: { id: `${pieza.id}--${slugger.slug(sinDiacriticos(toString(h)))}` } };
+      h.data = {
+        ...h.data,
+        hProperties: { id: `${pieza.id}--${slugger.slug(sinDiacriticos(toString(h)))}`, className: [`titulo-${relativo}`] },
+      };
     }
   };
 }
