@@ -15,6 +15,14 @@ const u = sitio.unidades.find((x) => x.modulo.id === Astro.params.modulo && x.id
 const m = u.modulo;
 ---
 <Base titulo={`${u.titulo} · ${m.id.toUpperCase()}`} color={m.datos.color}>
+  <section class="portada" aria-hidden="true">
+    <p class="portada-modulo">{m.datos.nombre}</p>
+    <p class="portada-meta">{m.id.toUpperCase()} · {m.datos.codigo} · {m.datos.ciclo} · {m.datos.curso}.º</p>
+    <h1 class="portada-titulo">{u.titulo}</h1>
+    <p class="portada-unidad">{u.pie}</p>
+    <Fecha fecha={u.fecha} />
+    <p class="portada-licencia">© Alejandro Bartolomé · {u.creditos.licenciaTexto.nombre}, salvo indicación expresa.<br />{sitio.sitioUrl}{u.url.slice(1)}</p>
+  </section>
   <p class="migas"><a href={sitio.base}>Inicio</a> › <a href={`${sitio.base}${m.id}/`}>{m.datos.nombre}</a></p>
   <header class="unidad-cabecera">
     <p class="meta">{m.datos.nombre} · {u.id.toUpperCase()}</p>

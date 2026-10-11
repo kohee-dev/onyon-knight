@@ -1,0 +1,112 @@
+/* Vista de impresión: es la fuente de los PDF (scripts/pdf.mjs). */
+@page {
+  size: A4;
+  margin: 18mm 16mm 20mm;
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+    --fondo: #fff;
+    --superficie: #fff;
+    --texto: #1d1f23;
+    --texto-suave: #555b66;
+    --borde: #d9d6cf;
+    --enlace: #1f5fa8;
+    --codigo-fondo: #f4f3ef;
+    --ejercicio: #2e8b57;
+    --nota: #3b6ea5;
+    --aviso: #c0582b;
+    --tip: #8a5cb8;
+  }
+  html {
+    font-size: 10.5pt;
+  }
+  body,
+  main {
+    background: #fff;
+  }
+  main {
+    max-width: none;
+    padding: 0;
+  }
+  .cabecera,
+  .pie,
+  .migas,
+  .boton,
+  .unidad-cabecera {
+    display: none !important;
+  }
+  .shiki,
+  .shiki span {
+    color: var(--shiki-light) !important;
+    background-color: var(--codigo-fondo) !important;
+  }
+
+  .portada {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 240mm;
+    border-left: 8px solid var(--color-modulo);
+    padding-left: 12mm;
+    break-after: page;
+  }
+  .portada-modulo {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  .portada-meta,
+  .portada-licencia {
+    color: var(--texto-suave);
+  }
+  .portada-titulo {
+    font-size: 2.6rem;
+    color: var(--color-modulo);
+    margin: 1.5rem 0 0.5rem;
+  }
+  .portada-unidad {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin: 0 0 1rem;
+  }
+  .portada-licencia {
+    margin-top: 3rem;
+    font-size: 0.85rem;
+  }
+
+  .indice {
+    border: 0;
+    padding: 0;
+  }
+  .pieza,
+  .licencias {
+    break-before: page;
+    margin-top: 0;
+  }
+  /* La primera pieza sigue al índice en su misma página. */
+  .indice + .pieza {
+    break-before: auto;
+    margin-top: 2rem;
+  }
+  .figura,
+  .recuadro,
+  pre,
+  table,
+  tr {
+    break-inside: avoid;
+  }
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    overflow: visible;
+  }
+  .tabla {
+    overflow: visible;
+  }
+}

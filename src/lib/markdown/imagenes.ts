@@ -114,7 +114,7 @@ export function remarkImagenes() {
               tagName: 'figcaption',
               properties: {},
               children: [
-                { type: 'element', tagName: 'span', properties: { className: ['pie'] }, children: [t(img.alt)] },
+                { type: 'element', tagName: 'span', properties: { className: ['figura-pie'] }, children: [t(img.alt)] },
                 { type: 'element', tagName: 'span', properties: { className: ['credito'] }, children: lineaCredito(ficha) },
               ],
             },

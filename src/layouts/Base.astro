@@ -2,6 +2,7 @@
 import '@fontsource-variable/inter';
 import '@fontsource/jetbrains-mono';
 import '../styles/global.css';
+import '../styles/print.css';
 
 interface Props {
   titulo: string;
@@ -30,5 +31,31 @@ const base = import.meta.env.BASE_URL;
     <footer class="pie">
       <p>© Alejandro Bartolomé · CC BY-SA 4.0, salvo indicación expresa</p>
     </footer>
+    <script>
+      // Señal para scripts/pdf.mjs: tipografías, imágenes y diagramas listos.
+      async function prepararPagina() {
+        const w = window as any;
+        try {
+          for (const img of document.images) img.loading = 'eager';
+          await document.fonts.ready;
+          await Promise.all(
+            [...document.images].map((img) =>
+              img.complete ? null : new Promise((r) => img.addEventListener('load', r) || img.addEventListener('error', r)),
+            ),
+          );
+          const diagramas = document.querySelectorAll<HTMLElement>('pre.mermaid');
+          if (diagramas.length) {
+            const { default: mermaid } = await import('mermaid');
+            mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+            await mermaid.run({ nodes: diagramas });
+          }
+        } catch (e) {
+          w.__onyonError = String((e as Error)?.message ?? e);
+          console.error(e);
+        }
+        w.__onyonListo = true;
+      }
+      prepararPagina();
+    </script>
   </body>
 </html>

@@ -390,7 +390,7 @@ blockquote {
   font-size: 0.85rem;
   color: var(--texto-suave);
 }
-.figura .pie {
+.figura-pie {
   display: block;
   border: 0;
   padding: 0;

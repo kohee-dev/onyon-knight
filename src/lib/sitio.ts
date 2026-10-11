@@ -39,6 +39,7 @@ export interface Sitio {
   catalogo: Catalogo;
   modo: Modo;
   base: string;
+  sitioUrl: string;
   unidades: UnidadSitio[];
   /** Render suelto (página /apuntes/<id>/) de cada pieza publicable. */
   sueltas: Map<string, PiezaEnUnidad>;
@@ -110,7 +111,7 @@ async function construirSitio(): Promise<Sitio> {
   for (const a of new Set([...fechas.avisos, ...catalogo.avisos])) console.warn(`⚠️  ${a}`);
   for (const i of catalogo.informe) console.info(`ℹ️  ${i}`);
 
-  return { catalogo, modo, base, unidades, sueltas, ultimosCambios, creditosSitio };
+  return { catalogo, modo, base, sitioUrl: sitioUrl.replace(/\/$/, '') + '/', unidades, sueltas, ultimosCambios, creditosSitio };
 }
 
 let memo: Promise<Sitio> | null = null;
