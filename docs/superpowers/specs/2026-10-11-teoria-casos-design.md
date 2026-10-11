@@ -24,7 +24,7 @@ En la presentación:
 | Índice del módulo | Sin cambios: teoría y casos van juntos en `piezas:`; el orden de la lista es el de la teoría y el de las tarjetas |
 | Portada / cabecera | `portada` = imagen de la tarjeta; `cabecera` = banner de la página del caso |
 | Imágenes de los casos | Obligatorias, pero mientras falten se usa una imagen genérica propia y el build avisa |
-| PDF | Un PDF de teoría por unidad y un PDF por caso y unidad |
+| PDF | Un PDF de teoría por unidad (`/pdf/<m>-<u>.pdf`) y un PDF por caso y unidad (`/pdf/<m>-<u>/<id>.pdf`) |
 | Índice | Lateral fijo desde 1280 px; por debajo, un botón de hamburguesa en la cabecera abre un panel |
 
 ## 3. Modelo de contenido
@@ -146,7 +146,10 @@ La fecha de la unidad sigue siendo la más reciente de todas sus piezas, casos i
 - Termina con una página **«Casos prácticos de esta unidad»**: cada caso con su título, su duración y los enlaces absolutos a su página y a su PDF.
 - Si la unidad no tiene teoría, **no se genera** y no aparece su botón.
 
-### 5.2 PDF del caso (`/pdf/<modulo>-<unidad>-<id>.pdf`)
+### 5.2 PDF del caso (`/pdf/<modulo>-<unidad>/<id>.pdf`)
+
+La subcarpeta por unidad evita choques: `aso-ut1-gatos.pdf` podría ser a la vez el caso `gatos` de la UT1 y la unidad `ut1-gatos`.
+
 
 - **Portada propia:**
   - la imagen de cabecera (o la genérica) arriba;
