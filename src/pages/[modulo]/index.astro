@@ -31,8 +31,11 @@ const cat = categoriaDe(modulo.datos.ciclo)!;
           <a class="unidad-titulo" href={u.url}>{u.titulo}</a>
           <Fecha fecha={u.fecha} />
         </div>
-        <ul class="unidad-piezas">{u.piezas.map((p) => <li>{p.fuente.datos.titulo}</li>)}</ul>
-        <a class="boton" href={u.urlPdf} download>PDF</a>
+        <ul class="unidad-piezas">
+          {u.teoria.map((p) => <li>{p.fuente.datos.titulo}</li>)}
+          {u.casos.map((c) => <li class="es-caso">Caso práctico: {c.pieza.fuente.datos.titulo}</li>)}
+        </ul>
+        {u.urlPdf && <a class="boton" href={u.urlPdf} download>PDF</a>}
       </li>
     ))}
   </ol>

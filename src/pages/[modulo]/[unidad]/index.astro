@@ -30,18 +30,18 @@ const cat = categoriaDe(m.datos.ciclo)!;
     <p class="meta">{m.datos.nombre} · {u.id.toUpperCase()}</p>
     <h1>{u.titulo}</h1>
     <Fecha fecha={u.fecha} />
-    <a class="boton" href={u.urlPdf} download>Descargar PDF</a>
+    {u.urlPdf && <a class="boton" href={u.urlPdf} download>PDF de teoría</a>}
   </header>
 
   <nav class="indice" aria-label="Índice de la unidad">
     <h2>Índice</h2>
     <ol>
-      {u.piezas.map((p) => <li><a href={`#${p.fuente.id}`}>{p.fuente.datos.titulo}</a></li>)}
+      {u.teoria.map((p) => <li><a href={`#${p.fuente.id}`}>{p.fuente.datos.titulo}</a></li>)}
       <li><a href="#licencias-y-fuentes">Licencias y fuentes</a></li>
     </ol>
   </nav>
 
-  {u.piezas.map((p) => (
+  {u.teoria.map((p) => (
     <section class="pieza" id={p.fuente.id}>
       <h2>{p.fuente.datos.titulo} <Distintivo pieza={p.fuente} /></h2>
       <Fecha fecha={p.fecha} />

@@ -98,11 +98,14 @@ describe('páginas', () => {
     }
   });
 
-  it('manifiesto de PDFs', () => {
+  it('manifiesto de PDFs: unidades con teoría y casos publicados', () => {
     const m = JSON.parse(leer('pdf-manifest.json'));
     expect(m).toEqual([
-      { modulo: 'aso', unidad: 'ut1', ruta: '/ok/aso/ut1/', salida: 'pdf/aso-ut1.pdf', pie: 'ASO · UT1' },
-      { modulo: 'som', unidad: 'ut3', ruta: '/ok/som/ut3/', salida: 'pdf/som-ut3.pdf', pie: 'SOM · UT3' },
+      { tipo: 'unidad', modulo: 'aso', unidad: 'ut1', ruta: '/ok/aso/ut1/', salida: 'pdf/aso-ut1.pdf', pie: 'ASO · UT1' },
+      { tipo: 'caso', modulo: 'aso', unidad: 'ut1', caso: 'caso-ldap', ruta: '/ok/aso/ut1/casos/caso-ldap/', salida: 'pdf/aso-ut1/caso-ldap.pdf', pie: 'ASO · UT1 · Caso práctico' },
+      { tipo: 'caso', modulo: 'aso', unidad: 'ut1', caso: 'caso-sin-imagenes', ruta: '/ok/aso/ut1/casos/caso-sin-imagenes/', salida: 'pdf/aso-ut1/caso-sin-imagenes.pdf', pie: 'ASO · UT1 · Caso práctico' },
+      { tipo: 'caso', modulo: 'aso', unidad: 'ut2', caso: 'caso-solo', ruta: '/ok/aso/ut2/casos/caso-solo/', salida: 'pdf/aso-ut2/caso-solo.pdf', pie: 'ASO · UT2 · Caso práctico' },
+      { tipo: 'unidad', modulo: 'som', unidad: 'ut3', ruta: '/ok/som/ut3/', salida: 'pdf/som-ut3.pdf', pie: 'SOM · UT3' },
     ]);
   });
 });

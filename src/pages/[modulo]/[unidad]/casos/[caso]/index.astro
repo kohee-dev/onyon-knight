@@ -1,0 +1,20 @@
+---
+// Provisional (Task 4): la página completa del caso llega en la Task 6.
+import Base from '../../../../../layouts/Base.astro';
+import { cargarSitio } from '../../../../../lib/sitio';
+
+export async function getStaticPaths() {
+  const sitio = await cargarSitio();
+  return sitio.unidades.flatMap((u) =>
+    u.casos.map((c) => ({ params: { modulo: u.modulo.id, unidad: u.id, caso: c.pieza.fuente.id } })),
+  );
+}
+
+const sitio = await cargarSitio();
+const u = sitio.unidades.find((x) => x.modulo.id === Astro.params.modulo && x.id === Astro.params.unidad)!;
+const c = u.casos.find((x) => x.pieza.fuente.id === Astro.params.caso)!;
+---
+<Base titulo={c.pieza.fuente.datos.titulo}>
+  <h1>{c.pieza.fuente.datos.titulo}</h1>
+  <div class="contenido" set:html={c.pieza.render.html} />
+</Base>

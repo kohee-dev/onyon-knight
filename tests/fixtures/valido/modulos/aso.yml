@@ -6,4 +6,7 @@ icono: terminal
 unidades:
   - id: ut1
     titulo: Gestión de procesos
-    piezas: [procesos-concepto, procesos-estados, procesos-linux]
+    piezas: [procesos-concepto, caso-ldap, procesos-estados, caso-sin-imagenes, caso-borrador, procesos-linux]
+  - id: ut2
+    titulo: Solo casos
+    piezas: [caso-solo]

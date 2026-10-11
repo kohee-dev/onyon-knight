@@ -16,16 +16,28 @@ export interface PiezaEnUnidad {
   fecha: Date | null;
 }
 
+export interface CasoSitio {
+  pieza: PiezaEnUnidad;
+  url: string;
+  urlPdf: string;
+  salidaPdf: string;
+  pie: string;
+  creditos: Creditos;
+}
+
 export interface UnidadSitio {
   modulo: ModuloFuente;
   id: string;
   titulo: string;
-  piezas: PiezaEnUnidad[];
+  teoria: PiezaEnUnidad[];
+  casos: CasoSitio[];
   fecha: Date | null;
+  /** Teoría más las portadas de las tarjetas. */
   creditos: Creditos;
   url: string;
-  urlPdf: string;
-  salidaPdf: string;
+  /** null si la unidad no tiene teoría (no hay PDF de unidad). */
+  urlPdf: string | null;
+  salidaPdf: string | null;
   pie: string;
 }
 
@@ -77,36 +89,73 @@ async function construirSitio(): Promise<Sitio> {
   );
 
   const unidades: UnidadSitio[] = [];
+  const primeraUrlCaso = new Map<string, string>();
   for (const m of catalogo.modulos) {
     for (const u of m.datos.unidades) {
-      const ctx: ContextoRender = {
+      const idsTeoria = u.piezas.filter((id) => catalogo.piezas.get(id)!.datos.tipo === 'teoria');
+      const idsCasos = u.piezas.filter((id) => catalogo.piezas.get(id)!.datos.tipo === 'caso');
+      const urlUnidad = `${base}${m.id}/${u.id}/`;
+      const pie = `${m.id.toUpperCase()} · ${u.id.toUpperCase()}`;
+      const contextoDe = (enPagina: string[]): ContextoRender => ({
         ...ctxBase,
-        unidad: { modulo: m.id, id: u.id, piezas: new Set(u.piezas), teoria: new Set(u.piezas), casos: new Set<string>() },
-      };
-      const lista: PiezaEnUnidad[] = [];
-      for (const id of u.piezas) {
+        unidad: { modulo: m.id, id: u.id, piezas: new Set(enPagina), teoria: new Set(idsTeoria), casos: new Set(idsCasos) },
+      });
+      const renderizar = async (id: string, ctx: ContextoRender): Promise<PiezaEnUnidad> => {
         const fuente = catalogo.piezas.get(id)!;
         const render = await renderizarPieza(fuente, ctx);
-        lista.push({ fuente, render, fecha: fechaPieza(fechas, fuente, render) });
+        return { fuente, render, fecha: fechaPieza(fechas, fuente, render) };
+      };
+
+      const ctxTeoria = contextoDe(idsTeoria);
+      const teoria: PiezaEnUnidad[] = [];
+      for (const id of idsTeoria) teoria.push(await renderizar(id, ctxTeoria));
+
+      const casos: CasoSitio[] = [];
+      for (const id of idsCasos) {
+        const pieza = await renderizar(id, contextoDe([id]));
+        const url = `${urlUnidad}casos/${id}/`;
+        if (!primeraUrlCaso.has(id)) primeraUrlCaso.set(id, url);
+        casos.push({
+          pieza,
+          url,
+          urlPdf: `${base}pdf/${m.id}-${u.id}/${id}.pdf`,
+          salidaPdf: `pdf/${m.id}-${u.id}/${id}.pdf`,
+          pie: `${pie} · Caso práctico`,
+          creditos: creditosDe([pieza]),
+        });
       }
+
+      // Créditos de la página de la unidad: la teoría más las portadas de sus tarjetas.
+      const portadas: PiezaEnUnidad[] = casos.map((c) => ({
+        ...c.pieza,
+        fuente: { ...c.pieza.fuente, datos: { ...c.pieza.fuente.datos, fuentes: [] } },
+        render: { ...c.pieza.render, imagenes: c.pieza.render.portada ? [c.pieza.render.portada] : [] },
+      }));
+      const conTeoria = teoria.length > 0;
       unidades.push({
         modulo: m,
         id: u.id,
         titulo: u.titulo,
-        piezas: lista,
-        fecha: masReciente([fechas.fechaUnidad(m.rutaAbs, u.id), ...lista.map((p) => p.fecha)]),
-        creditos: creditosDe(lista),
-        url: `${base}${m.id}/${u.id}/`,
-        urlPdf: `${base}pdf/${m.id}-${u.id}.pdf`,
-        salidaPdf: `pdf/${m.id}-${u.id}.pdf`,
-        pie: `${m.id.toUpperCase()} · ${u.id.toUpperCase()}`,
+        teoria,
+        casos,
+        fecha: masReciente([fechas.fechaUnidad(m.rutaAbs, u.id), ...teoria.map((p) => p.fecha), ...casos.map((c) => c.pieza.fecha)]),
+        creditos: creditosDe([...teoria, ...portadas]),
+        url: urlUnidad,
+        urlPdf: conTeoria ? `${base}pdf/${m.id}-${u.id}.pdf` : null,
+        salidaPdf: conTeoria ? `pdf/${m.id}-${u.id}.pdf` : null,
+        pie,
       });
     }
   }
 
   const ultimosCambios = [
     ...unidades.map((u) => ({ titulo: u.titulo, contexto: `${u.modulo.datos.nombre} · unidad`, url: u.url, fecha: u.fecha })),
-    ...[...sueltas.values()].map((p) => ({ titulo: p.fuente.datos.titulo, contexto: 'apunte', url: `${base}apuntes/${p.fuente.id}/`, fecha: p.fecha })),
+    ...[...sueltas.values()].map((p) => ({
+      titulo: p.fuente.datos.titulo,
+      contexto: p.fuente.datos.tipo === 'caso' ? 'caso práctico' : 'apunte',
+      url: primeraUrlCaso.get(p.fuente.id) ?? `${base}apuntes/${p.fuente.id}/`,
+      fecha: p.fecha,
+    })),
   ]
     .filter((c): c is typeof c & { fecha: Date } => c.fecha !== null)
     .sort((a, b) => b.fecha.getTime() - a.fecha.getTime())

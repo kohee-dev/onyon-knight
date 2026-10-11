@@ -46,10 +46,10 @@ describe('PDF por unidad', () => {
       expect(u).not.toContain('127.0.0.1');
       expect(u).not.toContain('localhost');
     }
-    expect(primera).toMatch(/PDF: 2 renderizados, 0 reutilizados/);
+    expect(primera).toMatch(/PDF: 5 renderizados, 0 reutilizados/);
   });
 
   it('reutiliza la caché si nada cambia', () => {
-    expect(generarPdfs()).toMatch(/PDF: 0 renderizados, 2 reutilizados/);
+    expect(generarPdfs()).toMatch(/PDF: 0 renderizados, 5 reutilizados/);
   });
 });
