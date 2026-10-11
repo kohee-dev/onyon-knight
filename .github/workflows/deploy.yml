@@ -16,6 +16,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       BASE_PATH: /${{ github.event.repository.name }}/
       SITE_URL: https://${{ github.repository_owner }}.github.io

@@ -27,7 +27,7 @@ import { entornoLimpio } from './util';
 
 async function portadaDev(extra: Record<string, string>): Promise<string> {
   const env = entornoLimpio({ ONYON_CONTENIDO: resolve('tests/fixtures/valido'), ...extra });
-  ejecutar('npx', ['astro', 'dev', '--port', '4397'], { env, stdio: 'ignore' });
+  ejecutar('npx', ['astro', 'dev', '--background', '--port', '4397'], { env, stdio: 'ignore', timeout: 60_000 });
   try {
     for (let i = 0; i < 60; i++) {
       const html = await fetch('http://localhost:4397/').then((r) => (r.ok ? r.text() : ''), () => '');
