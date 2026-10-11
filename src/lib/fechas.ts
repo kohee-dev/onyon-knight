@@ -3,14 +3,18 @@ import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 import { load } from 'js-yaml';
 
-/** Salida de `git log --format=%x00%cI --name-only` → ruta relativa → fecha más reciente. */
+/** Salida de `git log --format=%x00%aI --name-only` (fecha de autor) → ruta relativa → fecha más reciente. */
 export function parsearGitLog(salida: string): Map<string, Date> {
   const fechas = new Map<string, Date>();
   for (const bloque of salida.split('\0')) {
     const [cabecera, ...archivos] = bloque.split('\n');
     if (!cabecera.trim()) continue;
     const fecha = new Date(cabecera.trim());
-    for (const a of archivos) if (a.trim() && !fechas.has(a.trim())) fechas.set(a.trim(), fecha);
+    for (const a of archivos) {
+      const ruta = a.trim();
+      const previa = ruta ? fechas.get(ruta) : undefined;
+      if (ruta && (!previa || fecha > previa)) fechas.set(ruta, fecha);
+    }
   }
   return fechas;
 }
@@ -57,7 +61,7 @@ export async function leerFechas(raizRepo: string): Promise<IndiceFechas> {
   const sucios = new Set<string>();
   const avisos: string[] = [];
   try {
-    fechas = parsearGitLog(git('log', '--format=%x00%cI', '--name-only'));
+    fechas = parsearGitLog(git('log', '--format=%x00%aI', '--name-only'));
     // -z: rutas sin comillas ni escapes (no ASCII, espacios). En renombrados, la ruta de origen va en la entrada siguiente.
     const entradas = git('status', '--porcelain=v1', '-z', '--untracked-files=all').split('\0');
     for (let i = 0; i < entradas.length; i++) {
@@ -85,7 +89,7 @@ export async function leerFechas(raizRepo: string): Promise<IndiceFechas> {
     if (!rel.startsWith('..')) {
       try {
         if (sucios.has(rel)) versiones.push({ fecha: null, yaml: readFileSync(rutaModuloAbs, 'utf8') });
-        for (const l of git('log', '--format=%H%x00%cI', '--', rel).split('\n').filter(Boolean)) {
+        for (const l of git('log', '--format=%H%x00%aI', '--', rel).split('\n').filter(Boolean)) {
           const [hash, fecha] = l.split('\0');
           versiones.push({ fecha: new Date(fecha), yaml: git('show', `${hash}:${rel}`) });
         }

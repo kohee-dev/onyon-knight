@@ -18,6 +18,13 @@ describe('parsearGitLog', () => {
   });
 });
 
+describe('parsearGitLog con fechas de autor desordenadas', () => {
+  it('se queda con la más reciente aunque no sea la primera', () => {
+    const m = parsearGitLog('\x002026-09-01T10:00:00Z\n\na.md\n\x002026-10-05T10:00:00Z\n\na.md\n');
+    expect(m.get('a.md')?.toISOString()).toBe('2026-10-05T10:00:00.000Z');
+  });
+});
+
 describe('fechasBloques', () => {
   const d = (s: string) => new Date(`2026-10-${s}T12:00:00Z`);
   const v = (ut3: string, orden = false) =>
@@ -108,5 +115,21 @@ describe('leerFechas (repositorio real)', () => {
     expect(f.fechaDe([join(dir, 'administración', 'diseño.md')])?.toISOString()).toBe('2026-10-02T10:00:00.000Z');
     expect(f.fechaDe([join(dir, 'con espacio.md')])?.toISOString()).toBe('2026-10-02T10:00:00.000Z');
     expect(f.fechaDe([join(dir, 'año.md')])).toBeNull();
+  });
+
+  it('usa la fecha de autor (un rebase o amend no cambia la fecha mostrada)', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'onyon-git-'));
+    git(dir, 'init', '-q');
+    git(dir, 'config', 'user.email', 't@t');
+    git(dir, 'config', 'user.name', 't');
+    writeFileSync(join(dir, 'a.md'), '1');
+    writeFileSync(join(dir, 'm.yml'), 'unidades:\n  - {id: ut1, titulo: T, piezas: [a]}\n');
+    git(dir, 'add', '.');
+    execFileSync('git', ['-C', dir, 'commit', '-qm', 'x'], {
+      env: { ...process.env, GIT_AUTHOR_DATE: '2026-09-01T10:00:00Z', GIT_COMMITTER_DATE: '2026-10-10T10:00:00Z' },
+    });
+    const f = await leerFechas(dir);
+    expect(f.fechaDe([join(dir, 'a.md')])?.toISOString()).toBe('2026-09-01T10:00:00.000Z');
+    expect(f.fechaUnidad(join(dir, 'm.yml'), 'ut1')?.toISOString()).toBe('2026-09-01T10:00:00.000Z');
   });
 });
