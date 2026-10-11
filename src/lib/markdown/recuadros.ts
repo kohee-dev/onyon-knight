@@ -10,9 +10,24 @@ export const RECUADROS: Record<string, string> = {
   tip: 'Consejo',
 };
 
-/** Acepta la sintaxis heredada de Pandoc (`::: nota`) conservando el número de líneas. */
+/**
+ * Acepta la sintaxis heredada de Pandoc (`::: nota`) conservando el número de líneas.
+ * No toca el interior de los bloques de código (``` o ~~~).
+ */
 export function normalizarRecuadros(cuerpo: string): string {
-  return cuerpo.replace(/^(\s*):::[ \t]+([a-z]+)[ \t]*$/gm, '$1:::$2');
+  let valla: string | null = null;
+  return cuerpo
+    .split('\n')
+    .map((linea) => {
+      const m = /^\s*(`{3,}|~{3,})/.exec(linea);
+      if (m) {
+        if (!valla) valla = m[1][0].repeat(m[1].length);
+        else if (m[1].startsWith(valla)) valla = null;
+        return linea;
+      }
+      return valla ? linea : linea.replace(/^(\s*):::[ \t]+([a-z]+)[ \t]*$/, '$1:::$2');
+    })
+    .join('\n');
 }
 
 export function remarkRecuadros() {
@@ -34,7 +49,15 @@ export function remarkRecuadros() {
       const bloque = fuente.slice(nodo.position.start.offset, nodo.position.end.offset);
       const ultima = bloque.trimEnd().split('\n').at(-1)!.trim();
       if (!/^:{3,}$/.test(ultima) || bloque.trim().split('\n').length < 2) {
-        problema(file, nodo, `recuadro «${nodo.name}» sin cerrar (falta una línea «:::»)`);
+        // Dentro de otro recuadro es ambiguo cuál quedó sin cerrar: se nombran los dos y cómo anidar.
+        const padreRecuadro = padre?.type === 'containerDirective' ? padre.name : null;
+        problema(
+          file,
+          nodo,
+          padreRecuadro
+            ? `recuadro «${nodo.name}» sin cerrar, o «${padreRecuadro}», que lo contiene (falta una línea «:::»; para anidar, el exterior lleva más «:», p. ej. «::::${padreRecuadro}»)`
+            : `recuadro «${nodo.name}» sin cerrar (falta una línea «:::»)`,
+        );
       }
       const rotulo = RECUADROS[nodo.name];
       if (!rotulo) {

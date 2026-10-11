@@ -49,6 +49,12 @@ describe('validarFicha', () => {
     ).toContain('no permite modificaciones');
   });
 
+  it('rechaza una fuente que parece URL pero no es válida', () => {
+    expect(mensajeDe(() => validarFicha({ autor: 'X', fuente: 'https://', licencia: 'CC-BY-4.0' }, F))).toContain(
+      '«fuente» no es una URL válida',
+    );
+  });
+
   it('exige titular para marcas', () => {
     expect(mensajeDe(() => validarFicha({ autor: 'X', fuente: 'https://a', licencia: 'marca' }, F))).toContain(
       'titular',

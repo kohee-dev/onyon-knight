@@ -21,6 +21,8 @@ export interface ContextoRender {
   modo: Modo;
   base: string;
   sitioUrl: string;
+  /** Carpetas de contenido publicables: una imagen fuera de ellas es un error. Sin definir, no se comprueba. */
+  raices?: string[];
   /** Nivel HTML del primer título del cuerpo. Por defecto: 3 dentro de una unidad, 2 en una página suelta. */
   nivelTitulos?: 2 | 3;
   /** Ausente = página /apuntes/<id>/. */
@@ -123,6 +125,7 @@ function resolverImagenesCaso(p: PiezaFuente, ctx: ContextoRender, estado: Estad
         rutaPieza: p.rutaAbs,
         archivo: p.archivo,
         base: ctx.base,
+        raices: ctx.raices,
       });
       resultado[campo] = imagen;
       if (!estado.imagenes.some((i) => i.rutaAbs === imagen.rutaAbs)) estado.imagenes.push(imagen);

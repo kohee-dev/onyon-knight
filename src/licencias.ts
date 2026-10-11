@@ -110,6 +110,8 @@ export function validarFicha(datos: unknown, archivo: string): Ficha {
   if (!idLicencia) problemas.push({ archivo, mensaje: 'falta el campo «licencia»' });
   else if (!licencia) problemas.push({ archivo, mensaje: `licencia desconocida «${idLicencia}»` });
   if (!propio && !d.fuente) problemas.push({ archivo, mensaje: 'falta el campo «fuente»' });
+  if (d.fuente && /^https?:/i.test(d.fuente) && !URL.canParse(d.fuente))
+    problemas.push({ archivo, mensaje: `«fuente» no es una URL válida: «${d.fuente}»` });
   if (licencia && d.cambios && !licencia.permiteCambios)
     problemas.push({ archivo, mensaje: `la licencia ${licencia.nombre} no permite modificaciones («cambios»)` });
   if (licencia?.requiereTitular && !d.titular)

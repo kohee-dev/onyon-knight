@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, extname, join, resolve } from 'node:path';
+import { dirname, extname, join, resolve, sep } from 'node:path';
 import { load, YAMLException } from 'js-yaml';
 import type { Image, Root } from 'mdast';
 import type { VFile } from 'vfile';
@@ -46,12 +46,25 @@ function leerFicha(rutaFicha: string, archivoMensaje: string): Ficha {
  * Valida y resuelve una imagen local de una pieza: no remota, existente y con ficha válida.
  * Lo usan las imágenes del texto y la portada/cabecera de los casos. Lanza ErrorContenido (sin línea).
  */
-export function resolverImagen(url: string, alt: string, ctx: { rutaPieza: string; archivo: string; base: string }): ImagenUsada {
+export function resolverImagen(
+  url: string,
+  alt: string,
+  ctx: { rutaPieza: string; archivo: string; base: string; raices?: string[] },
+): ImagenUsada {
   const fallo = (mensaje: string): never => {
     throw new ErrorContenido([{ archivo: ctx.archivo, mensaje }]);
   };
   if (/^[a-z]+:\/\//i.test(url) || url.startsWith('//')) fallo(`imagen remota no permitida «${url}»: descárgala junto a la pieza con su ficha`);
-  const rutaAbs = resolve(dirname(ctx.rutaPieza), decodeURI(url));
+  let decodificada = url;
+  try {
+    decodificada = decodeURI(url);
+  } catch {
+    fallo(`ruta de imagen no válida «${url}» (revisa los caracteres %)`);
+  }
+  const rutaAbs = resolve(dirname(ctx.rutaPieza), decodificada);
+  if (ctx.raices && !ctx.raices.some((r) => rutaAbs.startsWith(r + sep))) {
+    fallo(`imagen fuera de las carpetas de contenido «${url}»: no se publicaría`);
+  }
   if (!existsSync(rutaAbs)) fallo(`imagen inexistente «${url}»`);
   const rutaFicha = join(dirname(rutaAbs), `${url.split('/').at(-1)!.slice(0, -extname(rutaAbs).length || undefined)}.yml`);
   const relFicha = url.replace(/\.[^.\/]+$/, '.yml');
@@ -98,7 +111,7 @@ export function remarkImagenes() {
       }
       let usada: ImagenUsada;
       try {
-        usada = resolverImagen(img.url, img.alt, { rutaPieza: e.pieza.rutaAbs, archivo: e.pieza.archivo, base: e.ctx.base });
+        usada = resolverImagen(img.url, img.alt, { rutaPieza: e.pieza.rutaAbs, archivo: e.pieza.archivo, base: e.ctx.base, raices: e.ctx.raices });
       } catch (err) {
         if (!(err instanceof ErrorContenido)) throw err;
         e.problemas.push(...err.problemas.map((p) => ({ ...p, linea: img.position ? img.position.start.line + e.desplazamiento : undefined })));

@@ -63,6 +63,20 @@ describe('imágenes', () => {
     expect(await error('![x](https://ejemplo.org/x.png)')).toContain('imagen remota no permitida');
   });
 
+  it('una ruta con un % mal codificado es un error con el archivo', async () => {
+    expect(await error('![x](./img/cpu%zz.png)')).toContain('ruta de imagen no válida «./img/cpu%zz.png»');
+  });
+
+  it('una imagen fuera de las carpetas de contenido es un error', async () => {
+    const p = piezaMd('a', '![x](../img/img/cpu.png)', { rutaAbs: resolve('tests/fixtures/img/sub/pieza.md') });
+    const ctx = { ...contexto([p]), raices: [resolve('tests/fixtures/img/sub')] };
+    const m = await renderizarPieza(p, ctx).then(
+      () => '',
+      (e) => (e as Error).message,
+    );
+    expect(m).toContain('fuera de las carpetas de contenido');
+  });
+
   it('rechaza imágenes inexistentes', async () => {
     expect(await error('![x](./img/no.png)')).toContain('imagen inexistente');
   });

@@ -77,7 +77,7 @@ async function construirSitio(): Promise<Sitio> {
   const { piezas, modulos } = await cargarFuentes();
   const catalogo = construirCatalogo(piezas, modulos, modo);
   const fechas = await leerFechas(process.cwd());
-  const ctxBase: Omit<ContextoRender, 'unidad'> = { catalogo, modo, base, sitioUrl };
+  const ctxBase: Omit<ContextoRender, 'unidad'> = { catalogo, modo, base, sitioUrl, raices: raicesPiezas };
 
   // Se renderiza todo antes de fallar, para mostrar todos los errores de una vez.
   const sueltas = new Map<string, PiezaEnUnidad>();

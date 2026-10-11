@@ -44,6 +44,20 @@ describe('recuadros', () => {
     expect(m).toContain('sin cerrar');
   });
 
+  it('con recuadros anidados sin cerrar, nombra los dos y explica cómo anidar', async () => {
+    const m = await error('Intro\n\n:::nota\nA\n\n:::ejercicio\nB\n:::');
+    expect(m).toContain('a.md:6');
+    expect(m).toContain('«ejercicio» sin cerrar, o «nota», que lo contiene');
+    expect(m).toContain('::::nota');
+  });
+
+  it('no reescribe «::: nota» dentro de un bloque de código', async () => {
+    const h = await html('```text\n::: nota\n:::\n```\n\n~~~\n::: aviso\n~~~');
+    expect(h).toContain('::: nota');
+    expect(h).toContain('::: aviso');
+    expect(h).not.toContain('<aside');
+  });
+
   it('conserva literal el texto con dos puntos', async () => {
     const h = await html('chown root:root fichero\n\nC:\\Windows\\System32\n\npuerto ldap:389\n\nfe80::1\n\n::nota en línea');
     expect(h).toContain('chown root:root fichero');
