@@ -10,6 +10,7 @@ import { VFile } from 'vfile';
 import { ErrorContenido, type Catalogo, type Ficha, type Modo, type PiezaFuente } from '../tipos';
 import type { EstadoRender } from './comun';
 import { remarkEncabezados } from './encabezados';
+import { remarkEnlaces } from './enlaces';
 import { remarkSinHtml } from './html';
 import { remarkMermaid } from './mermaid';
 import { normalizarRecuadros, remarkRecuadros } from './recuadros';
@@ -46,6 +47,7 @@ const procesador = unified()
   .use(remarkRecuadros)
   .use(remarkEncabezados)
   .use(remarkMermaid)
+  .use(remarkEnlaces)
   .use(remarkRehype)
   .use(rehypeShiki, {
     themes: { light: 'github-light', dark: 'github-dark' },
