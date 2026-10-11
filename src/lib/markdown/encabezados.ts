@@ -12,7 +12,7 @@ export function sinDiacriticos(texto: string): string {
 /** Normaliza niveles (el mínimo pasa a h2 suelta / h3 en unidad) y prefija los ids con la pieza. */
 export function remarkEncabezados() {
   return (arbol: Root, file: VFile) => {
-    const { pieza, ctx } = estado(file);
+    const { pieza, ctx, titulos } = estado(file);
     const encabezados: Heading[] = [];
     visit(arbol, 'heading', (h) => void encabezados.push(h));
     if (!encabezados.length) return;
@@ -21,11 +21,11 @@ export function remarkEncabezados() {
     const slugger = new GithubSlugger();
     for (const h of encabezados) {
       const relativo = h.depth - minimo + 1;
+      const texto = toString(h);
+      const id = `${pieza.id}--${slugger.slug(sinDiacriticos(texto))}`;
       h.depth = Math.min(6, h.depth + desplazar) as Heading['depth'];
-      h.data = {
-        ...h.data,
-        hProperties: { id: `${pieza.id}--${slugger.slug(sinDiacriticos(toString(h)))}`, className: [`titulo-${relativo}`] },
-      };
+      h.data = { ...h.data, hProperties: { id, className: [`titulo-${relativo}`] } };
+      titulos.push({ id, texto, nivel: relativo });
     }
   };
 }
