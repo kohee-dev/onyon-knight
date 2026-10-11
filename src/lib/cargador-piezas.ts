@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import type { Loader } from 'astro/loaders';
 import { load } from 'js-yaml';
 
+
 const CABECERA = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
 
 function listarMarkdown(dir: string): string[] {
@@ -49,7 +50,8 @@ export function piezasMarkdown(base: string): Loader {
       if (watcher) {
         watcher.add(base);
         const recargar = async (ruta: string) => {
-          if (!ruta.startsWith(base) || !ruta.endsWith('.md')) return;
+          // También imágenes y fichas: su URL publicada depende de su contenido (dev daría 404 si no).
+          if (!ruta.startsWith(base) || !/\.(md|ya?ml|png|jpe?g|gif|svg|webp)$/i.test(ruta)) return;
           logger.info(`recargando piezas (${relative(raiz, ruta)})`);
           await cargar();
         };

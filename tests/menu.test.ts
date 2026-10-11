@@ -92,6 +92,21 @@ describe('menú en móvil', () => {
   });
 });
 
+describe('índice lateral', () => {
+  it.each([1280, 1366, 1440])('a %i px deja al menos 1,5 rem entre el texto y el índice', async (ancho) => {
+    const p = await abrir('/ok/aso/ut1/', ancho);
+    const hueco = await p.evaluate(() => {
+      const main = document.querySelector('main')!;
+      const relleno = parseFloat(getComputedStyle(main).paddingRight);
+      const finTexto = main.getBoundingClientRect().right - relleno;
+      const inicioIndice = document.getElementById('menu')!.getBoundingClientRect().left;
+      return (inicioIndice - finTexto) / parseFloat(getComputedStyle(document.documentElement).fontSize);
+    });
+    expect(hueco).toBeGreaterThanOrEqual(1.5);
+    await p.close();
+  });
+});
+
 describe('cabecera', () => {
   it('queda fija y la barra de progreso avanza al bajar', async () => {
     const p = await abrir('/ok/aso/ut1/', 1440);
