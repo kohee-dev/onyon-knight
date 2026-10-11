@@ -85,3 +85,23 @@ describe('enlaces Markdown normales', () => {
     expect(await error('[js](javascript:alert(1))')).toContain('enlace no permitido «javascript:alert(1)»');
   });
 });
+
+describe('enlaces con teoría y casos de la unidad', () => {
+  const c = piezaMd('c', 'Caso C');
+  const d = piezaMd('d', 'Caso D');
+
+  it('desde la teoría, un caso de la unidad enlaza a su página', async () => {
+    const { html } = await render('Ver [[c]].', { unidad: ['a'], casos: ['c'] }, [c]);
+    expect(html).toContain('href="https://ej.es/ok/aso/ut1/casos/c/"');
+  });
+
+  it('desde un caso: ancla a sí mismo, teoría de la unidad y otros casos', async () => {
+    const pc = piezaMd('c', 'Yo [[c]], teoría [[a]], otro [[d]].');
+    const a = piezaMd('a', 'Teoría');
+    const ctx = contexto([pc, a, d], { unidad: ['c'], teoria: ['a'], casos: ['c', 'd'] });
+    const html = (await renderizarPieza(pc, ctx)).html;
+    expect(html).toContain('href="#c"');
+    expect(html).toContain('href="https://ej.es/ok/aso/ut1/#a"');
+    expect(html).toContain('href="https://ej.es/ok/aso/ut1/casos/d/"');
+  });
+});

@@ -2,8 +2,20 @@ import type { PhrasingContent, Root, Text } from 'mdast';
 import type { VFile } from 'vfile';
 import { SKIP, visit } from 'unist-util-visit';
 import { estado } from './comun';
+import type { ContextoRender } from './index';
 
 const ENLACE = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
+
+/** Destino de un enlace a una pieza según la página en que se renderiza (spec de casos §4.3). */
+function urlDestino(ctx: ContextoRender, id: string): string {
+  const u = ctx.unidad;
+  if (!u) return `${ctx.base}apuntes/${id}/`;
+  if (u.piezas.has(id)) return `#${id}`;
+  const unidad = `${ctx.base}${u.modulo}/${u.id}/`;
+  const ruta = u.teoria.has(id) ? `${unidad}#${id}` : u.casos.has(id) ? `${unidad}casos/${id}/` : `${ctx.base}apuntes/${id}/`;
+  // Absoluta: el PDF se imprime desde 127.0.0.1.
+  return new URL(ruta, ctx.sitioUrl).href;
+}
 
 /** `[[id]]` y `[[id|texto]]`: ancla si la pieza está en la unidad; si no, su página (absoluta dentro de una unidad, por el PDF). */
 export function remarkEnlaces() {
@@ -37,9 +49,7 @@ export function remarkEnlaces() {
           partes.push({ type: 'text', value: etiqueta });
           continue;
         }
-        const ruta = `${ctx.base}apuntes/${id}/`;
-        const url = ctx.unidad?.piezas.has(id) ? `#${id}` : ctx.unidad ? new URL(ruta, ctx.sitioUrl).href : ruta;
-        partes.push({ type: 'link', url, children: [{ type: 'text', value: etiqueta }] });
+        partes.push({ type: 'link', url: urlDestino(ctx, id), children: [{ type: 'text', value: etiqueta }] });
       }
       if (ultimo === 0) return;
       if (ultimo < nodo.value.length) partes.push({ type: 'text', value: nodo.value.slice(ultimo) });

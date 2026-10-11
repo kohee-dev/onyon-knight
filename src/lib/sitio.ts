@@ -79,7 +79,10 @@ async function construirSitio(): Promise<Sitio> {
   const unidades: UnidadSitio[] = [];
   for (const m of catalogo.modulos) {
     for (const u of m.datos.unidades) {
-      const ctx: ContextoRender = { ...ctxBase, unidad: { modulo: m.id, id: u.id, piezas: new Set(u.piezas) } };
+      const ctx: ContextoRender = {
+        ...ctxBase,
+        unidad: { modulo: m.id, id: u.id, piezas: new Set(u.piezas), teoria: new Set(u.piezas), casos: new Set<string>() },
+      };
       const lista: PiezaEnUnidad[] = [];
       for (const id of u.piezas) {
         const fuente = catalogo.piezas.get(id)!;

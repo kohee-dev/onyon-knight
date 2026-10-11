@@ -22,7 +22,16 @@ export interface ContextoRender {
   base: string;
   sitioUrl: string;
   /** Ausente = página /apuntes/<id>/. */
-  unidad?: { modulo: string; id: string; piezas: Set<string> };
+  unidad?: {
+    modulo: string;
+    id: string;
+    /** Piezas renderizadas en ESTA página: los enlaces a ellas son anclas. */
+    piezas: Set<string>;
+    /** Teoría de la unidad: `<unidad>/#id`. */
+    teoria: Set<string>;
+    /** Casos de la unidad: `<unidad>/casos/<id>/`. */
+    casos: Set<string>;
+  };
 }
 
 export interface ImagenUsada {

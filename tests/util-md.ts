@@ -20,13 +20,24 @@ export function piezaMd(
   };
 }
 
-export function contexto(piezas: PiezaFuente[], opciones: { modo?: Modo; unidad?: string[] } = {}): ContextoRender {
+export function contexto(
+  piezas: PiezaFuente[],
+  opciones: { modo?: Modo; unidad?: string[]; teoria?: string[]; casos?: string[] } = {},
+): ContextoRender {
   const modo = opciones.modo ?? 'desarrollo';
   return {
     catalogo: construirCatalogo(piezas, [], modo),
     modo,
     base: '/ok/',
     sitioUrl: 'https://ej.es',
-    unidad: opciones.unidad ? { modulo: 'aso', id: 'ut1', piezas: new Set(opciones.unidad) } : undefined,
+    unidad: opciones.unidad
+      ? {
+          modulo: 'aso',
+          id: 'ut1',
+          piezas: new Set(opciones.unidad),
+          teoria: new Set(opciones.teoria ?? opciones.unidad),
+          casos: new Set(opciones.casos ?? []),
+        }
+      : undefined,
   };
 }
