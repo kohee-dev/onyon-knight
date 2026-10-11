@@ -51,15 +51,20 @@ export interface IndiceFechas {
 
 export async function leerFechas(raizRepo: string): Promise<IndiceFechas> {
   const git = (...args: string[]) =>
-    execFileSync('git', ['-C', raizRepo, ...args], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+    execFileSync('git', ['-C', raizRepo, '-c', 'core.quotePath=false', ...args], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
 
   let fechas = new Map<string, Date>();
   const sucios = new Set<string>();
   const avisos: string[] = [];
   try {
     fechas = parsearGitLog(git('log', '--format=%x00%cI', '--name-only'));
-    for (const linea of git('status', '--porcelain', '--untracked-files=all').split('\n')) {
-      if (linea.trim()) sucios.add(linea.slice(3).replace(/^.* -> /, '').replace(/^"|"$/g, ''));
+    // -z: rutas sin comillas ni escapes (no ASCII, espacios). En renombrados, la ruta de origen va en la entrada siguiente.
+    const entradas = git('status', '--porcelain=v1', '-z', '--untracked-files=all').split('\0');
+    for (let i = 0; i < entradas.length; i++) {
+      const e = entradas[i];
+      if (!e) continue;
+      sucios.add(e.slice(3));
+      if (e[0] === 'R' || e[0] === 'C') sucios.add(entradas[++i]);
     }
   } catch {
     avisos.push('git no está disponible o no hay historial: todas las fechas se muestran como «Sin publicar»');

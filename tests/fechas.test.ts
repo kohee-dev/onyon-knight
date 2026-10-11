@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -88,5 +88,25 @@ describe('leerFechas (repositorio real)', () => {
     expect(f.fechaDe([join(dir, 'b.md'), join(dir, 'm.yml')])?.toISOString()).toBe('2026-10-05T10:00:00.000Z');
     expect(f.fechaDe(['/fuera/del/repo.md'])).toBeNull();
     expect(f.fechaUnidad(join(dir, 'm.yml'), 'ut1')?.toISOString()).toBe('2026-10-01T10:00:00.000Z');
+  });
+
+  it('funciona con rutas no ASCII y con espacios', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'onyon-git-'));
+    git(dir, 'init', '-q');
+    git(dir, 'config', 'user.email', 't@t');
+    git(dir, 'config', 'user.name', 't');
+    mkdirSync(join(dir, 'administración'));
+    writeFileSync(join(dir, 'administración', 'diseño.md'), '1');
+    writeFileSync(join(dir, 'con espacio.md'), '1');
+    writeFileSync(join(dir, 'año.md'), '1');
+    git(dir, 'add', '.');
+    execFileSync('git', ['-C', dir, 'commit', '-qm', 'x'], {
+      env: { ...process.env, GIT_COMMITTER_DATE: '2026-10-02T10:00:00Z', GIT_AUTHOR_DATE: '2026-10-02T10:00:00Z' },
+    });
+    writeFileSync(join(dir, 'año.md'), 'cambiado');
+    const f = await leerFechas(dir);
+    expect(f.fechaDe([join(dir, 'administración', 'diseño.md')])?.toISOString()).toBe('2026-10-02T10:00:00.000Z');
+    expect(f.fechaDe([join(dir, 'con espacio.md')])?.toISOString()).toBe('2026-10-02T10:00:00.000Z');
+    expect(f.fechaDe([join(dir, 'año.md')])).toBeNull();
   });
 });
