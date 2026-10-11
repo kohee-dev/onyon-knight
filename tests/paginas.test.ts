@@ -63,6 +63,40 @@ describe('páginas', () => {
     expect(h).toContain('href="#procesos-concepto"'); // enlace wiki dentro de la unidad
   });
 
+  describe('cabecera, menú y pie', () => {
+    const paginas = ['index.html', 'aso/index.html', 'aso/ut1/index.html', 'aso/ut1/casos/caso-ldap/index.html', 'apuntes/suelta/index.html', 'licencias/index.html'];
+
+    it.each(paginas)('%s: menú, botón de menú y botón de modo en cabecera y menú', (r) => {
+      const h = leer(r);
+      expect(h).toMatch(/<button class="menu-boton"[^>]*aria-controls="menu"[^>]*aria-label="Abrir el menú"/);
+      const cabecera = h.slice(h.indexOf('<header class="cabecera"'), h.indexOf('</header>'));
+      expect(cabecera).toContain('class="tema-boton"');
+      expect(cabecera).toContain('class="progreso" aria-hidden="true"');
+      expect(cabecera).not.toContain('Licencias');
+      const menu = h.slice(h.indexOf('id="menu"'));
+      expect(menu.slice(0, menu.indexOf('</nav>'))).toContain('class="tema-boton"');
+    });
+
+    it.each(paginas)('%s: «Licencias y fuentes» en el pie', (r) => {
+      const h = leer(r);
+      const pie = h.slice(h.indexOf('<footer class="pie"'));
+      expect(pie).toContain('href="/ok/licencias/"');
+      expect(pie).toContain('Licencias y fuentes');
+    });
+
+    it('las tarjetas no repiten el título en la imagen', () => {
+      const t = leer('aso/ut1/index.html').split('class="casos"')[1];
+      expect(t).toMatch(/<img class="imagen-caso[^"]*"[^>]*\balt(="")?[\s>]/); // `alt` vacío (Astro lo escribe sin valor)
+      expect(t).not.toMatch(/<img class="imagen-caso[^"]*"[^>]*alt="[^"]/);
+      expect(t).toMatch(/class="imagen-generica[^"]*"[^>]*aria-hidden="true"/);
+      expect(t).not.toMatch(/class="imagen-generica[^"]*"[^>]*role="img"/);
+    });
+
+    it('la página del caso no salta de h1 a h3', () => {
+      expect(leer('aso/ut1/casos/caso-ldap/index.html')).toMatch(/<h2 id="caso-ldap--escenario"/);
+    });
+  });
+
   describe('teoría y casos', () => {
     const tarjetas = (h: string) => h.slice(h.indexOf('class="casos"'));
 
@@ -109,7 +143,7 @@ describe('páginas', () => {
     it('una unidad solo con casos no tiene PDF de teoría ni botón de índice', () => {
       const h = leer('aso/ut2/index.html');
       expect(h).not.toContain('PDF de teoría');
-      expect(h).not.toContain('indice-boton');
+      expect(h).not.toMatch(/class="menu-indice"/);
       expect(h).toContain('/ok/aso/ut2/casos/caso-solo/');
     });
 
@@ -134,12 +168,12 @@ describe('páginas', () => {
 
     it('índice de la unidad y botón accesible oculto sin JavaScript', () => {
       const h = leer('aso/ut1/index.html');
-      const nav = h.slice(h.indexOf('<nav class="indice" id="indice"'));
+      const nav = h.slice(h.indexOf('id="menu"'));
       expect(nav).toContain('href="#procesos-concepto"');
       expect(nav).toContain('href="#procesos-concepto--que-es-un-proceso"');
-      expect(h).toMatch(/<button class="indice-boton"[^>]*hidden[^>]*>/);
-      expect(h).toMatch(/<button class="indice-boton"[^>]*aria-expanded="false"/);
-      expect(h).toMatch(/<button class="indice-boton"[^>]*aria-controls="indice"/);
+      expect(h).toMatch(/<button class="menu-boton"[^>]*hidden[^>]*>/);
+      expect(h).toMatch(/<button class="menu-boton"[^>]*aria-expanded="false"/);
+      expect(h).toMatch(/<button class="menu-boton"[^>]*aria-controls="menu"/);
     });
   });
 

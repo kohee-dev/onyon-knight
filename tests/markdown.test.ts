@@ -61,6 +61,12 @@ describe('encabezados', () => {
     expect(await html('## A\n\n### B')).toMatch(/<h2[^>]*>A<\/h2>[\s\S]*<h3[^>]*>B<\/h3>/);
   });
 
+  it('permite fijar el nivel de los títulos (página de un caso: h2 tras el h1)', async () => {
+    const p = piezaMd('a', '# A\n\n## B');
+    const ctx = { ...contexto([p], { unidad: ['a'] }), nivelTitulos: 2 as const };
+    expect((await renderizarPieza(p, ctx)).html).toMatch(/<h2[^>]*>A<\/h2>[\s\S]*<h3[^>]*>B<\/h3>/);
+  });
+
   it('marca el nivel relativo de cada título (para su estilo)', async () => {
     const h = await html('# A\n\n## B\n\n### C', ['a']);
     expect(h).toMatch(/<h3[^>]*class="titulo-1"[^>]*>A/);

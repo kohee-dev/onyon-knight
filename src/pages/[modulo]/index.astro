@@ -1,4 +1,5 @@
 ---
+import Menu from '../../components/Menu.astro';
 import Fecha from '../../components/Fecha.astro';
 import { categoriaDe } from '../../categorias';
 import Base from '../../layouts/Base.astro';
@@ -39,4 +40,5 @@ const cat = categoriaDe(modulo.datos.ciclo)!;
       </li>
     ))}
   </ol>
+  <Menu />
 </Base>

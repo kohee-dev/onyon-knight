@@ -1,0 +1,8 @@
+---
+import { svgIcono } from '../lib/iconos';
+---
+<button class="tema-boton" type="button" aria-label="Cambiar a modo oscuro">
+  <span class="tema-icono" set:html={svgIcono('casco')} />
+  <span class="tema-a-oscuro">Modo oscuro</span>
+  <span class="tema-a-claro">Modo claro</span>
+</button>

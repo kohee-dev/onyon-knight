@@ -10,11 +10,15 @@ interface Props {
   modulo?: ModuloFuente;
   proporcion: 'portada' | 'cabecera';
   titulo: string;
+  /** En las tarjetas: la imagen no repite el título, que ya está en el enlace. */
+  decorativa?: boolean;
 }
-const { imagen, modulo, proporcion, titulo } = Astro.props;
+const { imagen, modulo, proporcion, titulo, decorativa = false } = Astro.props;
 const cat = modulo ? categoriaDe(modulo.datos.ciclo) : undefined;
 const icono = modulo?.datos.icono ?? 'casco';
 ---
 {imagen
-  ? <img class={`imagen-caso imagen-${proporcion}`} src={imagen.url} alt={imagen.alt} loading="lazy" />
-  : <div class={`imagen-generica imagen-${proporcion} ${cat?.clase ?? ''}`} role="img" aria-label={titulo} set:html={svgIcono(icono)} />}
+  ? <img class={`imagen-caso imagen-${proporcion}`} src={imagen.url} alt={decorativa ? '' : imagen.alt} loading="lazy" />
+  : decorativa
+    ? <div class={`imagen-generica imagen-${proporcion} ${cat?.clase ?? ''}`} aria-hidden="true" set:html={svgIcono(icono)} />
+    : <div class={`imagen-generica imagen-${proporcion} ${cat?.clase ?? ''}`} role="img" aria-label={titulo} set:html={svgIcono(icono)} />}

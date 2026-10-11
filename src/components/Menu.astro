@@ -1,0 +1,123 @@
+---
+import BotonTema from './BotonTema.astro';
+
+export interface EntradaIndice {
+  id: string;
+  texto: string;
+  /** 0 = título de pieza; 1, 2 = títulos internos. */
+  nivel: number;
+  /** p. ej. solo-pantalla / solo-impresion */
+  clase?: string;
+}
+interface Props {
+  /** Índice de la página; vacío en las páginas sin índice (el menú solo tiene el modo). */
+  entradas?: EntradaIndice[];
+}
+const { entradas = [] } = Astro.props;
+const conIndice = entradas.length > 0;
+---
+<nav class={`menu${conIndice ? '' : ' menu-vacio'}`} id="menu" aria-label={conIndice ? 'Índice' : 'Menú'}>
+  <div class="menu-cabecera">
+    <p class="menu-titulo">Menú</p>
+    <button class="menu-cerrar" type="button" aria-label="Cerrar el menú">×</button>
+  </div>
+  <div class="menu-modo"><BotonTema /></div>
+  {conIndice && (
+    <div class="menu-indice">
+      <p class="indice-titulo">Índice</p>
+      <ol>
+        {entradas.map((e) => <li class={`indice-n${e.nivel}${e.clase ? ` ${e.clase}` : ''}`}><a href={`#${e.id}`}>{e.texto}</a></li>)}
+      </ol>
+    </div>
+  )}
+</nav>
+<div class="menu-capa" hidden></div>
+
+<script>
+  const menu = document.getElementById('menu');
+  const boton = document.querySelector<HTMLButtonElement>('.menu-boton');
+  const capa = document.querySelector<HTMLElement>('.menu-capa');
+  if (menu && boton && capa) {
+    const etiquetaReposo = menu.getAttribute('aria-label') ?? 'Menú';
+    const ancho = matchMedia('(min-width: 1280px)');
+    document.documentElement.classList.add('con-menu');
+    boton.hidden = false;
+
+    // Todo lo que queda detrás del panel abierto: cabecera, pie y el resto del contenido.
+    const detras = () =>
+      [document.querySelector('header.cabecera'), document.querySelector('footer.pie'), ...(menu.parentElement?.children ?? [])].filter(
+        (el): el is HTMLElement => el instanceof HTMLElement && el !== menu && el !== capa && el.tagName !== 'SCRIPT',
+      );
+    const enfocables = () =>
+      [...menu.querySelectorAll<HTMLElement>('a[href], button')].filter((el) => el.offsetParent !== null || el === document.activeElement);
+
+    const abierto = () => menu.classList.contains('menu-abierto');
+    const abrir = () => {
+      menu.classList.add('menu-abierto');
+      menu.setAttribute('role', 'dialog');
+      menu.setAttribute('aria-modal', 'true');
+      menu.setAttribute('aria-label', 'Menú');
+      capa.hidden = false;
+      boton.setAttribute('aria-expanded', 'true');
+      for (const el of detras()) el.inert = true;
+      document.documentElement.classList.add('menu-bloqueo');
+      enfocables()[0]?.focus();
+    };
+    const cerrar = (devolverFoco = true) => {
+      menu.classList.remove('menu-abierto');
+      menu.removeAttribute('role');
+      menu.removeAttribute('aria-modal');
+      menu.setAttribute('aria-label', etiquetaReposo);
+      capa.hidden = true;
+      boton.setAttribute('aria-expanded', 'false');
+      for (const el of detras()) el.inert = false;
+      document.documentElement.classList.remove('menu-bloqueo');
+      if (devolverFoco) boton.focus();
+    };
+
+    boton.addEventListener('click', () => (abierto() ? cerrar() : abrir()));
+    capa.addEventListener('click', () => cerrar());
+    menu.querySelector('.menu-cerrar')?.addEventListener('click', () => cerrar());
+    menu.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a') && abierto()) cerrar(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (!abierto()) return;
+      if (e.key === 'Escape') return cerrar();
+      if (e.key !== 'Tab') return;
+      // El foco no sale del panel.
+      const lista = enfocables();
+      if (!lista.length) return;
+      const [primero, ultimo] = [lista[0], lista[lista.length - 1]];
+      if (e.shiftKey && document.activeElement === primero) {
+        e.preventDefault();
+        ultimo.focus();
+      } else if (!e.shiftKey && document.activeElement === ultimo) {
+        e.preventDefault();
+        primero.focus();
+      }
+    });
+    // Al pasar a pantalla ancha, el panel no tiene sentido: se cierra.
+    ancho.addEventListener('change', (e) => {
+      if (e.matches && abierto()) cerrar(false);
+    });
+
+    // Sección actual resaltada en el índice.
+    const enlaces = new Map<string, HTMLAnchorElement>();
+    menu.querySelectorAll<HTMLAnchorElement>('.menu-indice a[href^="#"]').forEach((a) => enlaces.set(decodeURIComponent(a.hash.slice(1)), a));
+    const observador = new IntersectionObserver(
+      (vistas) => {
+        for (const v of vistas) {
+          if (!v.isIntersecting) continue;
+          menu.querySelectorAll('a.activa').forEach((a) => a.classList.remove('activa'));
+          enlaces.get(v.target.id)?.classList.add('activa');
+        }
+      },
+      { rootMargin: '0px 0px -70% 0px' },
+    );
+    for (const id of enlaces.keys()) {
+      const el = document.getElementById(id);
+      if (el) observador.observe(el);
+    }
+  }
+</script>

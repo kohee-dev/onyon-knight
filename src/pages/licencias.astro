@@ -1,4 +1,5 @@
 ---
+import Menu from '../components/Menu.astro';
 import Recursos from '../components/Recursos.astro';
 import Base from '../layouts/Base.astro';
 import { licenciaPorId } from '../licencias';
@@ -37,4 +38,5 @@ const creditos = creditosDe([...sitio.sueltas.values()]);
       </table>
     </div>
   </section>
+  <Menu />
 </Base>

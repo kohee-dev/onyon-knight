@@ -21,6 +21,8 @@ export interface ContextoRender {
   modo: Modo;
   base: string;
   sitioUrl: string;
+  /** Nivel HTML del primer título del cuerpo. Por defecto: 3 dentro de una unidad, 2 en una página suelta. */
+  nivelTitulos?: 2 | 3;
   /** Ausente = página /apuntes/<id>/. */
   unidad?: {
     modulo: string;

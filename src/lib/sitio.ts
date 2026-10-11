@@ -112,7 +112,8 @@ async function construirSitio(): Promise<Sitio> {
 
       const casos: CasoSitio[] = [];
       for (const id of idsCasos) {
-        const pieza = await renderizar(id, contextoDe([id]));
+        // En la página del caso el título es el h1: el cuerpo empieza en h2.
+        const pieza = await renderizar(id, { ...contextoDe([id]), nivelTitulos: 2 });
         const url = `${urlUnidad}casos/${id}/`;
         if (!primeraUrlCaso.has(id)) primeraUrlCaso.set(id, url);
         casos.push({

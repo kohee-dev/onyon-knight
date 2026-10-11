@@ -1,7 +1,6 @@
 ---
-import BotonIndice from '../../../components/BotonIndice.astro';
 import Distintivo from '../../../components/Distintivo.astro';
-import Indice from '../../../components/Indice.astro';
+import Menu from '../../../components/Menu.astro';
 import TarjetaCaso from '../../../components/TarjetaCaso.astro';
 import Fecha from '../../../components/Fecha.astro';
 import Recursos from '../../../components/Recursos.astro';
@@ -32,7 +31,6 @@ const entradas = [
 ];
 ---
 <Base titulo={`${u.titulo} · ${m.id.toUpperCase()}`}>
-  {u.teoria.length > 0 && <BotonIndice slot="cabecera-extra" />}
   <section class={`portada ${cat.clase}`} aria-hidden="true">
     <p class="portada-modulo">{m.datos.nombre}</p>
     <p class="portada-meta">{m.id.toUpperCase()} · {m.datos.codigo} · {m.datos.ciclo} · {m.datos.curso}.º</p>
@@ -43,13 +41,15 @@ const entradas = [
   </section>
   <p class="migas"><a href={sitio.base}>Inicio</a> › <a href={`${sitio.base}${m.id}/`}>{m.datos.nombre}</a></p>
   <header class="unidad-cabecera">
-    <p class="meta">{m.datos.nombre} · {u.id.toUpperCase()}</p>
-    <h1>{u.titulo}</h1>
-    <Fecha fecha={u.fecha} />
+    <div class="cabecera-texto">
+      <p class="meta">{m.datos.nombre} · {u.id.toUpperCase()}</p>
+      <h1>{u.titulo}</h1>
+      <Fecha fecha={u.fecha} />
+    </div>
     {u.urlPdf && <a class="boton" href={u.urlPdf} download>PDF de teoría</a>}
   </header>
 
-  {u.teoria.length > 0 && <Indice entradas={entradas} />}
+  <Menu entradas={u.teoria.length > 0 ? entradas : []} />
 
   {u.teoria.map((p) => (
     <section class="pieza" id={p.fuente.id}>

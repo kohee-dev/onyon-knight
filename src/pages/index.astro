@@ -1,4 +1,5 @@
 ---
+import Menu from '../components/Menu.astro';
 import Fecha from '../components/Fecha.astro';
 import TarjetaModulo from '../components/TarjetaModulo.astro';
 import Base from '../layouts/Base.astro';
@@ -25,4 +26,5 @@ const modulos = sitio.catalogo.modulos.map((m) => {
       <li><a href={c.url}>{c.titulo}</a> <span class="contexto">{c.contexto}</span> <Fecha fecha={c.fecha} /></li>
     ))}
   </ol>
+  <Menu />
 </Base>

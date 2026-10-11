@@ -15,7 +15,7 @@ const { fuente, render, fecha } = caso.pieza;
 ---
 <li class="tarjeta-caso">
   <a href={caso.url}>
-    <ImagenCaso imagen={render.portada} modulo={modulo} proporcion="portada" titulo={fuente.datos.titulo} />
+    <ImagenCaso imagen={render.portada} modulo={modulo} proporcion="portada" titulo={fuente.datos.titulo} decorativa />
     <span class="tarjeta-caso-cuerpo">
       <span class="tarjeta-meta"><span class="chip-caso">Caso práctico</span><span>{formatearHoras(fuente.datos.horas!)}</span></span>
       <span class="tarjeta-nombre">{fuente.datos.titulo}<Distintivo pieza={fuente} /></span>

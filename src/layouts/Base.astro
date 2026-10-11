@@ -4,7 +4,8 @@ import '@fontsource/jetbrains-mono';
 import '../styles/global.css';
 import '../styles/print.css';
 import { CATEGORIAS } from '../categorias';
-import { svgIcono } from '../lib/iconos';
+import BotonMenu from '../components/BotonMenu.astro';
+import BotonTema from '../components/BotonTema.astro';
 
 interface Props {
   titulo: string;
@@ -42,40 +43,56 @@ const cssCategorias = Object.values(CATEGORIAS)
   </head>
   <body>
     <header class="cabecera">
+      <span class="cabecera-hueco" aria-hidden="true"></span>
       <a class="marca" href={base}>Onyon Knight</a>
-      <nav>
-        <slot name="cabecera-extra" />
-        <button class="tema-boton" type="button" aria-label="Cambiar a modo oscuro">
-          <span class="tema-icono" set:html={svgIcono('casco')} />
-          <span class="tema-a-oscuro">Modo oscuro</span>
-          <span class="tema-a-claro">Modo claro</span>
-        </button>
-        <a href={`${base}licencias/`}>Licencias</a>
-      </nav>
+      <div class="cabecera-acciones">
+        <BotonTema />
+        <BotonMenu />
+      </div>
+      <div class="progreso" aria-hidden="true" style="--progreso: 0"><span></span></div>
     </header>
     <main>
       <slot />
     </main>
     <footer class="pie">
       <p>© Alejandro Bartolomé · CC BY-SA 4.0, salvo indicación expresa</p>
+      <p><a href={`${base}licencias/`}>Licencias y fuentes</a></p>
     </footer>
     <script>
-      // Botón de tema: alterna modo claro / oscuro y recuerda la elección.
-      const boton = document.querySelector<HTMLButtonElement>('.tema-boton');
+      // Botones de tema (cabecera y menú): alternan modo claro / oscuro y recuerdan la elección.
+      const botonesTema = document.querySelectorAll<HTMLButtonElement>('.tema-boton');
       const etiqueta = (t: string | null) => (t === 'oscuro' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
-      if (boton) {
-        boton.setAttribute('aria-label', etiqueta(document.documentElement.dataset.tema ?? null));
-        boton.addEventListener('click', () => {
+      const etiquetar = (t: string | null) => botonesTema.forEach((b) => b.setAttribute('aria-label', etiqueta(t)));
+      etiquetar(document.documentElement.dataset.tema ?? null);
+      botonesTema.forEach((b) =>
+        b.addEventListener('click', () => {
           const nuevo = document.documentElement.dataset.tema === 'oscuro' ? 'claro' : 'oscuro';
           document.documentElement.dataset.tema = nuevo;
-          boton.setAttribute('aria-label', etiqueta(nuevo));
+          etiquetar(nuevo);
           try {
             localStorage.setItem('onyon-tema', nuevo);
           } catch {
             /* sin almacenamiento: el tema dura hasta recargar */
           }
-        });
-      }
+        }),
+      );
+
+      // Barra de progreso de lectura.
+      const progreso = document.querySelector<HTMLElement>('.progreso');
+      let pendiente = false;
+      const medir = () => {
+        pendiente = false;
+        const total = document.documentElement.scrollHeight - innerHeight;
+        progreso?.style.setProperty('--progreso', String(total > 0 ? Math.min(1, scrollY / total) : 0));
+      };
+      addEventListener('scroll', () => {
+        if (!pendiente) {
+          pendiente = true;
+          requestAnimationFrame(medir);
+        }
+      }, { passive: true });
+      addEventListener('resize', medir);
+      medir();
 
       // Señal para scripts/pdf.mjs: tipografías, imágenes y diagramas listos.
       async function prepararPagina() {

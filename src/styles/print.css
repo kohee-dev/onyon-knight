@@ -43,14 +43,18 @@
     padding: 0;
   }
   .cabecera,
+  .menu-cabecera,
   .pie,
   .migas,
   .boton,
   .solo-pantalla,
   .tema-boton,
-  .indice-boton,
-  .indice-capa,
-  .indice-cerrar,
+  .menu-boton,
+  .menu-capa,
+  .menu-cabecera,
+  .menu-modo,
+  .menu-vacio,
+  .progreso,
   .banner,
   .casos,
   .unidad-cabecera {
@@ -97,8 +101,8 @@
     font-size: 0.85rem;
   }
 
-  .indice,
-  .con-indice .indice {
+  .menu,
+  .con-menu .menu {
     position: static !important;
     transform: none !important;
     visibility: visible !important;
@@ -128,8 +132,8 @@
   }
   /* La primera pieza sigue al índice en su misma página. */
   /* Entre el índice y la pieza están la capa del panel y el script del índice. */
-  .indice-capa + .pieza,
-  .indice-capa + script + .pieza {
+  .menu-capa + .pieza,
+  .menu-capa + script + .pieza {
     break-before: auto;
     margin-top: 2rem;
   }

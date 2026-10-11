@@ -54,6 +54,10 @@ describe('construirCatalogo', () => {
     expect(m).toContain('privado:piezas/b/procesos.md');
   });
 
+  it.each(['menu', 'casos-practicos', 'casos-de-esta-unidad', 'licencias-y-fuentes'])('reserva el id «%s» para la página', (id) => {
+    expect(problemas(() => construirCatalogo([pieza(id)], [], 'desarrollo'))).toContain(`id de pieza reservado «${id}»`);
+  });
+
   it('rechaza ids de pieza que no son slugs', () => {
     expect(problemas(() => construirCatalogo([pieza('Tema 1')], [], 'desarrollo'))).toContain('id de pieza no válido «Tema 1»');
   });

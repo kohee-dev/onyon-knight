@@ -17,7 +17,7 @@ export function remarkEncabezados() {
     visit(arbol, 'heading', (h) => void encabezados.push(h));
     if (!encabezados.length) return;
     const minimo = Math.min(...encabezados.map((h) => h.depth));
-    const desplazar = (ctx.unidad ? 3 : 2) - minimo;
+    const desplazar = (ctx.nivelTitulos ?? (ctx.unidad ? 3 : 2)) - minimo;
     const slugger = new GithubSlugger();
     for (const h of encabezados) {
       const relativo = h.depth - minimo + 1;

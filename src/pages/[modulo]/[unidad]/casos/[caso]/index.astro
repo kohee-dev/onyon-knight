@@ -1,8 +1,7 @@
 ---
-import BotonIndice from '../../../../../components/BotonIndice.astro';
 import Fecha from '../../../../../components/Fecha.astro';
 import ImagenCaso from '../../../../../components/ImagenCaso.astro';
-import Indice from '../../../../../components/Indice.astro';
+import Menu from '../../../../../components/Menu.astro';
 import Recursos from '../../../../../components/Recursos.astro';
 import { categoriaDe } from '../../../../../categorias';
 import Base from '../../../../../layouts/Base.astro';
@@ -25,7 +24,6 @@ const { fuente, render, fecha } = c.pieza;
 const entradas = render.titulos.filter((t) => t.nivel <= 2).map((t) => ({ id: t.id, texto: t.texto, nivel: t.nivel }));
 ---
 <Base titulo={`${fuente.datos.titulo} · ${m.id.toUpperCase()}`} descripcion={fuente.datos.resumen}>
-  {entradas.length > 0 && <BotonIndice slot="cabecera-extra" />}
   <section class={`portada portada-caso ${cat.clase}`} aria-hidden="true">
     <div class="portada-imagen"><ImagenCaso imagen={render.cabecera} modulo={m} proporcion="cabecera" titulo={fuente.datos.titulo} /></div>
     <p class="portada-modulo">{m.datos.nombre} · {u.titulo}</p>
@@ -38,12 +36,14 @@ const entradas = render.titulos.filter((t) => t.nivel <= 2).map((t) => ({ id: t.
   <p class="migas"><a href={sitio.base}>Inicio</a> › <a href={`${sitio.base}${m.id}/`}>{m.datos.nombre}</a> › <a href={u.url}>{u.titulo}</a></p>
   <div class="banner"><ImagenCaso imagen={render.cabecera} modulo={m} proporcion="cabecera" titulo={fuente.datos.titulo} /></div>
   <header class="unidad-cabecera caso-cabecera">
-    <p class="meta"><span class="chip-caso">Caso práctico</span> {formatearHoras(fuente.datos.horas!)}</p>
-    <h1>{fuente.datos.titulo}</h1>
-    <Fecha fecha={fecha} />
+    <div class="cabecera-texto">
+      <p class="meta"><span class="chip-caso">Caso práctico</span> {formatearHoras(fuente.datos.horas!)}</p>
+      <h1>{fuente.datos.titulo}</h1>
+      <Fecha fecha={fecha} />
+    </div>
     <a class="boton" href={c.urlPdf} download>PDF del caso</a>
   </header>
-  {entradas.length > 0 && <Indice entradas={entradas} />}
+  <Menu entradas={entradas} />
   <article class="pieza contenido" id={fuente.id} set:html={render.html} />
   <Recursos creditos={c.creditos} />
 </Base>

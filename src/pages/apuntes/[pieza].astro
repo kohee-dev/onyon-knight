@@ -1,4 +1,5 @@
 ---
+import Menu from '../../components/Menu.astro';
 import Distintivo from '../../components/Distintivo.astro';
 import Fecha from '../../components/Fecha.astro';
 import ImagenCaso from '../../components/ImagenCaso.astro';
@@ -39,4 +40,5 @@ const moduloRef = sitio.catalogo.modulos.find((m) => m.id === apariciones[0]?.mo
   )}
   <article class="pieza contenido" set:html={p.render.html} />
   <Recursos creditos={creditosDe([p])} />
+  <Menu />
 </Base>

@@ -1,0 +1,106 @@
+import { createServer, type Server } from 'node:http';
+import { resolve } from 'node:path';
+import { chromium, type Browser, type Page } from 'playwright';
+import sirv from 'sirv';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { construir } from './util';
+
+// Comportamiento real del menú y la cabecera en Chromium, sobre el sitio construido.
+let servidor: Server;
+let navegador: Browser;
+let origen = '';
+
+beforeAll(async () => {
+  const dist = construir({ ONYON_CONTENIDO: resolve('tests/fixtures/valido'), BASE_PATH: '/ok/', SITE_URL: 'https://ej.es' });
+  const estatico = sirv(dist, { dev: true });
+  servidor = createServer((req, res) => {
+    if (!req.url!.startsWith('/ok/')) return void res.writeHead(404).end();
+    req.url = req.url!.slice(3);
+    estatico(req, res, () => res.writeHead(404).end());
+  });
+  await new Promise<void>((r) => servidor.listen(0, '127.0.0.1', () => r()));
+  origen = `http://127.0.0.1:${(servidor.address() as any).port}`;
+  navegador = await chromium.launch();
+}, 300_000);
+
+afterAll(async () => {
+  await navegador?.close();
+  servidor?.close();
+});
+
+async function abrir(ruta: string, ancho: number): Promise<Page> {
+  const pagina = await navegador.newPage({ viewport: { width: ancho, height: 800 } });
+  await pagina.goto(origen + ruta);
+  await pagina.waitForFunction('window.__onyonListo === true');
+  return pagina;
+}
+
+const estado = (p: Page) =>
+  p.evaluate(() => {
+    const menu = document.getElementById('menu')!;
+    return {
+      abierto: menu.classList.contains('menu-abierto'),
+      rol: menu.getAttribute('role'),
+      modal: menu.getAttribute('aria-modal'),
+      expandido: document.querySelector('.menu-boton')!.getAttribute('aria-expanded'),
+      focoDentro: menu.contains(document.activeElement),
+      focoEnBoton: document.activeElement?.classList.contains('menu-boton') ?? false,
+      inertes: ['header.cabecera', 'footer.pie', 'section.pieza'].map((s) => (document.querySelector(s) as any)?.inert ?? null),
+    };
+  });
+
+describe('menú en móvil', () => {
+  it('se abre como diálogo modal, retiene el foco y se cierra con Esc', async () => {
+    const p = await abrir('/ok/aso/ut1/', 375);
+    expect(await p.isVisible('.menu-boton')).toBe(true);
+    expect(await p.isVisible('header.cabecera .tema-boton')).toBe(false);
+    await p.click('.menu-boton');
+    let e = await estado(p);
+    expect(e).toMatchObject({ abierto: true, rol: 'dialog', modal: 'true', expandido: 'true', focoDentro: true });
+    expect(e.inertes).toEqual([true, true, true]);
+    expect(await p.isVisible('#menu .tema-boton')).toBe(true);
+    for (let i = 0; i < 25; i++) await p.keyboard.press('Tab');
+    expect((await estado(p)).focoDentro).toBe(true);
+    for (let i = 0; i < 25; i++) await p.keyboard.press('Shift+Tab');
+    expect((await estado(p)).focoDentro).toBe(true);
+    await p.keyboard.press('Escape');
+    e = await estado(p);
+    expect(e).toMatchObject({ abierto: false, rol: null, expandido: 'false', focoEnBoton: true });
+    expect(e.inertes).toEqual([false, false, false]);
+    await p.close();
+  });
+
+  it('se cierra solo al ensanchar la ventana', async () => {
+    const p = await abrir('/ok/aso/ut1/', 375);
+    await p.click('.menu-boton');
+    await p.setViewportSize({ width: 1440, height: 800 });
+    await p.waitForFunction(() => !document.getElementById('menu')!.classList.contains('menu-abierto'));
+    const e = await estado(p);
+    expect(e.inertes).toEqual([false, false, false]);
+    expect(await p.isVisible('.menu-indice')).toBe(true); // índice lateral
+    expect(await p.isVisible('.menu-boton')).toBe(false);
+    expect(await p.isVisible('header.cabecera .tema-boton')).toBe(true);
+    await p.close();
+  });
+
+  it('existe en páginas sin índice y solo contiene el modo', async () => {
+    const p = await abrir('/ok/', 375);
+    await p.click('.menu-boton');
+    expect(await p.isVisible('#menu .tema-boton')).toBe(true);
+    expect(await p.locator('#menu .menu-indice').count()).toBe(0);
+    await p.close();
+  });
+});
+
+describe('cabecera', () => {
+  it('queda fija y la barra de progreso avanza al bajar', async () => {
+    const p = await abrir('/ok/aso/ut1/', 1440);
+    const progreso = () => p.evaluate(() => getComputedStyle(document.querySelector('.progreso')!).getPropertyValue('--progreso').trim());
+    expect(Number(await progreso())).toBe(0);
+    await p.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await p.waitForFunction(() => Number(getComputedStyle(document.querySelector('.progreso')!).getPropertyValue('--progreso')) > 0.95);
+    const arriba = await p.evaluate(() => document.querySelector('header.cabecera')!.getBoundingClientRect().top);
+    expect(arriba).toBe(0);
+    await p.close();
+  });
+});

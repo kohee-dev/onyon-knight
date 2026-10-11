@@ -5,6 +5,9 @@ import { ErrorContenido, type Aparicion, type Catalogo, type Modo, type ModuloFu
 
 export const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
+/** Ids que usa la propia página; una pieza con uno de ellos duplicaría ids y rompería anclas y aria-controls. */
+export const IDS_RESERVADOS = ['menu', 'casos-practicos', 'casos-de-esta-unidad', 'licencias-y-fuentes'];
+
 export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[], modo: Modo): Catalogo {
   const problemas: Problema[] = [];
   const publicacion = modo === 'publicacion';
@@ -13,6 +16,9 @@ export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[]
   for (const p of piezas) {
     if (!SLUG.test(p.id)) {
       problemas.push({ archivo: p.archivo, mensaje: `id de pieza no válido «${p.id}»: usa minúsculas, números y guiones` });
+    }
+    if (IDS_RESERVADOS.includes(p.id)) {
+      problemas.push({ archivo: p.archivo, mensaje: `id de pieza reservado «${p.id}»: renombra el archivo` });
     }
     if (!licenciaPorId(p.datos.licencia)) {
       problemas.push({ archivo: p.archivo, mensaje: `licencia desconocida «${p.datos.licencia}»` });
