@@ -32,3 +32,15 @@ export function creditosDe(piezas: { fuente: PiezaFuente; render: PiezaRenderiza
     recursos: [...recursos.values()],
   };
 }
+
+/** Añade a unos créditos imágenes sueltas (p. ej. las portadas de las tarjetas), sin atribuir el texto de sus piezas. */
+export function conImagenes(c: Creditos, imagenes: { rutaAbs: string; url: string; alt: string; ficha: Ficha }[]): Creditos {
+  const vistas = new Set(c.recursos.map((r) => r.url));
+  const recursos = [...c.recursos];
+  for (const i of imagenes) {
+    if (i.ficha.propio || vistas.has(i.url)) continue;
+    vistas.add(i.url);
+    recursos.push({ url: i.url, alt: i.alt, ficha: i.ficha });
+  }
+  return { ...c, recursos };
+}

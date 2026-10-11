@@ -25,8 +25,10 @@ const entradas = [
     { id: p.fuente.id, texto: p.fuente.datos.titulo, nivel: 0 },
     ...p.render.titulos.filter((t) => t.nivel === 1).map((t) => ({ id: t.id, texto: t.texto, nivel: 1 })),
   ]),
-  ...(u.casos.length ? [{ id: 'casos-practicos', texto: 'Casos prácticos', nivel: 0 }] : []),
+  ...(u.casos.length ? [{ id: 'casos-practicos', texto: 'Casos prácticos', nivel: 0, clase: 'solo-pantalla' }] : []),
   { id: 'licencias-y-fuentes', texto: 'Licencias y fuentes', nivel: 0 },
+  // Al imprimir, las tarjetas no salen: el índice apunta a la lista final de casos.
+  ...(u.casos.length ? [{ id: 'casos-de-esta-unidad', texto: 'Casos prácticos de esta unidad', nivel: 0, clase: 'solo-impresion' }] : []),
 ];
 ---
 <Base titulo={`${u.titulo} · ${m.id.toUpperCase()}`}>
@@ -66,8 +68,10 @@ const entradas = [
     </section>
   )}
 
+  <Recursos creditos={u.creditos} />
+
   {u.casos.length > 0 && (
-    <section class="solo-impresion lista-casos">
+    <section class="solo-impresion lista-casos" id="casos-de-esta-unidad">
       <h2>Casos prácticos de esta unidad</h2>
       <ul>
         {u.casos.map((c) => (
@@ -80,6 +84,4 @@ const entradas = [
       </ul>
     </section>
   )}
-
-  <Recursos creditos={u.creditos} />
 </Base>

@@ -91,6 +91,21 @@ describe('páginas', () => {
       expect(imp).toContain('https://ej.es/ok/pdf/aso-ut1/caso-ldap.pdf');
     });
 
+    it('el índice impreso enlaza la lista de casos que sí se imprime', () => {
+      const h = leer('aso/ut1/index.html');
+      expect(h).toMatch(/<li class="[^"]*solo-impresion[^"]*"><a href="#casos-de-esta-unidad"/);
+      expect(h).toMatch(/<li class="[^"]*solo-pantalla[^"]*"><a href="#casos-practicos"/);
+      expect(h).toContain('id="casos-de-esta-unidad"');
+    });
+
+    it('los créditos de la unidad no atribuyen la licencia del texto de un caso', () => {
+      const h = leer('aso/ut1/index.html');
+      const lic = h.slice(h.indexOf('id="licencias-y-fuentes"'), h.indexOf('id="casos-de-esta-unidad"'));
+      expect(lic).not.toMatch(/<li>«Caso LDAP en Elpis»:/); // la licencia del texto del caso no va en la unidad
+      expect(lic).toContain('Autora portada'); // la portada sí se acredita
+      expect(leer('aso/ut1/casos/caso-ldap/index.html')).toMatch(/<li>«Caso LDAP en Elpis»: <a[^>]*>CC BY 4\.0/);
+    });
+
     it('una unidad solo con casos no tiene PDF de teoría ni botón de índice', () => {
       const h = leer('aso/ut2/index.html');
       expect(h).not.toContain('PDF de teoría');

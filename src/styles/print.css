@@ -46,6 +46,7 @@
   .pie,
   .migas,
   .boton,
+  .solo-pantalla,
   .tema-boton,
   .indice-boton,
   .indice-capa,
@@ -108,6 +109,11 @@
   }
   .solo-impresion {
     display: block;
+  }
+  li.solo-impresion {
+    display: list-item;
+  }
+  section.solo-impresion {
     break-before: page;
   }
   .portada-caso .portada-imagen {
@@ -121,7 +127,9 @@
     margin-top: 0;
   }
   /* La primera pieza sigue al índice en su misma página. */
-  .indice-capa + .pieza {
+  /* Entre el índice y la pieza están la capa del panel y el script del índice. */
+  .indice-capa + .pieza,
+  .indice-capa + script + .pieza {
     break-before: auto;
     margin-top: 2rem;
   }

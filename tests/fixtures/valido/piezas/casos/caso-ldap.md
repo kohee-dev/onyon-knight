@@ -5,6 +5,7 @@ horas: 2
 portada: ./img/portada.png
 cabecera: ./img/cabecera.png
 resumen: Directorio para Elpis
+licencia: CC-BY-4.0
 ---
 
 # Escenario

@@ -4,6 +4,8 @@ export interface EntradaIndice {
   texto: string;
   /** 0 = título de pieza; 1, 2 = títulos internos. */
   nivel: number;
+  /** p. ej. solo-pantalla / solo-impresion */
+  clase?: string;
 }
 interface Props {
   entradas: EntradaIndice[];
@@ -16,7 +18,7 @@ const { entradas } = Astro.props;
     <button class="indice-cerrar" type="button" aria-label="Cerrar el índice">×</button>
   </div>
   <ol>
-    {entradas.map((e) => <li class={`indice-n${e.nivel}`}><a href={`#${e.id}`}>{e.texto}</a></li>)}
+    {entradas.map((e) => <li class={`indice-n${e.nivel}${e.clase ? ` ${e.clase}` : ''}`}><a href={`#${e.id}`}>{e.texto}</a></li>)}
   </ol>
 </nav>
 <div class="indice-capa" hidden></div>

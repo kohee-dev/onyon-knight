@@ -82,6 +82,19 @@ describe('PDF de los casos', () => {
     expect(existsSync(join(dist, 'pdf/aso-ut2.pdf'))).toBe(false);
   });
 
+  it('la primera pieza sigue al índice en su misma página', async () => {
+    const doc = await getDocument({ data: new Uint8Array(readFileSync(join(dist, 'pdf/aso-ut1.pdf'))) }).promise;
+    const p2 = (await (await doc.getPage(2)).getTextContent()).items.map((it: any) => it.str).join(' ');
+    expect(p2).toMatch(/ndice/i);
+    expect(p2).toContain('Un proceso es un programa en ejecución'); // cuerpo, no la entrada del índice
+  });
+
+  it('el PDF de teoría acaba con la página de casos', async () => {
+    const doc = await getDocument({ data: new Uint8Array(readFileSync(join(dist, 'pdf/aso-ut1.pdf'))) }).promise;
+    const ultima = (await (await doc.getPage(doc.numPages)).getTextContent()).items.map((it: any) => it.str).join(' ');
+    expect(ultima).toContain('Casos prácticos de esta unidad');
+  });
+
   it('el PDF de teoría termina con los casos de la unidad', async () => {
     const { texto, uris } = await leerPdf(join(dist, 'pdf/aso-ut1.pdf'));
     expect(texto).toContain('Casos prácticos de esta unidad');

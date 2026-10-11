@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { load } from 'js-yaml';
 import { construirCatalogo } from './catalogo';
-import { creditosDe, type Creditos } from './creditos';
+import { conImagenes, creditosDe, type Creditos } from './creditos';
 import { leerFechas, type IndiceFechas } from './fechas';
 import { cargarFuentes } from './fuentes';
 import { renderizarPieza, type ContextoRender, type PiezaRenderizada } from './markdown';
@@ -125,12 +125,6 @@ async function construirSitio(): Promise<Sitio> {
         });
       }
 
-      // Créditos de la página de la unidad: la teoría más las portadas de sus tarjetas.
-      const portadas: PiezaEnUnidad[] = casos.map((c) => ({
-        ...c.pieza,
-        fuente: { ...c.pieza.fuente, datos: { ...c.pieza.fuente.datos, fuentes: [] } },
-        render: { ...c.pieza.render, imagenes: c.pieza.render.portada ? [c.pieza.render.portada] : [] },
-      }));
       const conTeoria = teoria.length > 0;
       unidades.push({
         modulo: m,
@@ -139,7 +133,8 @@ async function construirSitio(): Promise<Sitio> {
         teoria,
         casos,
         fecha: masReciente([fechas.fechaUnidad(m.rutaAbs, u.id), ...teoria.map((p) => p.fecha), ...casos.map((c) => c.pieza.fecha)]),
-        creditos: creditosDe([...teoria, ...portadas]),
+        // Créditos de la unidad: la teoría más las imágenes de portada de sus tarjetas (no el texto de los casos).
+        creditos: conImagenes(creditosDe(teoria), casos.flatMap((c) => (c.pieza.render.portada ? [c.pieza.render.portada] : []))),
         url: urlUnidad,
         urlPdf: conTeoria ? `${base}pdf/${m.id}-${u.id}.pdf` : null,
         salidaPdf: conTeoria ? `pdf/${m.id}-${u.id}.pdf` : null,
