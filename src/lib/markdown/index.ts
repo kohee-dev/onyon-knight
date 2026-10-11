@@ -11,6 +11,7 @@ import { ErrorContenido, type Catalogo, type Ficha, type Modo, type PiezaFuente 
 import type { EstadoRender } from './comun';
 import { remarkEncabezados } from './encabezados';
 import { remarkEnlaces } from './enlaces';
+import { remarkImagenes } from './imagenes';
 import { remarkSinHtml } from './html';
 import { remarkMermaid } from './mermaid';
 import { normalizarRecuadros, remarkRecuadros } from './recuadros';
@@ -48,6 +49,7 @@ const procesador = unified()
   .use(remarkEncabezados)
   .use(remarkMermaid)
   .use(remarkEnlaces)
+  .use(remarkImagenes)
   .use(remarkRehype)
   .use(rehypeShiki, {
     themes: { light: 'github-light', dark: 'github-dark' },
