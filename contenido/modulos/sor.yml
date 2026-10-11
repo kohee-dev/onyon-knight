@@ -1,0 +1,15 @@
+nombre: Sistemas operativos en red
+codigo: "0224"
+ciclo: SMR
+curso: 2
+color: "#2e8b57"
+unidades:
+  - id: ut0
+    titulo: Configuración del software de base
+    piezas: [consola-escritorio]
+  - id: ut1
+    titulo: Introducción a los sistemas operativos
+    piezas: [intro-sistemas-operativos]
+  - id: ut2
+    titulo: Servicios de virtualización
+    piezas: [virtualizacion]

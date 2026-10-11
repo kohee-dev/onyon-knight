@@ -1,0 +1,18 @@
+nombre: Administración de sistemas operativos
+codigo: "0374"
+ciclo: ASIR
+curso: 2
+color: "#2f6f9f"
+unidades:
+  - id: ut0
+    titulo: Linux
+    piezas: [opera-jidoor]
+  - id: ut1
+    titulo: Servicios de directorio
+    piezas: [servicios-directorio, openldap, caso-servicios-directorio, gatos-elpis, expediente-02-llaves-almacen]
+  - id: ut2
+    titulo: Procesos del sistema
+    piezas: [procesos-teoria, procesos-linux, procesos-windows, procesos-sala-maquinas, procesos-espectro]
+  - id: ut6
+    titulo: Servicios de impresión
+    piezas: [impresion-cups, impresion-windows]

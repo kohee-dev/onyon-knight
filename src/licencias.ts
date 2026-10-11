@@ -47,6 +47,14 @@ export const LICENCIAS: Record<string, Licencia> = Object.fromEntries(
       requiereTitular: false,
     },
     {
+      id: 'OLDAP-2.8',
+      nombre: 'OpenLDAP Public License 2.8',
+      url: 'https://www.openldap.org/software/release/license.html',
+      permiteCambios: true,
+      noComercial: false,
+      requiereTitular: false,
+    },
+    {
       id: 'OFL-1.1',
       nombre: 'SIL Open Font License 1.1',
       url: 'https://openfontlicense.org/open-font-license-official-text/',

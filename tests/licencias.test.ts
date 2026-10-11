@@ -70,6 +70,10 @@ describe('validarFicha', () => {
 });
 
 describe('licenciaPorId', () => {
+  it('incluye la OpenLDAP Public License 2.8', () => {
+    expect(licenciaPorId('OLDAP-2.8')?.url).toBe('https://www.openldap.org/software/release/license.html');
+  });
+
   it('devuelve undefined para ids desconocidos', () => {
     expect(licenciaPorId('nada')).toBeUndefined();
     expect(licenciaPorId('CC0-1.0')?.permiteCambios).toBe(true);
