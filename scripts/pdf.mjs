@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-// Genera un PDF por unidad imprimiendo su página con Chromium. Caché por huella de contenido.
-import { createHash } from 'node:crypto';
+// Genera los PDF (teoría de cada unidad y cada caso) imprimiendo su página con Chromium. Caché por huella de contenido.
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { dirname, join, resolve } from 'node:path';
@@ -8,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import sirv from 'sirv';
 import { calcularHuella } from './lib/huella.mjs';
+import { describirEntrada, guardarAtomico, versionesGenerador } from './lib/pdf-utiles.mjs';
 
 const args = process.argv.slice(2);
 const dist = resolve(args.includes('--dist') ? args[args.indexOf('--dist') + 1] : 'dist');
@@ -37,10 +37,10 @@ const leerRecurso = (url) => {
 };
 
 const navegador = await chromium.launch();
-const versiones = [
-  createHash('sha256').update(readFileSync(fileURLToPath(import.meta.url))).digest('hex'),
+const versiones = versionesGenerador(
+  [fileURLToPath(import.meta.url), fileURLToPath(new URL('./lib/huella.mjs', import.meta.url)), fileURLToPath(new URL('./lib/pdf-utiles.mjs', import.meta.url))],
   navegador.version(),
-].join('|');
+);
 
 let renderizados = 0;
 let reutilizados = 0;
@@ -66,20 +66,20 @@ async function generar(entrada) {
     await pagina.waitForFunction('window.__onyonListo === true', null, { timeout: TIEMPO_MAXIMO });
     const error = await pagina.evaluate('window.__onyonError');
     if (error) throw new Error(`la página informó de un error: ${error}`);
-    await pagina.pdf({
-      path: enCache,
+    const opciones = {
       format: 'A4',
       printBackground: true,
       preferCSSPageSize: true,
       displayHeaderFooter: true,
       headerTemplate: '<span></span>',
       footerTemplate: `<div style="font: 8pt Arial, Helvetica, sans-serif; color: #666; width: 100%; padding: 0 16mm; text-align: right;">${entrada.pie} · página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
-    });
+    };
+    await guardarAtomico(enCache, (tmp) => pagina.pdf({ ...opciones, path: tmp }));
     copyFileSync(enCache, destino);
     renderizados++;
   } catch (e) {
     rmSync(enCache, { force: true });
-    fallos.push(`${entrada.modulo}/${entrada.unidad}: ${e.message.split('\n')[0]}`);
+    fallos.push(`${describirEntrada(entrada)}: ${e.message.split('\n')[0]}`);
   } finally {
     await pagina.close();
   }
@@ -95,8 +95,8 @@ await navegador.close();
 servidor.close();
 
 if (fallos.length) {
-  console.error(`PDF: ${fallos.length} unidades fallaron:\n  ${fallos.join('\n  ')}`);
+  console.error(`PDF: ${fallos.length} fallaron:\n  ${fallos.join('\n  ')}`);
   process.exit(1);
 }
-for (const n of readdirSync(cache)) if (!usadas.has(n)) rmSync(join(cache, n));
+for (const n of readdirSync(cache)) if (!usadas.has(n)) rmSync(join(cache, n)); // también temporales huérfanos
 console.log(`PDF: ${renderizados} renderizados, ${reutilizados} reutilizados, ${((Date.now() - inicio) / 1000).toFixed(1)} s`);

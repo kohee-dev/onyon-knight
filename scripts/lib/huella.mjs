@@ -25,6 +25,8 @@ function referenciasCss(css, desde) {
  * @param {string} versiones
  */
 export function calcularHuella(html, leerRecurso, versiones) {
+  // Lo que no se imprime (p. ej. las tarjetas de los casos) no debe regenerar el PDF.
+  html = html.replace(/<(\w+)\b[^>]*\bdata-huella="ignorar"[^>]*>[\s\S]*?<\/\1>/g, '');
   const vistos = new Map();
   const pendientes = referenciasHtml(html).map((u) => u.split('#')[0].split('?')[0]);
   while (pendientes.length) {

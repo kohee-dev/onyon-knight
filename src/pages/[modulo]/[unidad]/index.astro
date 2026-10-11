@@ -60,7 +60,7 @@ const entradas = [
   ))}
 
   {u.casos.length > 0 && (
-    <section class="casos" id="casos-practicos">
+    <section class="casos" id="casos-practicos" data-huella="ignorar">
       <h2>Casos prácticos</h2>
       <ul class="tarjetas-casos">
         {u.casos.map((c) => <TarjetaCaso caso={c} modulo={m} />)}
