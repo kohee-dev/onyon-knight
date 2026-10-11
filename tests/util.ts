@@ -5,12 +5,13 @@ import { join } from 'node:path';
 
 /**
  * Entorno del proceso sin las variables que Vitest/Vite inyectan (BASE_URL, MODE, NODE_ENV…) ni las de agentes
- * de IA (AI_AGENT, CLAUDECODE…), que cambian el comportamiento de `astro dev`: así local se comporta como CI.
+ * de IA (AI_AGENT, CLAUDECODE…), que cambian `astro dev`, ni la configuración del sitio heredada (BASE_PATH,
+ * SITE_URL, ONYON_*, PDF_*): cada prueba pasa la suya. Así local y CI se comportan igual.
  */
 export function entornoLimpio(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   for (const [k, v] of Object.entries(process.env)) {
-    if (/^(VITEST|VITE_|BASE_URL$|MODE$|DEV$|PROD$|SSR$|NODE_ENV$|TEST$|AI_AGENT|CLAUDE)/.test(k)) continue;
+    if (/^(VITEST|VITE_|BASE_URL$|MODE$|DEV$|PROD$|SSR$|NODE_ENV$|TEST$|AI_AGENT|CLAUDE|BASE_PATH$|SITE_URL$|ONYON_|PDF_)/.test(k)) continue;
     env[k] = v;
   }
   return { ...env, ...extra };
