@@ -38,7 +38,11 @@ export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[]
   const resultado: ModuloFuente[] = [];
   const referenciadas = new Set<string>();
 
+  const idsModulo = new Map<string, string>();
   for (const m of modulos) {
+    const previo = idsModulo.get(m.id);
+    if (previo) problemas.push({ archivo: m.archivo, mensaje: `id de módulo duplicado «${m.id}» (también en ${previo})` });
+    else idsModulo.set(m.id, m.archivo);
     if (!categoriaDe(m.datos.ciclo))
       problemas.push({ archivo: m.archivo, mensaje: `ciclo desconocido «${m.datos.ciclo}» (categorías: GB, SMR, ASIR, DAM)` });
     if (!ICONOS.has(m.datos.icono))
@@ -48,7 +52,10 @@ export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[]
       if (!SLUG.test(u.id)) problemas.push({ archivo: m.archivo, mensaje: `id de unidad no válido «${u.id}»` });
       if (ids.has(u.id)) problemas.push({ archivo: m.archivo, mensaje: `unidad duplicada «${u.id}»` });
       ids.add(u.id);
+      const vistas = new Set<string>();
       for (const id of u.piezas) {
+        if (vistas.has(id)) problemas.push({ archivo: m.archivo, mensaje: `${u.id}: pieza repetida «${id}»` });
+        vistas.add(id);
         referenciadas.add(id);
         const p = todas.get(id);
         if (!p) problemas.push({ archivo: m.archivo, mensaje: `${u.id}: pieza inexistente «${id}»` });
@@ -58,11 +65,15 @@ export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[]
     }
     if (!m.datos.activo || (publicacion && m.privado)) continue;
 
-    const unidades = m.datos.unidades.map((u) => {
+    const unidades = m.datos.unidades.flatMap((u) => {
       const borradores = u.piezas.filter((id) => todas.get(id)?.datos.borrador);
-      if (!publicacion || borradores.length === 0) return u;
+      if (!publicacion || borradores.length === 0) return [u];
+      if (borradores.length === u.piezas.length) {
+        avisos.push(`${m.id}/${u.id}: todas sus piezas son borradores; la unidad no se publica`);
+        return [];
+      }
       avisos.push(`${m.id}/${u.id}: incluye borradores (${borradores.join(', ')})`);
-      return { ...u, piezas: u.piezas.filter((id) => !borradores.includes(id)) };
+      return [{ ...u, piezas: u.piezas.filter((id) => !borradores.includes(id)) }];
     });
     resultado.push({ ...m, datos: { ...m.datos, unidades } });
   }

@@ -87,6 +87,29 @@ describe('construirCatalogo', () => {
     expect(c.modulos[0].id).toBe('tut');
   });
 
+  it('detecta una pieza repetida en la misma unidad', () => {
+    expect(problemas(() => construirCatalogo([pieza('a')], [modulo('aso', [{ id: 'ut1', piezas: ['a', 'a'] }])], 'desarrollo'))).toContain(
+      'ut1: pieza repetida «a»',
+    );
+  });
+
+  it('detecta ids de módulo duplicados (p. ej. público y privado)', () => {
+    const m = problemas(() =>
+      construirCatalogo([pieza('a')], [modulo('aso', [{ id: 'ut1', piezas: ['a'] }]), modulo('aso', [{ id: 'ut2', piezas: ['a'] }], {}, true)], 'desarrollo'),
+    );
+    expect(m).toContain('id de módulo duplicado «aso»');
+  });
+
+  it('no publica una unidad cuyas piezas son todas borradores, y avisa', () => {
+    const c = construirCatalogo(
+      [pieza('a'), pieza('b', { borrador: true })],
+      [modulo('aso', [{ id: 'ut1', piezas: ['a'] }, { id: 'ut2', piezas: ['b'] }])],
+      'publicacion',
+    );
+    expect(c.modulos[0].datos.unidades.map((u) => u.id)).toEqual(['ut1']);
+    expect(c.avisos).toContain('aso/ut2: todas sus piezas son borradores; la unidad no se publica');
+  });
+
   it('detecta unidades duplicadas', () => {
     expect(
       problemas(() =>
