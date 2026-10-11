@@ -97,3 +97,19 @@ describe('HTML en línea', () => {
     expect(m).toContain('HTML');
   });
 });
+
+import { recogerErrores } from '../src/lib/tipos';
+
+describe('recogerErrores', () => {
+  it('ejecuta todas las tareas y reúne todos los problemas', async () => {
+    const fallo = (archivo: string) => async () => {
+      throw new ErrorContenido([{ archivo, mensaje: 'mal' }]);
+    };
+    const err = await recogerErrores([fallo('a.md'), async () => 1, fallo('b.md')]).catch((e) => e);
+    expect(err).toBeInstanceOf(ErrorContenido);
+    expect(err.problemas.map((p: any) => p.archivo)).toEqual(['a.md', 'b.md']);
+  });
+  it('devuelve los resultados si no hay errores', async () => {
+    expect(await recogerErrores([async () => 1, async () => 2])).toEqual([1, 2]);
+  });
+});

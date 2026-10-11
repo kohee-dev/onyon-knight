@@ -163,3 +163,14 @@ describe('esquemas', () => {
     expect(esquemaModulo.safeParse({ nombre: 'a', codigo: '1', ciclo: 'c', curso: 1, color: 'rojo', unidades: [] }).success).toBe(false);
   });
 });
+
+import { separarCabecera } from '../src/lib/cargador-piezas';
+
+describe('separarCabecera', () => {
+  it('separa la cabecera YAML del cuerpo', () => {
+    expect(separarCabecera('---\ntitulo: X\n---\n\n# Hola\n')).toEqual({ datos: { titulo: 'X' }, cuerpo: '\n# Hola\n' });
+  });
+  it('sin cabecera devuelve datos vacíos', () => {
+    expect(separarCabecera('# Hola')).toEqual({ datos: {}, cuerpo: '# Hola' });
+  });
+});

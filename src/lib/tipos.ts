@@ -74,3 +74,19 @@ export interface Catalogo {
   avisos: string[];
   informe: string[];
 }
+
+/** Ejecuta todas las tareas; si alguna lanza ErrorContenido, reúne todos sus problemas en uno solo. */
+export async function recogerErrores<T>(tareas: (() => Promise<T>)[]): Promise<T[]> {
+  const resultados: T[] = [];
+  const problemas: Problema[] = [];
+  for (const tarea of tareas) {
+    try {
+      resultados.push(await tarea());
+    } catch (e) {
+      if (!(e instanceof ErrorContenido)) throw e;
+      problemas.push(...e.problemas);
+    }
+  }
+  if (problemas.length) throw new ErrorContenido(problemas);
+  return resultados;
+}

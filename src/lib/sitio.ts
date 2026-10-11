@@ -7,7 +7,7 @@ import { leerFechas, type IndiceFechas } from './fechas';
 import { cargarFuentes } from './fuentes';
 import { renderizarPieza, type ContextoRender, type PiezaRenderizada } from './markdown';
 import { raizContenido } from './raices';
-import type { Catalogo, Modo, ModuloFuente, PiezaFuente } from './tipos';
+import { recogerErrores, type Catalogo, type Modo, type ModuloFuente, type PiezaFuente } from './tipos';
 
 export interface PiezaEnUnidad {
   fuente: PiezaFuente;
@@ -64,11 +64,14 @@ async function construirSitio(): Promise<Sitio> {
   const fechas = await leerFechas(process.cwd());
   const ctxBase: Omit<ContextoRender, 'unidad'> = { catalogo, modo, base, sitioUrl };
 
+  // Se renderiza todo antes de fallar, para mostrar todos los errores de una vez.
   const sueltas = new Map<string, PiezaEnUnidad>();
-  for (const p of catalogo.piezas.values()) {
-    const render = await renderizarPieza(p, ctxBase);
-    sueltas.set(p.id, { fuente: p, render, fecha: fechaPieza(fechas, p, render) });
-  }
+  await recogerErrores(
+    [...catalogo.piezas.values()].map((p) => async () => {
+      const render = await renderizarPieza(p, ctxBase);
+      sueltas.set(p.id, { fuente: p, render, fecha: fechaPieza(fechas, p, render) });
+    }),
+  );
 
   const unidades: UnidadSitio[] = [];
   for (const m of catalogo.modulos) {
