@@ -1,7 +1,7 @@
 # Onyon Knight · Núcleo de la web docente — Diseño
 
 - **Fecha:** 2026-10-11
-- **Estado:** pendiente de revisión
+- **Estado:** aprobada (2026-10-11)
 - **Subproyecto:** 1 de 2 (núcleo). El subproyecto 2 (generación de PPTX por tema) tendrá su propia spec.
 - **Sustituye a:** `~/Documents/Proyectos/Personal Projects/OnyonKnight` (queda archivado como referencia).
 
@@ -286,7 +286,12 @@ El paso a un dominio propio o a la Raspberry Pi (rsync y Cloudflare Tunnel) solo
   - los recuadros `::: nota/aviso/tip/ejercicio` ya son compatibles;
   - las rutas de imágenes se reescriben a `./img/`.
 - Cada imagen migrada necesita su ficha, que se crea a mano; el build lista las que faltan.
-- Los archivos que empiezan por `_` en el proyecto antiguo, como `_Gatos.md` y `_Expediente 02…`, se migran a la carpeta **privada**.
+- Los archivos que empiezan por `_` (los que ignoraba el build antiguo) **no tienen un destino automático**: el docente clasifica cada uno como
+  - **privado** → carpeta privada;
+  - **borrador** → pieza pública con `borrador: true`;
+  - **antiguo** → no se migra y queda solo en el proyecto archivado.
+
+  En ASO y SOR son dos: `aso/UD2…/_Gatos.md` y `aso/UD2…/_Expediente 02 - Las llaves del almacen.md`. La clasificación se decide durante la migración.
 - Se puede usar un script auxiliar de migración. Es desechable y no forma parte del producto.
 
 ## 13. Fuera de alcance (este subproyecto)
