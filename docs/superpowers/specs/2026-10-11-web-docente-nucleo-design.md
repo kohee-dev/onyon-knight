@@ -162,7 +162,7 @@ Todas las rutas respetan la ruta base configurable (`BASE_PATH`, p. ej. `/onyon-
 - El texto alternativo vacío es un **error**.
 - Una imagen remota (`http(s)://`) es un **error**.
 - Una imagen sin ficha `.yml` hermana es un **error**.
-- Optimización con el pipeline de imágenes de Astro.
+- Las imágenes se publican tal cual, en `/img/<hash>-<nombre>`. No se usa la optimización de Astro, porque las piezas se renderizan con un pipeline propio que necesita el contexto de la unidad. Si más adelante pesa, se añade la optimización al endpoint de imágenes.
 
 ### 6.2 Ficha de licencia (`<imagen>.yml`)
 
