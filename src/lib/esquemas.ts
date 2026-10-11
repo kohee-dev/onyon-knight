@@ -1,13 +1,32 @@
 import { z } from 'astro/zod';
 import { LICENCIA_PROPIA } from '../licencias';
 
-export const esquemaPieza = z.strictObject({
-  titulo: z.string().min(1),
-  resumen: z.string().optional(),
-  borrador: z.boolean().default(false),
-  fuentes: z.array(z.string().min(1)).default([]),
-  licencia: z.string().default(LICENCIA_PROPIA),
-});
+export const esquemaPieza = z
+  .strictObject({
+    titulo: z.string().min(1),
+    /** teoria: material de estudio (puede tener ejercicios); caso: ejercicio de principio a fin. */
+    tipo: z.enum(['teoria', 'caso'], { error: 'debe ser «teoria» o «caso»' }).default('teoria'),
+    resumen: z.string().optional(),
+    borrador: z.boolean().default(false),
+    fuentes: z.array(z.string().min(1)).default([]),
+    licencia: z.string().default(LICENCIA_PROPIA),
+    /** Solo en casos: duración estimada, imagen de la tarjeta y banner de la página. */
+    horas: z.number().positive().optional(),
+    portada: z.string().min(1).optional(),
+    cabecera: z.string().min(1).optional(),
+  })
+  .superRefine((d, ctx) => {
+    if (d.tipo === 'caso' && d.horas === undefined) {
+      ctx.addIssue({ code: 'custom', path: ['horas'], message: 'un caso debe indicar sus «horas»' });
+    }
+    if (d.tipo === 'teoria') {
+      for (const campo of ['horas', 'portada', 'cabecera'] as const) {
+        if (d[campo] !== undefined) {
+          ctx.addIssue({ code: 'custom', path: [campo], message: `«${campo}» va solo en casos (tipo: caso)` });
+        }
+      }
+    }
+  });
 
 export const esquemaUnidad = z.strictObject({
   id: z.string(),

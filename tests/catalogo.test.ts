@@ -161,6 +161,33 @@ describe('construirCatalogo', () => {
   });
 });
 
+describe('esquema de casos', () => {
+  const issues = (d: unknown) => JSON.stringify(esquemaPieza.safeParse(d).error?.issues ?? []);
+
+  it('por defecto una pieza es teoría', () => {
+    expect(esquemaPieza.parse({ titulo: 'x' }).tipo).toBe('teoria');
+  });
+  it('acepta un caso con horas decimales', () => {
+    expect(esquemaPieza.safeParse({ titulo: 'x', tipo: 'caso', horas: 1.5 }).success).toBe(true);
+  });
+  it('rechaza tipos desconocidos indicando los válidos', () => {
+    const m = issues({ titulo: 'x', tipo: 'borrador' });
+    expect(m).toContain('teoria');
+    expect(m).toContain('caso');
+  });
+  it('exige horas en los casos', () => {
+    expect(issues({ titulo: 'x', tipo: 'caso' })).toContain('horas');
+  });
+  it('rechaza horas no positivas', () => {
+    expect(esquemaPieza.safeParse({ titulo: 'x', tipo: 'caso', horas: 0 }).success).toBe(false);
+  });
+  it.each(['horas', 'portada', 'cabecera'])('prohíbe %s en la teoría', (campo) => {
+    const m = issues({ titulo: 'x', [campo]: campo === 'horas' ? 2 : './img/a.png' });
+    expect(m).toContain('solo en casos');
+    expect(m).toContain(campo);
+  });
+});
+
 describe('esquemas', () => {
   it('rechaza campos desconocidos en la pieza', () => {
     const r = esquemaPieza.safeParse({ titulo: 'x', borador: true });
@@ -169,7 +196,7 @@ describe('esquemas', () => {
   });
 
   it('aplica los valores por defecto', () => {
-    expect(esquemaPieza.parse({ titulo: 'x' })).toEqual({ titulo: 'x', borrador: false, fuentes: [], licencia: 'CC-BY-SA-4.0' });
+    expect(esquemaPieza.parse({ titulo: 'x' })).toEqual({ titulo: 'x', tipo: 'teoria', borrador: false, fuentes: [], licencia: 'CC-BY-SA-4.0' });
   });
 
   it('exige un icono en el módulo', () => {

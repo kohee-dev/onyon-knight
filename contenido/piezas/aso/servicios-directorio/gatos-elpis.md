@@ -1,5 +1,7 @@
 ---
 titulo: "Gatos: los gatos de Elpis"
+tipo: caso
+horas: 5
 ---
 
 # Elpis · Expediente 01: los gatos desaparecidos

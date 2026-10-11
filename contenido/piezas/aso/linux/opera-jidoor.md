@@ -1,5 +1,7 @@
 ---
 titulo: "La Ópera de Jidoor"
+tipo: caso
+horas: 10
 ---
 
 *Warnings*
