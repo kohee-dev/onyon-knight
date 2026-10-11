@@ -27,7 +27,7 @@ Viven **fuera del repo**. Indica su carpeta con `ONYON_PRIVADO`:
 ONYON_PRIVADO=../onyon-privado npm run dev
 ```
 
-Solo `astro dev` los lee; `astro build` nunca publica contenido privado.
+Solo `astro dev` los lee; `astro build` nunca publica contenido privado. Si la carpeta está dentro del repositorio, el servidor de desarrollo se niega a arrancar: se subiría a GitHub.
 
 Diseño: `docs/superpowers/specs/2026-10-11-web-docente-nucleo-design.md`.
 

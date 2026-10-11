@@ -15,6 +15,7 @@ describe('privacidad en el build', () => {
     const salida = construir({
       ONYON_CONTENIDO: resolve('tests/fixtures/valido'),
       ONYON_PRIVADO: resolve('tests/fixtures/privado'),
+      ONYON_PRIVADO_EN_REPO: 'permitir',
     });
     const todo = textoDe(salida);
     expect(todo).toContain('PUBLICO-OK-456');
@@ -58,7 +59,7 @@ async function portadaDev(extra: Record<string, string>): Promise<string> {
 
 describe('privacidad tras una sesión de desarrollo', () => {
   it('sin ONYON_PRIVADO, dev y build no conservan nada privado de una sesión anterior', async () => {
-    expect(await portadaDev({ ONYON_PRIVADO: resolve('tests/fixtures/privado') })).toContain('SECRETO-PRIVADO-123');
+    expect(await portadaDev({ ONYON_PRIVADO: resolve('tests/fixtures/privado'), ONYON_PRIVADO_EN_REPO: 'permitir' })).toContain('SECRETO-PRIVADO-123');
     expect(await portadaDev({})).not.toContain('SECRETO-PRIVADO-123');
     expect(textoDe(construir({ ONYON_CONTENIDO: resolve('tests/fixtures/valido') }))).not.toContain('SECRETO-PRIVADO-123');
   });
