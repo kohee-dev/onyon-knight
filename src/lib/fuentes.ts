@@ -23,12 +23,14 @@ async function coleccion(nombre: string): Promise<any[]> {
 export async function cargarFuentes(): Promise<{ piezas: PiezaFuente[]; modulos: ModuloFuente[] }> {
   const piezas: PiezaFuente[] = [];
   const modulos: ModuloFuente[] = [];
-  for (const [nombre, esPrivado] of [['piezas', false], ['piezasPrivadas', true]] as const) {
+  // Sin carpeta privada activa (siempre en build), las colecciones privadas ni se leen.
+  const conPrivado = <T,>(lista: readonly (readonly [string, boolean])[]) => lista.filter(([, p]) => !p || privado);
+  for (const [nombre, esPrivado] of conPrivado([['piezas', false], ['piezasPrivadas', true]])) {
     for (const e of await coleccion(nombre)) {
       piezas.push({ ...rutas(e.filePath, esPrivado), datos: e.data, cuerpo: e.body ?? '', privado: esPrivado });
     }
   }
-  for (const [nombre, esPrivado] of [['modulos', false], ['modulosPrivados', true]] as const) {
+  for (const [nombre, esPrivado] of conPrivado([['modulos', false], ['modulosPrivados', true]])) {
     for (const e of await coleccion(nombre)) {
       modulos.push({ ...rutas(e.filePath, esPrivado), datos: e.data, privado: esPrivado });
     }

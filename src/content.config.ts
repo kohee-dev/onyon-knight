@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
 import { defineCollection } from 'astro:content';
+import type { Loader } from 'astro/loaders';
 import { glob } from 'astro/loaders';
 import { piezasMarkdown } from './lib/cargador-piezas';
 import { esquemaModulo, esquemaPieza } from './lib/esquemas';
@@ -11,13 +12,12 @@ const piezasEn = (base: string) => defineCollection({ loader: piezasMarkdown(bas
 const modulosEn = (base: string) =>
   defineCollection({ loader: glob({ pattern: '*.yml', base }), schema: esquemaModulo });
 
+/** Sin carpeta privada, las colecciones privadas existen pero se vacían: así no sobrevive nada de una sesión anterior. */
+const vacia: Loader = { name: 'onyon-vacia', load: async ({ store }) => store.clear() };
+
 export const collections = {
   piezas: piezasEn(resolve(contenido, 'piezas')),
   modulos: modulosEn(resolve(contenido, 'modulos')),
-  ...(privado
-    ? {
-        piezasPrivadas: piezasEn(resolve(privado, 'piezas')),
-        modulosPrivados: modulosEn(resolve(privado, 'modulos')),
-      }
-    : {}),
+  piezasPrivadas: privado ? piezasEn(resolve(privado, 'piezas')) : defineCollection({ loader: vacia, schema: esquemaPieza }),
+  modulosPrivados: privado ? modulosEn(resolve(privado, 'modulos')) : defineCollection({ loader: vacia, schema: esquemaModulo }),
 };
