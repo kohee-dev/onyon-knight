@@ -57,6 +57,12 @@ describe('construirCatalogo', () => {
     expect(problemas(() => construirCatalogo([pieza('Tema 1')], [], 'desarrollo'))).toContain('id de pieza no válido «Tema 1»');
   });
 
+  it('rechaza licencias de pieza fuera del catálogo', () => {
+    const p = pieza('a');
+    p.datos.licencia = 'CC-XYZ';
+    expect(problemas(() => construirCatalogo([p], [], 'desarrollo'))).toContain('licencia desconocida «CC-XYZ»');
+  });
+
   it('detecta piezas inexistentes en un índice', () => {
     const m = problemas(() => construirCatalogo([], [modulo('aso', [{ id: 'ut1', piezas: ['no-existe'] }])], 'desarrollo'));
     expect(m).toContain('aso.yml');

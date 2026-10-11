@@ -47,6 +47,14 @@ export const LICENCIAS: Record<string, Licencia> = Object.fromEntries(
       requiereTitular: false,
     },
     {
+      id: 'OFL-1.1',
+      nombre: 'SIL Open Font License 1.1',
+      url: 'https://openfontlicense.org/open-font-license-official-text/',
+      permiteCambios: true,
+      noComercial: false,
+      requiereTitular: false,
+    },
+    {
       id: 'marca',
       nombre: 'Marca registrada (uso identificativo)',
       permiteCambios: false,

@@ -1,3 +1,4 @@
+import { licenciaPorId } from '../licencias';
 import { ErrorContenido, type Aparicion, type Catalogo, type Modo, type ModuloFuente, type PiezaFuente, type Problema } from './tipos';
 
 export const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -10,6 +11,9 @@ export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[]
   for (const p of piezas) {
     if (!SLUG.test(p.id)) {
       problemas.push({ archivo: p.archivo, mensaje: `id de pieza no válido «${p.id}»: usa minúsculas, números y guiones` });
+    }
+    if (!licenciaPorId(p.datos.licencia)) {
+      problemas.push({ archivo: p.archivo, mensaje: `licencia desconocida «${p.datos.licencia}»` });
     }
     const previa = todas.get(p.id);
     if (previa) {

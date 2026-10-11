@@ -1,0 +1,21 @@
+# Herramientas y recursos con los que está hecho el sitio.
+- nombre: Astro
+  autor: The Astro Technology Company
+  url: https://astro.build
+  licencia: MIT
+- nombre: Inter
+  autor: Rasmus Andersson
+  url: https://rsms.me/inter/
+  licencia: OFL-1.1
+- nombre: JetBrains Mono
+  autor: JetBrains
+  url: https://www.jetbrains.com/lp/mono/
+  licencia: OFL-1.1
+- nombre: Mermaid
+  autor: Knut Sveidqvist y colaboradores
+  url: https://mermaid.js.org
+  licencia: MIT
+- nombre: Shiki
+  autor: Pine Wu, Anthony Fu y colaboradores
+  url: https://shiki.style
+  licencia: MIT
