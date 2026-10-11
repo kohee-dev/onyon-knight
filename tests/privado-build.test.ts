@@ -22,32 +22,37 @@ describe('privacidad en el build', () => {
   });
 });
 
-import { execFileSync as ejecutar } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { entornoLimpio } from './util';
 
+/**
+ * Arranca un `astro dev` propio (proceso hijo, --ignore-lock) y devuelve la portada.
+ * No toca el servidor de desarrollo que el docente pueda tener abierto.
+ */
 async function portadaDev(extra: Record<string, string>): Promise<string> {
   const env = entornoLimpio({ ONYON_CONTENIDO: resolve('tests/fixtures/valido'), ...extra });
-  const astro = (...args: string[]) => ejecutar('npx', ['astro', 'dev', ...args], { env, encoding: 'utf8', timeout: 60_000 });
-  astro('--background', '--host', '127.0.0.1', '--port', '4397');
+  const hijo = spawn('npx', ['astro', 'dev', '--ignore-lock', '--host', '127.0.0.1', '--port', '4397'], {
+    env,
+    detached: true,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let registro = '';
+  hijo.stdout!.on('data', (d) => (registro += d));
+  hijo.stderr!.on('data', (d) => (registro += d));
   try {
     for (let i = 0; i < 180; i++) {
       const html = await fetch('http://127.0.0.1:4397/').then((r) => (r.ok ? r.text() : ''), () => '');
       if (html.includes('Onyon Knight')) return html;
       await new Promise((r) => setTimeout(r, 500));
     }
-    let registro = '';
-    try {
-      registro = astro('logs');
-    } catch (e) {
-      registro = String(e);
-    }
     throw new Error(`astro dev no respondió en 90 s. Registro:\n${registro.slice(-3000)}`);
   } finally {
     try {
-      astro('stop');
+      process.kill(-hijo.pid!, 'SIGTERM'); // todo el grupo: npx y astro
     } catch {
-      /* ya parado */
+      /* ya terminado */
     }
+    await new Promise((r) => setTimeout(r, 500));
   }
 }
 
