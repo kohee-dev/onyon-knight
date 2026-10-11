@@ -5,9 +5,9 @@
 }
 
 @media print {
-  /* Siempre Paladín al imprimir. */
+  /* Siempre en modo claro al imprimir. */
   :root,
-  :root[data-tema='caballero'] {
+  :root[data-tema='oscuro'] {
     color-scheme: light;
     --fondo: #fff;
     --superficie: #fff;
@@ -52,8 +52,8 @@
   }
   .shiki,
   .shiki span,
-  :root[data-tema='caballero'] .shiki,
-  :root[data-tema='caballero'] .shiki span {
+  :root[data-tema='oscuro'] .shiki,
+  :root[data-tema='oscuro'] .shiki span {
     color: var(--shiki-light) !important;
     background-color: var(--codigo-fondo) !important;
   }

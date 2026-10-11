@@ -18,7 +18,7 @@ const cssCategorias = Object.values(CATEGORIAS)
   .map(
     (c) =>
       `.${c.clase}{--cat-fondo:${c.claro.fondo};--cat-texto:${c.claro.texto}}` +
-      `:root[data-tema="caballero"] .${c.clase}{--cat-fondo:${c.oscuro.fondo};--cat-texto:${c.oscuro.texto}}`,
+      `:root[data-tema="oscuro"] .${c.clase}{--cat-fondo:${c.oscuro.fondo};--cat-texto:${c.oscuro.texto}}`,
   )
   .join('');
 ---
@@ -30,11 +30,11 @@ const cssCategorias = Object.values(CATEGORIAS)
     <title>{titulo} · Onyon Knight</title>
     {descripcion && <meta name="description" content={descripcion} />}
     <script is:inline>
-      // Tema antes de pintar: elección guardada, o la preferencia del sistema. Paladín = claro; Caballero Oscuro = oscuro.
+      // Tema antes de pintar: elección guardada o, si no hay, la preferencia del sistema.
       (function () {
         var t = null;
         try { t = localStorage.getItem('onyon-tema'); } catch (e) {}
-        if (t !== 'paladin' && t !== 'caballero') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'caballero' : 'paladin';
+        if (t !== 'claro' && t !== 'oscuro') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
         document.documentElement.setAttribute('data-tema', t);
       })();
     </script>
@@ -44,10 +44,10 @@ const cssCategorias = Object.values(CATEGORIAS)
     <header class="cabecera">
       <a class="marca" href={base}>Onyon Knight</a>
       <nav>
-        <button class="tema-boton" type="button" aria-label="Cambiar a modo oscuro (Caballero Oscuro)">
+        <button class="tema-boton" type="button" aria-label="Cambiar a modo oscuro">
           <span class="tema-icono" set:html={svgIcono('casco')} />
-          <span class="tema-a-caballero">Modo oscuro · Caballero Oscuro</span>
-          <span class="tema-a-paladin">Modo claro · Paladín</span>
+          <span class="tema-a-oscuro">Modo oscuro</span>
+          <span class="tema-a-claro">Modo claro</span>
         </button>
         <a href={`${base}licencias/`}>Licencias</a>
       </nav>
@@ -59,14 +59,13 @@ const cssCategorias = Object.values(CATEGORIAS)
       <p>© Alejandro Bartolomé · CC BY-SA 4.0, salvo indicación expresa</p>
     </footer>
     <script>
-      // Botón de tema: alterna Paladín / Caballero Oscuro y recuerda la elección.
+      // Botón de tema: alterna modo claro / oscuro y recuerda la elección.
       const boton = document.querySelector<HTMLButtonElement>('.tema-boton');
-      const etiqueta = (t: string | null) =>
-        t === 'caballero' ? 'Cambiar a modo claro (Paladín)' : 'Cambiar a modo oscuro (Caballero Oscuro)';
+      const etiqueta = (t: string | null) => (t === 'oscuro' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
       if (boton) {
         boton.setAttribute('aria-label', etiqueta(document.documentElement.dataset.tema ?? null));
         boton.addEventListener('click', () => {
-          const nuevo = document.documentElement.dataset.tema === 'caballero' ? 'paladin' : 'caballero';
+          const nuevo = document.documentElement.dataset.tema === 'oscuro' ? 'claro' : 'oscuro';
           document.documentElement.dataset.tema = nuevo;
           boton.setAttribute('aria-label', etiqueta(nuevo));
           try {

@@ -26,12 +26,13 @@ describe('páginas', () => {
     expect(h).toMatch(/<li class="tarjeta cat-smr"/);
   });
 
-  it('botón de tema con el nombre exacto de cada modo', () => {
+  it('botón de tema: solo «Modo oscuro» / «Modo claro»', () => {
     const h = leer('index.html');
     expect(h).toContain('class="tema-boton"');
-    expect(h).toContain('Modo oscuro · Caballero Oscuro');
-    expect(h).toContain('Modo claro · Paladín');
-    expect(h).toContain('aria-label="Cambiar a modo oscuro (Caballero Oscuro)"');
+    expect(h).toMatch(/<span class="tema-a-oscuro">Modo oscuro<\/span>/);
+    expect(h).toMatch(/<span class="tema-a-claro">Modo claro<\/span>/);
+    expect(h).toContain('aria-label="Cambiar a modo oscuro"');
+    expect(h).not.toMatch(/Paladín|Caballero/);
     // El tema se aplica antes de pintar: script en línea en <head>.
     expect(h).toMatch(/<head>[\s\S]*data-tema[\s\S]*<\/head>/);
   });
