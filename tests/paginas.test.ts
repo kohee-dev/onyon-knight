@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { construir } from './util';
@@ -63,6 +63,12 @@ describe('páginas', () => {
   it('las imágenes se publican', () => {
     const src = /src="\/ok\/(img\/[0-9a-f]{8}-cpu\.png)"/.exec(leer('aso/ut1/index.html'))![1];
     expect(readFileSync(join(dist, src)).subarray(1, 4).toString()).toBe('PNG');
+  });
+
+  it('solo publica las imágenes que usa alguna pieza publicada', () => {
+    const publicadas = readdirSync(join(dist, 'img'));
+    expect(publicadas.some((n) => n.endsWith('-cpu.png'))).toBe(true);
+    expect(publicadas.some((n) => n.includes('huerfana'))).toBe(false);
   });
 
   it('todas las páginas llevan el pie de licencia', () => {

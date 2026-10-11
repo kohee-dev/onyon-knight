@@ -1,12 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 import { load } from 'js-yaml';
 import { construirCatalogo } from './catalogo';
 import { creditosDe, type Creditos } from './creditos';
 import { leerFechas, type IndiceFechas } from './fechas';
 import { cargarFuentes } from './fuentes';
 import { renderizarPieza, type ContextoRender, type PiezaRenderizada } from './markdown';
-import { raizContenido } from './raices';
+import { listarImagenes } from './imagenes-url';
+import { raicesPiezas, raizContenido } from './raices';
 import { recogerErrores, type Catalogo, type Modo, type ModuloFuente, type PiezaFuente } from './tipos';
 
 export interface PiezaEnUnidad {
@@ -44,6 +45,8 @@ export interface Sitio {
   /** Render suelto (página /apuntes/<id>/) de cada pieza publicable. */
   sueltas: Map<string, PiezaEnUnidad>;
   ultimosCambios: { titulo: string; contexto: string; url: string; fecha: Date }[];
+  /** Rutas absolutas de las imágenes que usan las piezas publicadas: las únicas que se publican. */
+  imagenes: string[];
   creditosSitio: CreditoSitio[];
 }
 
@@ -111,10 +114,14 @@ async function construirSitio(): Promise<Sitio> {
   const rutaCreditos = existsSync(propios) ? propios : resolve('contenido/creditos-sitio.yml');
   const creditosSitio = (load(readFileSync(rutaCreditos, 'utf8')) as CreditoSitio[]) ?? [];
 
+  const imagenes = [...new Set([...sueltas.values()].flatMap((p) => p.render.imagenes.map((i) => i.rutaAbs)))];
+  const sinUso = listarImagenes(raicesPiezas).filter((r) => !imagenes.includes(r));
+
   for (const a of new Set([...fechas.avisos, ...catalogo.avisos])) console.warn(`⚠️  ${a}`);
   for (const i of catalogo.informe) console.info(`ℹ️  ${i}`);
+  for (const r of sinUso) console.info(`ℹ️  imagen sin usar (no se publica): ${relative(process.cwd(), r)}`);
 
-  return { catalogo, modo, base, sitioUrl: sitioUrl.replace(/\/$/, '') + '/', unidades, sueltas, ultimosCambios, creditosSitio };
+  return { catalogo, modo, base, sitioUrl: sitioUrl.replace(/\/$/, '') + '/', unidades, sueltas, ultimosCambios, imagenes, creditosSitio };
 }
 
 let memo: Promise<Sitio> | null = null;
