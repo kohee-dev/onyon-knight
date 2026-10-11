@@ -53,3 +53,39 @@ describe('PDF por unidad', () => {
     expect(generarPdfs()).toMatch(/PDF: 0 renderizados, 5 reutilizados/);
   });
 });
+
+async function leerPdf(ruta: string): Promise<{ texto: string; uris: string[]; paginas: number }> {
+  const doc = await getDocument({ data: new Uint8Array(readFileSync(ruta)) }).promise;
+  let texto = '';
+  const uris: string[] = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const pagina = await doc.getPage(i);
+    texto += (await pagina.getTextContent()).items.map((it: any) => it.str).join(' ') + '\n';
+    for (const a of await pagina.getAnnotations()) if (a.url) uris.push(a.url);
+  }
+  return { texto, uris, paginas: doc.numPages };
+}
+
+describe('PDF de los casos', () => {
+  it('cada caso tiene su PDF con portada, duración, licencias y pie', async () => {
+    const { texto, uris } = await leerPdf(join(dist, 'pdf/aso-ut1/caso-ldap.pdf'));
+    expect(texto).toContain('Caso LDAP en Elpis');
+    expect(texto).toMatch(/caso práctico/i);
+    expect(texto).toContain('2 h');
+    expect(texto).toContain('Licencias y fuentes');
+    expect(texto).toContain('ASO · UT1 · Caso práctico');
+    for (const u of [...uris, texto]) expect(u).not.toContain('127.0.0.1');
+  });
+
+  it('una unidad sin teoría solo tiene PDFs de casos', () => {
+    expect(existsSync(join(dist, 'pdf/aso-ut2/caso-solo.pdf'))).toBe(true);
+    expect(existsSync(join(dist, 'pdf/aso-ut2.pdf'))).toBe(false);
+  });
+
+  it('el PDF de teoría termina con los casos de la unidad', async () => {
+    const { texto, uris } = await leerPdf(join(dist, 'pdf/aso-ut1.pdf'));
+    expect(texto).toContain('Casos prácticos de esta unidad');
+    expect(uris).toContain('https://ej.es/ok/aso/ut1/casos/caso-ldap/');
+    expect(texto).not.toContain('Elpis necesita un directorio'); // el contenido del caso no va en la teoría
+  });
+});
