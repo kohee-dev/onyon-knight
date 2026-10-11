@@ -3,13 +3,17 @@ import { esquemaPieza } from '../src/lib/esquemas';
 import type { ContextoRender } from '../src/lib/markdown';
 import type { Modo, PiezaFuente } from '../src/lib/tipos';
 
-export function piezaMd(id: string, cuerpo: string, extra: Partial<PiezaFuente> & { titulo?: string; borrador?: boolean } = {}): PiezaFuente {
-  const { titulo, borrador, ...resto } = extra;
+export function piezaMd(
+  id: string,
+  cuerpo: string,
+  extra: Partial<PiezaFuente> & { titulo?: string; borrador?: boolean; campos?: Record<string, unknown> } = {},
+): PiezaFuente {
+  const { titulo, borrador, campos, ...resto } = extra;
   return {
     id,
     archivo: `contenido/piezas/${id}.md`,
     rutaAbs: `/no-existe/${id}.md`,
-    datos: esquemaPieza.parse({ titulo: titulo ?? `Título de ${id.toUpperCase()}`, borrador }),
+    datos: esquemaPieza.parse({ titulo: titulo ?? `Título de ${id.toUpperCase()}`, borrador, ...campos }),
     cuerpo,
     privado: false,
     ...resto,

@@ -11,7 +11,7 @@ import { ErrorContenido, type Catalogo, type Ficha, type Modo, type PiezaFuente 
 import type { EstadoRender } from './comun';
 import { remarkEncabezados } from './encabezados';
 import { remarkEnlaces, remarkEnlacesNormales } from './enlaces';
-import { remarkImagenes } from './imagenes';
+import { remarkImagenes, resolverImagen } from './imagenes';
 import { remarkSinHtml } from './html';
 import { remarkMermaid } from './mermaid';
 import { normalizarRecuadros, remarkRecuadros } from './recuadros';
@@ -33,11 +33,22 @@ export interface ImagenUsada {
   ficha: Ficha;
 }
 
+export interface Titulo {
+  id: string;
+  texto: string;
+  /** Nivel relativo dentro de la pieza (1 = titulo-1). */
+  nivel: number;
+}
+
 export interface PiezaRenderizada {
   id: string;
   html: string;
   imagenes: ImagenUsada[];
   tieneMermaid: boolean;
+  /** Solo en casos; ausente = imagen genérica. */
+  portada?: ImagenUsada;
+  cabecera?: ImagenUsada;
+  titulos: Titulo[];
 }
 
 const procesador = unified()
@@ -75,11 +86,39 @@ export async function renderizarPieza(p: PiezaFuente, ctx: ContextoRender): Prom
     problemas: [],
     imagenes: [],
     tieneMermaid: false,
+    titulos: [],
   };
   const file = new VFile({ value: normalizarRecuadros(p.cuerpo), path: p.rutaAbs, data: { onyon: estado } });
   const arbol = procesador.parse(file);
   const hast = await procesador.run(arbol, file);
+  const imagenesCaso = p.datos.tipo === 'caso' ? resolverImagenesCaso(p, ctx, estado) : {};
   if (estado.problemas.length) throw new ErrorContenido(estado.problemas);
   const html = procesador.stringify(hast as any, file);
-  return { id: p.id, html: String(html), imagenes: estado.imagenes, tieneMermaid: estado.tieneMermaid };
+  return { id: p.id, html: String(html), imagenes: estado.imagenes, tieneMermaid: estado.tieneMermaid, ...imagenesCaso, titulos: estado.titulos };
+}
+
+/** Portada y cabecera de un caso: validadas como cualquier imagen; si faltan, imagen genérica y aviso. */
+function resolverImagenesCaso(p: PiezaFuente, ctx: ContextoRender, estado: EstadoRender): { portada?: ImagenUsada; cabecera?: ImagenUsada } {
+  const resultado: { portada?: ImagenUsada; cabecera?: ImagenUsada } = {};
+  for (const campo of ['portada', 'cabecera'] as const) {
+    const url = p.datos[campo];
+    if (!url) {
+      const aviso = `caso sin ${campo}: ${p.id}`;
+      if (!ctx.catalogo.avisos.includes(aviso)) ctx.catalogo.avisos.push(aviso);
+      continue;
+    }
+    try {
+      const imagen = resolverImagen(url, `${campo === 'portada' ? 'Portada' : 'Cabecera'} de «${p.datos.titulo}»`, {
+        rutaPieza: p.rutaAbs,
+        archivo: p.archivo,
+        base: ctx.base,
+      });
+      resultado[campo] = imagen;
+      if (!estado.imagenes.some((i) => i.rutaAbs === imagen.rutaAbs)) estado.imagenes.push(imagen);
+    } catch (e) {
+      if (!(e instanceof ErrorContenido)) throw e;
+      estado.problemas.push(...e.problemas.map((x) => ({ ...x, mensaje: `«${campo}»: ${x.mensaje}` })));
+    }
+  }
+  return resultado;
 }

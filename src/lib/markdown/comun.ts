@@ -1,6 +1,6 @@
 import type { Node } from 'unist';
 import type { VFile } from 'vfile';
-import type { ContextoRender, ImagenUsada } from './index';
+import type { ContextoRender, ImagenUsada, Titulo } from './index';
 import type { PiezaFuente, Problema } from '../tipos';
 
 /** Datos que comparten los plugins durante el render de una pieza. */
@@ -12,6 +12,7 @@ export interface EstadoRender {
   problemas: Problema[];
   imagenes: ImagenUsada[];
   tieneMermaid: boolean;
+  titulos: Titulo[];
 }
 
 export function estado(file: VFile): EstadoRender {

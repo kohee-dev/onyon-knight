@@ -99,6 +99,63 @@ describe('urlImagen y listarImagenes', () => {
 
   it('lista las imágenes de las carpetas dadas', () => {
     const lista = listarImagenes([resolve('tests/fixtures/img'), resolve('no-existe')]);
-    expect(lista.map((r) => r.split('/').at(-1)).sort()).toEqual(['cpu.png', 'mala.png', 'mod.png', 'nc.png', 'propia.png', 'sin-ficha.png']);
+    expect(lista.map((r) => r.split('/').at(-1)).sort()).toEqual(['cabecera.png', 'cpu.png', 'mala.png', 'mod.png', 'nc.png', 'portada.png', 'propia.png', 'sin-ficha.png']);
+  });
+});
+
+import { creditosDe } from '../src/lib/creditos';
+
+describe('portada y cabecera de los casos', () => {
+  const caso = (campos: Record<string, unknown>, cuerpo = 'Texto') =>
+    piezaMd('a', cuerpo, { rutaAbs: rutaPieza, campos: { tipo: 'caso', horas: 2, ...campos } });
+
+  async function errorDe(p: ReturnType<typeof caso>): Promise<string> {
+    try {
+      await renderizarPieza(p, contexto([p]));
+    } catch (e) {
+      expect(e).toBeInstanceOf(ErrorContenido);
+      return (e as Error).message;
+    }
+    throw new Error('no lanzó error');
+  }
+
+  it('resuelve la portada con su ficha y la añade a las imágenes', async () => {
+    const p = caso({ portada: './img/portada.png', cabecera: './img/cabecera.png' });
+    const r = await renderizarPieza(p, contexto([p]));
+    expect(r.portada?.url).toMatch(/-portada\.png$/);
+    expect(r.portada?.ficha.autor).toBe('Autora portada');
+    expect(r.cabecera?.ficha.autor).toBe('Autora cabecera');
+    expect(r.imagenes.map((i) => i.rutaAbs)).toContain(r.portada!.rutaAbs);
+  });
+
+  it('una cabecera inexistente es un error con el campo', async () => {
+    const m = await errorDe(caso({ portada: './img/portada.png', cabecera: './img/no.png' }));
+    expect(m).toContain('a.md');
+    expect(m).toContain('cabecera');
+    expect(m).toContain('imagen inexistente');
+  });
+
+  it('una portada sin ficha es un error', async () => {
+    expect(await errorDe(caso({ portada: './img/sin-ficha.png' }))).toContain('sin-ficha.yml');
+  });
+
+  it('una portada remota es un error', async () => {
+    expect(await errorDe(caso({ portada: 'https://x/y.png' }))).toContain('imagen remota no permitida');
+  });
+
+  it('sin portada usa la genérica y avisa una sola vez', async () => {
+    const p = caso({ cabecera: './img/cabecera.png' });
+    const ctx = contexto([p]);
+    const r = await renderizarPieza(p, ctx);
+    await renderizarPieza(p, ctx);
+    expect(r.portada).toBeUndefined();
+    expect(ctx.catalogo.avisos.filter((a) => a === 'caso sin portada: a')).toHaveLength(1);
+  });
+
+  it('la misma imagen como portada y en el texto aparece una vez en los créditos', async () => {
+    const p = caso({ portada: './img/portada.png', cabecera: './img/cabecera.png' }, '![Portada](./img/portada.png)');
+    const r = await renderizarPieza(p, contexto([p]));
+    const autores = creditosDe([{ fuente: p, render: r }]).recursos.map((x) => x.ficha.autor);
+    expect(autores.filter((a) => a === 'Autora portada')).toHaveLength(1);
   });
 });

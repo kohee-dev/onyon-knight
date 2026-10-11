@@ -7,6 +7,7 @@ import { SKIP, visit } from 'unist-util-visit';
 import { validarFicha } from '../../licencias';
 import { urlImagen } from '../imagenes-url';
 import { ErrorContenido, type Ficha } from '../tipos';
+import type { ImagenUsada } from './index';
 import { estado, problema } from './comun';
 
 export const CLASES_IMAGEN = ['pequena', 'mediana', 'completa', 'derecha'];
@@ -39,6 +40,24 @@ function leerFicha(rutaFicha: string, archivoMensaje: string): Ficha {
     throw new ErrorContenido([{ archivo: archivoMensaje, mensaje: `YAML no válido: ${(e as Error).message.split('\n')[0]}` }]);
   }
   return validarFicha(datos, archivoMensaje);
+}
+
+/**
+ * Valida y resuelve una imagen local de una pieza: no remota, existente y con ficha válida.
+ * Lo usan las imágenes del texto y la portada/cabecera de los casos. Lanza ErrorContenido (sin línea).
+ */
+export function resolverImagen(url: string, alt: string, ctx: { rutaPieza: string; archivo: string; base: string }): ImagenUsada {
+  const fallo = (mensaje: string): never => {
+    throw new ErrorContenido([{ archivo: ctx.archivo, mensaje }]);
+  };
+  if (/^[a-z]+:\/\//i.test(url) || url.startsWith('//')) fallo(`imagen remota no permitida «${url}»: descárgala junto a la pieza con su ficha`);
+  const rutaAbs = resolve(dirname(ctx.rutaPieza), decodeURI(url));
+  if (!existsSync(rutaAbs)) fallo(`imagen inexistente «${url}»`);
+  const rutaFicha = join(dirname(rutaAbs), `${url.split('/').at(-1)!.slice(0, -extname(rutaAbs).length || undefined)}.yml`);
+  const relFicha = url.replace(/\.[^.\/]+$/, '.yml');
+  if (!existsSync(rutaFicha)) fallo(`falta la ficha de licencia «${relFicha}» junto a la imagen`);
+  const ficha = leerFicha(rutaFicha, `${ctx.archivo} → ${relFicha}`);
+  return { rutaAbs, rutaFicha, url: urlImagen(rutaAbs, ctx.base), alt, ficha };
 }
 
 export function remarkImagenes() {
@@ -77,31 +96,17 @@ export function remarkImagenes() {
         problema(file, img, 'falta el texto alternativo de la imagen ![texto](…)');
         return null;
       }
-      if (/^[a-z]+:\/\//i.test(img.url) || img.url.startsWith('//')) {
-        problema(file, img, `imagen remota no permitida «${img.url}»: descárgala junto a la pieza con su ficha`);
-        return null;
-      }
-      const rutaAbs = resolve(dirname(e.pieza.rutaAbs), decodeURI(img.url));
-      if (!existsSync(rutaAbs)) {
-        problema(file, img, `imagen inexistente «${img.url}»`);
-        return null;
-      }
-      const rutaFicha = join(dirname(rutaAbs), `${img.url.split('/').at(-1)!.slice(0, -extname(rutaAbs).length || undefined)}.yml`);
-      const relFicha = img.url.replace(/\.[^.\/]+$/, '.yml');
-      if (!existsSync(rutaFicha)) {
-        problema(file, img, `falta la ficha de licencia «${relFicha}» junto a la imagen`);
-        return null;
-      }
-      let ficha: Ficha;
+      let usada: ImagenUsada;
       try {
-        ficha = leerFicha(rutaFicha, `${e.pieza.archivo} → ${relFicha}`);
+        usada = resolverImagen(img.url, img.alt, { rutaPieza: e.pieza.rutaAbs, archivo: e.pieza.archivo, base: e.ctx.base });
       } catch (err) {
         if (!(err instanceof ErrorContenido)) throw err;
         e.problemas.push(...err.problemas.map((p) => ({ ...p, linea: img.position ? img.position.start.line + e.desplazamiento : undefined })));
         return null;
       }
-      const url = urlImagen(rutaAbs, e.ctx.base);
-      e.imagenes.push({ rutaAbs, rutaFicha, url, alt: img.alt, ficha });
+      e.imagenes.push(usada);
+      const url = usada.url;
+      const ficha = usada.ficha;
       return {
         type: 'figura',
         data: {
