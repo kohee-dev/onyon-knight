@@ -1,5 +1,6 @@
 ---
 titulo: "Caso práctico: administración de una empresa"
+borrador: true
 ---
 
 # Caso práctico: Administración de una Empresa

@@ -1,12 +1,17 @@
 # Onyon Knight · Teoría y casos prácticos — Diseño
 
 - **Fecha:** 2026-10-11
-- **Estado:** pendiente de revisión
+- **Estado:** aprobada (2026-10-11)
 - **Amplía:** `docs/superpowers/specs/2026-10-11-web-docente-nucleo-design.md` (núcleo). Todo lo que este documento no cambia sigue como allí.
 
 ## 1. Propósito
 
-Separar en cada unidad la **teoría** de los **casos prácticos**:
+Separar en cada unidad la **teoría** de los **casos prácticos**. Las dos se definen así:
+
+- **Teoría:** contenido para estudiar. Puede incluir ejercicios y entregas (recuadros `:::ejercicio`).
+- **Caso práctico:** un ejercicio de principio a fin.
+
+En la presentación:
 
 - La teoría se lee seguida en la página de la unidad, con un **índice lateral** para moverse por ella.
 - Los casos se presentan como **tarjetas** dentro de la unidad (título, duración, portada) y tienen **página propia**, con una imagen de cabecera, y **PDF propio**.
@@ -192,12 +197,12 @@ Se marcan como `tipo: caso`, con las `horas` de la web anterior, los casos que a
 | Pieza | `horas` | Estado |
 |---|---|---|
 | `opera-jidoor` (La Ópera de Jidoor) | 8 | publicado |
-| `caso-servicios-directorio` | 2 | publicado; el docente indica si además va en borrador |
+| `caso-servicios-directorio` | 2 | publicado (el `tipo: "borrador"` local del docente pasa a `tipo: caso`) |
 | `gatos-elpis` (Gatos: los gatos de Elpis) | 6 | publicado |
 | `procesos-sala-maquinas` (Sala de máquinas) | 4 | sigue en borrador |
 | `procesos-espectro` (El Espectro de la Máquina) | 9 | sigue en borrador |
 
-- «De la consola al escritorio» (SOR UT0) era teoría en la web anterior y sigue siéndolo.
+- «De la consola al escritorio» (SOR UT0) sigue siendo teoría: tiene una entrega, pero es material de estudio, no un ejercicio de principio a fin.
 - Ningún caso tiene aún imágenes: todos usan la genérica, con su aviso, hasta que el docente añada portada y cabecera con su ficha.
 
 ## 8. Fuera de alcance
