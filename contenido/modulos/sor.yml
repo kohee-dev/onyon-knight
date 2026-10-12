@@ -18,4 +18,4 @@ unidades:
     piezas: [active-directory, aldea-goblins]
   - id: ut4
     titulo: "Linux: usuarios, permisos y acceso remoto"
-    piezas: [usuarios-linux]
+    piezas: [usuarios-linux, opera-garnier]
