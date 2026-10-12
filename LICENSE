@@ -1,0 +1,48 @@
+Onyon Knight usa dos licencias, según el tipo de material.
+
+================================================================================
+1. Apuntes: carpeta contenido/
+================================================================================
+
+© Alejandro Bartolomé
+
+Los apuntes se distribuyen bajo la licencia Creative Commons
+Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0):
+https://creativecommons.org/licenses/by-sa/4.0/legalcode.es
+
+Excepciones:
+- Una pieza que declare otra licencia en su cabecera (campo «licencia») se rige
+  por esa licencia. Por ejemplo, los apuntes adaptados de materiales
+  CC BY-NC-SA 4.0 conservan esa licencia.
+- Cada imagen se rige por la licencia indicada en su ficha (.yml), junto a la
+  imagen, con el autor y la fuente.
+
+================================================================================
+2. Código de la web: todo lo que no está en contenido/
+================================================================================
+
+MIT License
+
+Copyright (c) 2026 Alejandro Bartolomé
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Las tipografías, iconos y bibliotecas de terceros conservan sus propias
+licencias; se listan en contenido/creditos-sitio.yml y en la página
+«Licencias y fuentes» de la web.

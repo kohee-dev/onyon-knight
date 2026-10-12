@@ -1,42 +1,37 @@
 # Onyon Knight
 
-Web docente estática (Astro). Los apuntes son **piezas** Markdown pequeñas y
-combinables; cada **módulo** es un índice YAML que las ordena en unidades. Cada
-unidad se publica como página web y como PDF.
+Este proyecto busca **crear, compartir y mantener apuntes docentes** de Formación Profesional de Informática: Grado Básico, SMR, ASIR y DAM.
 
-## Uso diario
+Los apuntes se leen en <https://kohee-dev.github.io/onyon-knight/>, y cada unidad y cada caso práctico se pueden descargar en PDF.
 
-```bash
-npm install
-npm run dev      # http://localhost:4321
-npm test
-npm run build    # web + PDFs en dist/
-```
+## Crear
 
-## Dónde se escribe
+Los apuntes se escriben en piezas pequeñas que se combinan entre sí. Un mismo tema puede formar parte de varios módulos sin copiarlo. Así, cada explicación se escribe una sola vez y se mejora en un solo sitio.
 
-- `contenido/piezas/**/<id>.md`: apuntes. El id es el nombre del archivo.
-- `contenido/piezas/**/img/<imagen>` + `<imagen>.yml`: imagen y su ficha de licencia (obligatoria).
-- `contenido/modulos/<id>.yml`: índice del módulo (unidades → piezas).
+Hay dos tipos de contenido:
 
-## Apuntes privados
+- **Teoría**: el material de estudio, que puede incluir ejercicios y entregas.
+- **Casos prácticos**: ejercicios completos de principio a fin, casi siempre dentro de una historia (una ópera en apuros, un puerto con barcos que no encuentran amarre, una tienda de aventureros…) para que lo aprendido tenga sentido.
 
-Viven **fuera del repo**. Indica su carpeta con `ONYON_PRIVADO`:
+## Compartir
 
-```bash
-ONYON_PRIVADO=../onyon-privado npm run dev
-```
+Todo el material es abierto. Cualquiera puede leerlo, imprimirlo, usarlo en clase y adaptarlo, siempre que respete su licencia.
 
-Solo `astro dev` los lee; `astro build` nunca publica contenido privado. Si la carpeta está dentro del repositorio, el servidor de desarrollo se niega a arrancar: se subiría a GitHub.
+Por eso cada recurso dice de dónde viene:
 
-Diseño: `docs/superpowers/specs/2026-10-11-web-docente-nucleo-design.md`.
+- Cada imagen lleva su ficha con el autor, la licencia y la fuente. Si una imagen no tiene esa información, no se publica.
+- Los apuntes adaptados de otros docentes citan su origen y conservan la licencia original.
+- Cada página y cada PDF terminan con su apartado de licencias y fuentes.
 
-## Despliegue
+## Mantener
 
-Cada push a `main` ejecuta `.github/workflows/deploy.yml`: pruebas, build (web + PDF) y publicación en
-GitHub Pages (`https://<usuario>.github.io/<repo>/`). La caché de PDFs se guarda entre ejecuciones.
+Un apunte no se termina nunca: cambian las versiones, aparecen erratas y se encuentran formas mejores de explicar las cosas. Cada página muestra la fecha de su última modificación, para que quien la lea sepa si está al día.
 
-Configuración única en GitHub: *Settings → Pages → Source: GitHub Actions*.
+Si encuentras un error o tienes una sugerencia, abre una [incidencia](https://github.com/kohee-dev/onyon-knight/issues).
 
-Para cambiar de destino (dominio propio, Raspberry Pi…), ajusta `BASE_PATH` y `SITE_URL`, y sustituye el
-trabajo `deploy` por un `rsync` de `dist/` al servidor.
+## Licencia
+
+- **Apuntes** (`contenido/`): © Alejandro Bartolomé, bajo [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.es), salvo que la pieza o la ficha de la imagen indiquen otra licencia.
+- **Código de la web** (todo lo demás): [MIT](LICENSE).
+
+Los detalles están en [LICENSE](LICENSE) y en la página [Licencias y fuentes](https://kohee-dev.github.io/onyon-knight/licencias/).
