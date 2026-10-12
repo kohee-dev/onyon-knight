@@ -1,21 +1,30 @@
 ---
-import { moduloDeRuta, modulosNavegacion } from '../lib/navegacion';
+import { moduloDeRuta, seccionesNavegacion } from '../lib/navegacion';
 
 interface Props {
   id?: string;
   clase: string;
+  /** Prefijo de los ids de las cabeceras (la lista aparece en la cabecera y en el menú). */
+  prefijo?: string;
 }
-const { id, clase } = Astro.props;
-const modulos = await modulosNavegacion();
+const { id, clase, prefijo = '' } = Astro.props;
+const secciones = await seccionesNavegacion();
 const actual = moduloDeRuta(Astro.url.pathname);
 ---
-<ul class={clase} id={id}>
-  {modulos.map((m) => (
-    <li>
-      <a href={m.url} aria-current={m.id === actual ? 'page' : undefined}>
-        <span class={`chip ${m.clase}`}>{m.sigla}</span>
-        <span>{m.nombre}</span>
-      </a>
-    </li>
+<div class={clase} id={id}>
+  {secciones.map((s) => (
+    <div class="modulos-grupo">
+      <p class={`modulos-seccion ${s.clase}`} id={`${prefijo}cab-${s.id}`}>{s.titulo}</p>
+      <ul aria-labelledby={`${prefijo}cab-${s.id}`}>
+        {s.modulos.map((m) => (
+          <li>
+            <a href={m.url} aria-current={m.id === actual ? 'page' : undefined}>
+              <span class={`chip ${m.clase}`}>{m.sigla}</span>
+              <span>{m.nombre}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
   ))}
-</ul>
+</div>

@@ -93,10 +93,20 @@ describe('páginas', () => {
       expect(lista).not.toContain('/ok/sri/'); // inactivo
       expect(lista).not.toContain('/ok/rds/'); // solo borradores
       expect(lista).toMatch(/<a[^>]*href="\/ok\/aso\/"[^>]*aria-current="page"/);
+      // Secciones por ciclo, en orden GB → SMR → ASIR → DAM, cada lista ligada a su cabecera.
+      const smr = lista.indexOf('SMR · Sistemas Microinformáticos y Redes');
+      const asir = lista.indexOf('ASIR · Administración de Sistemas Informáticos en Red');
+      expect(smr).toBeGreaterThan(0);
+      expect(lista.indexOf('href="/ok/som/"')).toBeGreaterThan(smr);
+      expect(asir).toBeGreaterThan(lista.indexOf('href="/ok/som/"'));
+      expect(lista.indexOf('href="/ok/aso/"')).toBeGreaterThan(asir);
+      expect(lista).not.toContain('Grado Básico ·'); // sin módulos publicados (rds solo tiene borradores)
+      expect(lista).toMatch(/<p class="modulos-seccion cat-asir" id="cab-asir">[\s\S]*?<ul aria-labelledby="cab-asir">/);
       expect(lista).not.toMatch(/<a[^>]*href="\/ok\/som\/"[^>]*aria-current/);
       const menu = h.slice(h.indexOf('id="menu"'), h.indexOf('</nav>', h.indexOf('id="menu"')));
       expect(menu).toContain('class="menu-modulos"');
       expect(menu).toContain('href="/ok/som/"');
+      expect(menu).toContain('id="menu-cab-asir"'); // ids distintos de los de la cabecera
     });
 
     it('un módulo sin unidades publicadas no aparece ni se publica', () => {
