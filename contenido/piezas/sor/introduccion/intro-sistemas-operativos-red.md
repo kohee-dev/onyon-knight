@@ -204,8 +204,8 @@ El programa que lo hace posible se llama [hipervisor](https://es.wikipedia.org/w
 
 | Tipo | Dónde funciona | Ejemplos | Para qué se usa |
 | --- | --- | --- | --- |
-| Tipo 1 | Directamente sobre el hardware, sin sistema operativo debajo | Hyper-V, KVM (en Proxmox), VMware ESXi | Servidores y centros de datos |
-| Tipo 2 | Como un programa más dentro de un sistema operativo | [VirtualBox](https://es.wikipedia.org/wiki/VirtualBox), VMware Workstation | Laboratorios, aprendizaje y pruebas |
+| Tipo 1 | Directamente sobre el hardware, sin sistema operativo debajo | Hyper-V, KVM (en Proxmox), VMware ESXi, Xen | Servidores y centros de datos |
+| Tipo 2 | Como un programa más dentro de un sistema operativo | [VirtualBox](https://es.wikipedia.org/wiki/VirtualBox), VMware Workstation, Parallels, QEMU | Laboratorios, aprendizaje y pruebas |
 
 En este módulo vas a usar uno de tipo 2, porque te permite montar una red entera en tu portátil, equivocarte sin consecuencias y volver atrás cuando algo sale mal.
 
