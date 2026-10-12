@@ -6,7 +6,10 @@ icono: globo
 unidades:
   - id: ut1
     titulo: DHCP
-    piezas: [dhcp, kea-dhcp, amarres-innsmouth]
+    piezas: [dhcp, kea-dhcp, dhcp-windows, amarres-innsmouth]
   - id: ut2
     titulo: DNS
-    piezas: [dns]
+    piezas: [dns, dns-bind, dns-windows]
+  - id: ut3
+    titulo: Servidores web
+    piezas: [web, web-apache, web-nginx, web-iis]
