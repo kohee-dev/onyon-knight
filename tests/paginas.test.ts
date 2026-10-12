@@ -254,6 +254,16 @@ describe('páginas', () => {
     expect(publicadas.some((n) => n.includes('huerfana'))).toBe(false);
   });
 
+  it('los iconos de la licencia se sirven desde el propio sitio', () => {
+    const h = leer('index.html');
+    for (const i of ['cc', 'by', 'nc', 'sa']) {
+      expect(h).toContain(`src="/ok/cc/${i}.svg"`);
+      expect(existsSync(join(dist, 'cc', `${i}.svg`))).toBe(true);
+    }
+    expect(h).not.toContain('mirrors.creativecommons.org');
+    expect(leer('licencias/index.html')).toContain('Iconos de licencia Creative Commons');
+  });
+
   it('todas las páginas llevan el pie de licencia', () => {
     for (const r of ['index.html', 'aso/index.html', 'aso/ut1/index.html', 'apuntes/suelta/index.html', 'licencias/index.html']) {
       expect(leer(r)).toContain(PIE);

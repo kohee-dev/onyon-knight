@@ -65,7 +65,7 @@ const cssCategorias = Object.values(CATEGORIAS)
     </main>
     <footer class="pie">
       <p class="pie-licencia">
-        <a href={urlSitio}>Onyon Knight</a> © 2026 de <a href={AUTOR_URL}>{AUTOR}</a> está bajo licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>{cc.map((i) => <img class="cc-icono" src={`https://mirrors.creativecommons.org/presskit/icons/${i}.svg`} alt="" />)}
+        <a href={urlSitio}>Onyon Knight</a> © 2026 de <a href={AUTOR_URL}>{AUTOR}</a> está bajo licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>{cc.map((i) => <img class="cc-icono" src={`${base}cc/${i}.svg`} alt="" />)}
       </p>
       <p>Salvo indicación expresa en cada recurso.</p>
       <p><a href={`${base}licencias/`}>Licencias y fuentes</a></p>
