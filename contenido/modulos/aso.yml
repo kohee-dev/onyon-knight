@@ -9,7 +9,7 @@ unidades:
     piezas: [opera-jidoor]
   - id: ut1
     titulo: Servicios de directorio
-    piezas: [servicios-directorio, openldap, caso-servicios-directorio, gatos-elpis, expediente-02-llaves-almacen]
+    piezas: [servicios-directorio, openldap, active-directory, caso-servicios-directorio, gatos-elpis, expediente-02-llaves-almacen]
   - id: ut2
     titulo: Procesos del sistema
     piezas: [procesos-teoria, procesos-linux, procesos-windows, procesos-sala-maquinas, procesos-espectro]

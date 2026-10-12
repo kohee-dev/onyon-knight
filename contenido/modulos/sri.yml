@@ -7,3 +7,6 @@ unidades:
   - id: ut1
     titulo: DHCP
     piezas: [dhcp, kea-dhcp, amarres-innsmouth]
+  - id: ut2
+    titulo: DNS
+    piezas: [dns]
