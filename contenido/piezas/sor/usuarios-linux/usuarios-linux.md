@@ -283,6 +283,8 @@ minlen = 12        # longitud mínima
 minclass = 3       # mínimo de tipos de carácter distintos (minúsculas, mayúsculas, números, símbolos)
 ```
 
+Ten en cuenta que, por defecto, `minlen` vale 8 y `minclass` vale 0 (sin exigencia), y que **root no queda sujeto a estas reglas**: si cambia una contraseña, el sistema solo avisa. Por eso las pruebas se hacen con un usuario normal.
+
 Otro módulo, **`pwhistory`**, recuerda las últimas contraseñas para que no se repitan.
 
 ## Bloqueo por intentos fallidos
@@ -689,10 +691,10 @@ Documentación para ampliar el bloque:
 | Apartado | Enlace |
 | --- | --- |
 | 3. Gestión de usuarios en Ubuntu Server | [User management (Ubuntu Server)](https://ubuntu.com/server/docs/how-to/security/user-management/) |
-| 5. Caducidad de contraseñas | [Manual de chage](https://manpages.ubuntu.com/manpages/noble/en/man1/chage.1.html) |
-| 5. Calidad de contraseñas | [Manual de pwquality.conf](https://manpages.ubuntu.com/manpages/noble/en/man5/pwquality.conf.5.html) |
+| 5. Caducidad de contraseñas | [Manual de chage](https://manpages.debian.org/bookworm/passwd/chage.1.en.html) |
+| 5. Calidad de contraseñas | [Manual de pwquality.conf](https://www.mankier.com/5/pwquality.conf) |
 | 5. Bloqueo por intentos fallidos | [Manual de faillock.conf](https://manpages.ubuntu.com/manpages/noble/en/man5/faillock.conf.5.html) |
-| 8. Reglas de sudo | [Manual de sudoers](https://manpages.ubuntu.com/manpages/noble/en/man5/sudoers.5.html) |
+| 8. Reglas de sudo | [Manual de sudoers](https://manpages.debian.org/bookworm/sudo/sudoers.5.en.html) |
 | 9. Servidor OpenSSH en Ubuntu | [OpenSSH server (Ubuntu Server)](https://ubuntu.com/server/docs/how-to/security/openssh-server/) |
 | 9. Opciones de `sshd_config` | [Manual de sshd_config](https://manpages.ubuntu.com/manpages/noble/man5/sshd_config.5.html) |
 

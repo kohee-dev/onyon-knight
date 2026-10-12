@@ -219,8 +219,8 @@ Esta es la parte que más cuesta al principio, pero es fundamental. Cuando creas
 
 | Modo | Salida a Internet | Entre VM | Con el equipo anfitrión | Desde la red real |
 | --- | --- | --- | --- | --- |
-| NAT | Sí | No | No (salvo reenvío de puertos) | No (salvo reenvío de puertos) |
-| Red NAT | Sí | Sí | No (salvo reenvío de puertos) | No (salvo reenvío de puertos) |
+| NAT | Sí | No | La VM llega a él; él a la VM solo con reenvío de puertos | No (salvo reenvío de puertos) |
+| Red NAT | Sí | Sí | La VM llega a él; él a la VM solo con reenvío de puertos | No (salvo reenvío de puertos) |
 | Red interna | No | Sí, dentro de la misma red | No | No |
 | Solo anfitrión | No | Sí | Sí | No |
 | Adaptador puente | Sí | Sí | Sí | Sí (la VM es un equipo más de la red) |
