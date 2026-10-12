@@ -15,4 +15,4 @@ unidades:
     piezas: [intro-sistemas-operativos-red, virtualizacion]
   - id: ut3
     titulo: Active Directory
-    piezas: [aldea-goblins]
+    piezas: [active-directory, aldea-goblins]
