@@ -11,6 +11,9 @@ unidades:
     titulo: Introducción a los sistemas operativos
     piezas: [intro-sistemas-operativos]
   - id: ut2
+    titulo: Introducción a los sistemas operativos en red
+    piezas: [intro-sistemas-operativos-red]
+  - id: ut3
     titulo: Servicios de virtualización
     piezas: [virtualizacion]
   - id: ut3
