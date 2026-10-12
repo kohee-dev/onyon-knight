@@ -64,6 +64,22 @@ export interface PiezaRenderizada {
   titulos: Titulo[];
 }
 
+/** Cada tabla va en un contenedor con desplazamiento propio: nunca sale de la columna ni tapa el índice. */
+function rehypeTablas() {
+  return (arbol: any) => {
+    const recorrer = (nodo: any) => {
+      if (!nodo.children) return;
+      nodo.children = nodo.children.map((h: any) => {
+        recorrer(h);
+        return h.type === 'element' && h.tagName === 'table'
+          ? { type: 'element', tagName: 'div', properties: { className: ['tabla-desplazable'], tabIndex: 0, role: 'region', ariaLabel: 'Tabla' }, children: [h] }
+          : h;
+      });
+    };
+    recorrer(arbol);
+  };
+}
+
 const procesador = unified()
   .use(remarkParse)
   .use(remarkGfm)
@@ -76,6 +92,7 @@ const procesador = unified()
   .use(remarkEnlaces)
   .use(remarkImagenes)
   .use(remarkRehype)
+  .use(rehypeTablas)
   .use(rehypeShiki, {
     themes: { light: 'github-light', dark: 'github-dark' },
     lazy: true,

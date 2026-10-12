@@ -23,7 +23,7 @@ const cat = categoriaDe(m.datos.ciclo)!;
 const { fuente, render, fecha } = c.pieza;
 const entradas = render.titulos.filter((t) => t.nivel <= 2).map((t) => ({ id: t.id, texto: t.texto, nivel: t.nivel }));
 ---
-<Base titulo={`${fuente.datos.titulo} · ${m.id.toUpperCase()}`} descripcion={fuente.datos.resumen}>
+<Base progreso titulo={`${fuente.datos.titulo} · ${m.id.toUpperCase()}`} descripcion={fuente.datos.resumen}>
   <section class={`portada portada-caso ${cat.clase}`} aria-hidden="true">
     <div class="portada-imagen"><ImagenCaso imagen={render.cabecera} modulo={m} proporcion="cabecera" titulo={fuente.datos.titulo} /></div>
     <p class="portada-modulo">{m.datos.nombre} · {u.titulo}</p>

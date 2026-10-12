@@ -30,7 +30,7 @@ const entradas = [
   ...(u.casos.length ? [{ id: 'casos-de-esta-unidad', texto: 'Casos prácticos de esta unidad', nivel: 0, clase: 'solo-impresion' }] : []),
 ];
 ---
-<Base titulo={`${u.titulo} · ${m.id.toUpperCase()}`}>
+<Base progreso titulo={`${u.titulo} · ${m.id.toUpperCase()}`}>
   <section class={`portada ${cat.clase}`} aria-hidden="true">
     <p class="portada-modulo">{m.datos.nombre}</p>
     <p class="portada-meta">{m.id.toUpperCase()} · {m.datos.codigo} · {m.datos.ciclo} · {m.datos.curso}.º</p>

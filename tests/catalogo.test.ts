@@ -54,7 +54,7 @@ describe('construirCatalogo', () => {
     expect(m).toContain('privado:piezas/b/procesos.md');
   });
 
-  it.each(['menu', 'casos-practicos', 'casos-de-esta-unidad', 'licencias-y-fuentes'])('reserva el id «%s» para la página', (id) => {
+  it.each(['menu', 'lista-modulos', 'casos-practicos', 'casos-de-esta-unidad', 'licencias-y-fuentes'])('reserva el id «%s» para la página', (id) => {
     expect(problemas(() => construirCatalogo([pieza(id)], [], 'desarrollo'))).toContain(`id de pieza reservado «${id}»`);
   });
 
@@ -108,6 +108,12 @@ describe('construirCatalogo', () => {
     );
     expect(c.modulos[0].datos.unidades.map((u) => u.id)).toEqual(['ut1']);
     expect(c.avisos).toContain('aso/ut2: todas sus piezas son borradores; la unidad no se publica');
+  });
+
+  it('no publica un módulo sin unidades publicadas, y avisa', () => {
+    const c = construirCatalogo([pieza('b', { borrador: true })], [modulo('rds', [{ id: 'ut1', piezas: ['b'] }])], 'publicacion');
+    expect(c.modulos).toHaveLength(0);
+    expect(c.avisos).toContain('rds: no tiene unidades publicadas; el módulo no se publica');
   });
 
   it('detecta unidades duplicadas', () => {

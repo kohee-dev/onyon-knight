@@ -6,12 +6,15 @@ import '../styles/print.css';
 import { CATEGORIAS } from '../categorias';
 import BotonMenu from '../components/BotonMenu.astro';
 import BotonTema from '../components/BotonTema.astro';
+import DesplegableModulos from '../components/DesplegableModulos.astro';
 
 interface Props {
   titulo: string;
   descripcion?: string;
+  /** Barra de progreso de lectura: solo en páginas de contenido (unidad, caso, apunte). */
+  progreso?: boolean;
 }
-const { titulo, descripcion } = Astro.props;
+const { titulo, descripcion, progreso = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 
 // Colores de categoría generados desde src/categorias.ts (única fuente).
@@ -44,12 +47,15 @@ const cssCategorias = Object.values(CATEGORIAS)
   <body>
     <header class="cabecera">
       <span class="cabecera-hueco" aria-hidden="true"></span>
-      <a class="marca" href={base}>Onyon Knight</a>
+      <div class="cabecera-inicio">
+        <a class="marca" href={base}>Onyon Knight</a>
+        <DesplegableModulos />
+      </div>
       <div class="cabecera-acciones">
         <BotonTema />
         <BotonMenu />
       </div>
-      <div class="progreso" aria-hidden="true" style="--progreso: 0"><span></span></div>
+      {progreso && <div class="progreso" aria-hidden="true" style="--progreso: 0"><span></span></div>}
     </header>
     <main>
       <slot />
@@ -80,6 +86,7 @@ const cssCategorias = Object.values(CATEGORIAS)
       // Barra de progreso de lectura.
       const progreso = document.querySelector<HTMLElement>('.progreso');
       let pendiente = false;
+      if (progreso) {
       const medir = () => {
         pendiente = false;
         const total = document.documentElement.scrollHeight - innerHeight;
@@ -93,6 +100,7 @@ const cssCategorias = Object.values(CATEGORIAS)
       }, { passive: true });
       addEventListener('resize', medir);
       medir();
+      }
 
       // Señal para scripts/pdf.mjs: tipografías, imágenes y diagramas listos.
       async function prepararPagina() {

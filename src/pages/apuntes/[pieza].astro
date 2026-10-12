@@ -20,7 +20,7 @@ const apariciones = sitio.catalogo.apariciones.get(p.fuente.id) ?? [];
 const esCaso = p.fuente.datos.tipo === 'caso';
 const moduloRef = sitio.catalogo.modulos.find((m) => m.id === apariciones[0]?.modulo);
 ---
-<Base titulo={p.fuente.datos.titulo} descripcion={p.fuente.datos.resumen}>
+<Base progreso titulo={p.fuente.datos.titulo} descripcion={p.fuente.datos.resumen}>
   <p class="migas"><a href={sitio.base}>Inicio</a></p>
   {esCaso && (
     <>

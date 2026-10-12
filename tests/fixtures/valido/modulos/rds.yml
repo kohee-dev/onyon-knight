@@ -1,0 +1,9 @@
+nombre: Redes solo en borrador
+codigo: "9999"
+ciclo: GB
+curso: 1
+icono: red
+unidades:
+  - id: ut1
+    titulo: Todo en preparación
+    piezas: [procesos-linux]

@@ -153,7 +153,12 @@
     white-space: pre-wrap;
     overflow: visible;
   }
-  .tabla {
+  .tabla,
+  .tabla-desplazable {
     overflow: visible;
+  }
+  .modulos-desplegable,
+  .menu-modulos {
+    display: none !important;
   }
 }

@@ -1,0 +1,35 @@
+---
+import ListaModulos from './ListaModulos.astro';
+---
+<div class="modulos-desplegable">
+  <button class="modulos-boton" type="button" aria-expanded="false" aria-controls="lista-modulos" hidden>
+    Módulos <span aria-hidden="true">▾</span>
+  </button>
+  <ListaModulos id="lista-modulos" clase="modulos-lista" />
+</div>
+
+<script>
+  // Desplegable (patrón disclosure): sin JS, la lista se ve tal cual.
+  const caja = document.querySelector<HTMLElement>('.modulos-desplegable');
+  const boton = caja?.querySelector<HTMLButtonElement>('.modulos-boton');
+  if (caja && boton) {
+    document.documentElement.classList.add('con-modulos');
+    boton.hidden = false;
+    const abierto = () => boton.getAttribute('aria-expanded') === 'true';
+    const poner = (si: boolean, devolverFoco = false) => {
+      boton.setAttribute('aria-expanded', String(si));
+      caja.classList.toggle('modulos-abierto', si);
+      if (!si && devolverFoco) boton.focus();
+    };
+    boton.addEventListener('click', () => poner(!abierto()));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && abierto()) poner(false, true);
+    });
+    document.addEventListener('click', (e) => {
+      if (abierto() && !caja.contains(e.target as Node)) poner(false);
+    });
+    caja.addEventListener('focusout', (e) => {
+      if (abierto() && !caja.contains(e.relatedTarget as Node | null) && e.relatedTarget) poner(false);
+    });
+  }
+</script>

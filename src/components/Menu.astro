@@ -1,5 +1,6 @@
 ---
 import BotonTema from './BotonTema.astro';
+import ListaModulos from './ListaModulos.astro';
 
 export interface EntradaIndice {
   id: string;
@@ -22,6 +23,10 @@ const conIndice = entradas.length > 0;
     <button class="menu-cerrar" type="button" aria-label="Cerrar el menú">×</button>
   </div>
   <div class="menu-modo"><BotonTema /></div>
+  <div class="menu-modulos">
+    <p class="indice-titulo">Módulos</p>
+    <ListaModulos clase="menu-modulos-lista" />
+  </div>
   {conIndice && (
     <div class="menu-indice">
       <p class="indice-titulo">Índice</p>
@@ -79,7 +84,21 @@ const conIndice = entradas.length > 0;
     capa.addEventListener('click', () => cerrar());
     menu.querySelector('.menu-cerrar')?.addEventListener('click', () => cerrar());
     menu.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).closest('a') && abierto()) cerrar(false);
+      const enlace = (e.target as HTMLElement).closest<HTMLAnchorElement>('a');
+      if (!enlace) return;
+      // El índice no añade entradas al historial: «Atrás» vuelve a la página anterior.
+      const destino = enlace.hash && enlace.pathname === location.pathname ? document.getElementById(decodeURIComponent(enlace.hash.slice(1))) : null;
+      if (destino) {
+        e.preventDefault();
+        if (abierto()) cerrar(false);
+        history.replaceState(history.state, '', enlace.hash);
+        const suave = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        destino.scrollIntoView({ behavior: suave ? 'smooth' : 'auto', block: 'start' });
+        if (!destino.hasAttribute('tabindex')) destino.setAttribute('tabindex', '-1');
+        destino.focus({ preventScroll: true });
+      } else if (abierto()) {
+        cerrar(false);
+      }
     });
     document.addEventListener('keydown', (e) => {
       if (!abierto()) return;

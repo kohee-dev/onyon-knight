@@ -107,6 +107,72 @@ describe('índice lateral', () => {
   });
 });
 
+describe('desplegable de módulos', () => {
+  it('se abre, se cierra con Esc y con un clic fuera, y devuelve el foco', async () => {
+    const p = await abrir('/ok/aso/ut1/', 1440);
+    const abierto = () => p.evaluate(() => document.querySelector('.modulos-boton')!.getAttribute('aria-expanded'));
+    expect(await p.isVisible('#lista-modulos')).toBe(false);
+    await p.click('.modulos-boton');
+    expect(await abierto()).toBe('true');
+    expect(await p.isVisible('#lista-modulos a[href="/ok/som/"]')).toBe(true);
+    await p.keyboard.press('Escape');
+    expect(await abierto()).toBe('false');
+    expect(await p.evaluate(() => document.activeElement?.classList.contains('modulos-boton'))).toBe(true);
+    await p.click('.modulos-boton');
+    await p.mouse.click(700, 600);
+    expect(await abierto()).toBe('false');
+    expect(await p.isVisible('#lista-modulos')).toBe(false);
+    await p.close();
+  });
+
+  it('en móvil, los módulos están dentro del menú', async () => {
+    const p = await abrir('/ok/aso/ut1/', 375);
+    expect(await p.isVisible('.modulos-boton')).toBe(false);
+    await p.click('.menu-boton');
+    expect(await p.isVisible('#menu .menu-modulos a[href="/ok/som/"]')).toBe(true);
+    await p.close();
+  });
+});
+
+describe('tablas anchas', () => {
+  it.each([1280, 1440])('a %i px ninguna tabla sale de la columna', async (ancho) => {
+    const p = await abrir('/ok/aso/ut1/', ancho);
+    const exceso = await p.evaluate(() => {
+      const main = document.querySelector('main')!;
+      const fin = main.getBoundingClientRect().right - parseFloat(getComputedStyle(main).paddingRight);
+      return Math.max(...[...document.querySelectorAll('.contenido table, .tabla-desplazable')].map((t) => t.getBoundingClientRect().right - fin));
+    });
+    expect(exceso).toBeLessThanOrEqual(1);
+    await p.close();
+  });
+});
+
+describe('móvil sin desplazamiento horizontal', () => {
+  it.each(['/ok/aso/ut1/', '/ok/aso/ut1/casos/caso-ldap/', '/ok/'])('%s a 375 px', async (ruta) => {
+    const p = await abrir(ruta, 375);
+    expect(await p.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+    await p.close();
+  });
+});
+
+describe('«Atrás» y el índice', () => {
+  it.each([1440, 375])('a %i px, después de usar el índice, «Atrás» vuelve a la página anterior', async (ancho) => {
+    const p = await navegador.newPage({ viewport: { width: ancho, height: 800 } });
+    await p.goto(origen + '/ok/');
+    await p.goto(origen + '/ok/aso/ut1/');
+    await p.waitForFunction('window.__onyonListo === true');
+    for (const id of ['procesos-estados', 'procesos-concepto', 'licencias-y-fuentes']) {
+      if (ancho < 1280) await p.click('.menu-boton');
+      await p.click(`#menu .menu-indice a[href="#${id}"]`);
+      await p.waitForFunction((h) => location.hash === h, `#${id}`);
+    }
+    await p.goBack();
+    await p.waitForURL(origen + '/ok/');
+    expect(new URL(p.url()).pathname).toBe('/ok/');
+    await p.close();
+  });
+});
+
 describe('cabecera', () => {
   it('queda fija y la barra de progreso avanza al bajar', async () => {
     const p = await abrir('/ok/aso/ut1/', 1440);

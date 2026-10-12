@@ -1,0 +1,21 @@
+---
+import { moduloDeRuta, modulosNavegacion } from '../lib/navegacion';
+
+interface Props {
+  id?: string;
+  clase: string;
+}
+const { id, clase } = Astro.props;
+const modulos = await modulosNavegacion();
+const actual = moduloDeRuta(Astro.url.pathname);
+---
+<ul class={clase} id={id}>
+  {modulos.map((m) => (
+    <li>
+      <a href={m.url} aria-current={m.id === actual ? 'page' : undefined}>
+        <span class={`chip ${m.clase}`}>{m.sigla}</span>
+        <span>{m.nombre}</span>
+      </a>
+    </li>
+  ))}
+</ul>

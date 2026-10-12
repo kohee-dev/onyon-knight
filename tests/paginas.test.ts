@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { construir } from './util';
@@ -71,7 +71,6 @@ describe('páginas', () => {
       expect(h).toMatch(/<button class="menu-boton"[^>]*aria-controls="menu"[^>]*aria-label="Abrir el menú"/);
       const cabecera = h.slice(h.indexOf('<header class="cabecera"'), h.indexOf('</header>'));
       expect(cabecera).toContain('class="tema-boton"');
-      expect(cabecera).toContain('class="progreso" aria-hidden="true"');
       expect(cabecera).not.toContain('Licencias');
       const menu = h.slice(h.indexOf('id="menu"'));
       expect(menu.slice(0, menu.indexOf('</nav>'))).toContain('class="tema-boton"');
@@ -82,6 +81,42 @@ describe('páginas', () => {
       const pie = h.slice(h.indexOf('<footer class="pie"'));
       expect(pie).toContain('href="/ok/licencias/"');
       expect(pie).toContain('Licencias y fuentes');
+    });
+
+    it('desplegable de módulos con los módulos publicados', () => {
+      const h = leer('aso/ut1/index.html');
+      const cab = h.slice(h.indexOf('<header class="cabecera"'), h.indexOf('</header>'));
+      expect(cab).toMatch(/<button class="modulos-boton"[^>]*aria-expanded="false"[^>]*aria-controls="lista-modulos"[^>]*hidden/);
+      const lista = cab.slice(cab.indexOf('id="lista-modulos"'));
+      expect(lista).toContain('href="/ok/aso/"');
+      expect(lista).toContain('href="/ok/som/"');
+      expect(lista).not.toContain('/ok/sri/'); // inactivo
+      expect(lista).not.toContain('/ok/rds/'); // solo borradores
+      expect(lista).toMatch(/<a[^>]*href="\/ok\/aso\/"[^>]*aria-current="page"/);
+      expect(lista).not.toMatch(/<a[^>]*href="\/ok\/som\/"[^>]*aria-current/);
+      const menu = h.slice(h.indexOf('id="menu"'), h.indexOf('</nav>', h.indexOf('id="menu"')));
+      expect(menu).toContain('class="menu-modulos"');
+      expect(menu).toContain('href="/ok/som/"');
+    });
+
+    it('un módulo sin unidades publicadas no aparece ni se publica', () => {
+      expect(leer('index.html')).not.toContain('Redes solo en borrador');
+      expect(existsSync(join(dist, 'rds/index.html'))).toBe(false);
+    });
+
+    it('las tablas van en un contenedor desplazable y accesible', () => {
+      expect(leer('aso/ut1/index.html')).toMatch(/<div class="tabla-desplazable" tabindex="0" role="region" aria-label="Tabla"><table>/);
+    });
+
+    it.each([
+      ['aso/ut1/index.html', true],
+      ['aso/ut1/casos/caso-ldap/index.html', true],
+      ['apuntes/suelta/index.html', true],
+      ['index.html', false],
+      ['aso/index.html', false],
+      ['licencias/index.html', false],
+    ])('barra de progreso en %s: %s', (r, si) => {
+      expect(leer(r).includes('class="progreso"')).toBe(si);
     });
 
     it('las tarjetas no repiten el título en la imagen', () => {

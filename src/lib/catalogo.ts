@@ -6,7 +6,7 @@ import { ErrorContenido, type Aparicion, type Catalogo, type Modo, type ModuloFu
 export const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /** Ids que usa la propia página; una pieza con uno de ellos duplicaría ids y rompería anclas y aria-controls. */
-export const IDS_RESERVADOS = ['menu', 'casos-practicos', 'casos-de-esta-unidad', 'licencias-y-fuentes'];
+export const IDS_RESERVADOS = ['menu', 'lista-modulos', 'casos-practicos', 'casos-de-esta-unidad', 'licencias-y-fuentes'];
 
 export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[], modo: Modo): Catalogo {
   const problemas: Problema[] = [];
@@ -75,6 +75,10 @@ export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[]
       avisos.push(`${m.id}/${u.id}: incluye borradores (${borradores.join(', ')})`);
       return [{ ...u, piezas: u.piezas.filter((id) => !borradores.includes(id)) }];
     });
+    if (publicacion && unidades.length === 0) {
+      avisos.push(`${m.id}: no tiene unidades publicadas; el módulo no se publica`);
+      continue;
+    }
     resultado.push({ ...m, datos: { ...m.datos, unidades } });
   }
 

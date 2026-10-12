@@ -915,3 +915,116 @@ blockquote {
 .solo-impresion {
   display: none;
 }
+
+/* ── Desplegable de módulos (cabecera) ──────────── */
+.cabecera-inicio {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+.modulos-boton {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+  background: transparent;
+  border: 0;
+  padding: 0.3rem 0.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.modulos-boton:hover,
+.modulos-abierto .modulos-boton {
+  color: var(--acento);
+  background: var(--acento-suave);
+}
+.modulos-desplegable {
+  position: relative;
+}
+.modulos-lista,
+.menu-modulos-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* Sin JS: lista corta en línea. */
+.modulos-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  font-size: 0.85rem;
+}
+.modulos-lista a,
+.menu-modulos-lista a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--texto);
+  text-decoration: none;
+}
+.modulos-lista a[aria-current='page'],
+.menu-modulos-lista a[aria-current='page'] {
+  font-weight: 800;
+  color: var(--acento);
+}
+/* Con JS: panel que se abre bajo el botón. */
+.con-modulos .modulos-lista {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 45;
+  min-width: 18rem;
+  flex-direction: column;
+  gap: 0;
+  padding: 0.4rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+}
+.con-modulos .modulos-abierto .modulos-lista {
+  display: flex;
+}
+.con-modulos .modulos-lista a {
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+}
+.con-modulos .modulos-lista a:hover,
+.menu-modulos-lista a:hover {
+  background: var(--acento-suave);
+}
+.menu-modulos {
+  display: none;
+}
+.menu-modulos-lista a {
+  padding: 0.35rem 0;
+}
+@media (max-width: 1279.98px) {
+  /* En móvil los módulos van dentro del menú. */
+  .con-menu .modulos-desplegable {
+    display: none;
+  }
+  .con-menu .menu-modulos {
+    display: block;
+    margin-bottom: 1rem;
+  }
+  .con-menu .cabecera-inicio {
+    justify-content: center;
+  }
+}
+
+/* ── Tablas: desplazamiento propio, nunca fuera de la columna ── */
+.tabla-desplazable {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.tabla-desplazable:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+.contenido :is(td, th) code {
+  overflow-wrap: anywhere;
+}
