@@ -219,6 +219,16 @@ html {
   color: var(--acento);
   font-weight: 700;
 }
+/* Iconos oficiales de la licencia (negros): en oscuro se invierten. */
+.cc-icono {
+  max-width: 1em;
+  max-height: 1em;
+  margin-left: 0.2em;
+  vertical-align: -0.125em;
+}
+:root[data-tema='oscuro'] .cc-icono {
+  filter: invert(1);
+}
 
 .migas,
 .meta,

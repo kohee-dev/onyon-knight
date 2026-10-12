@@ -1,4 +1,5 @@
 ---
+import { AUTOR } from '../licencias';
 import { condicionesTexto, type Creditos } from '../lib/creditos';
 interface Props { creditos: Creditos; titulo?: string }
 const { creditos, titulo = 'Licencias y fuentes' } = Astro.props;
@@ -7,7 +8,7 @@ const { licenciaTexto: l } = creditos;
 <section class="licencias" id="licencias-y-fuentes">
   <h2>{titulo}</h2>
   <p>
-    Texto: © Alejandro Bartolomé, bajo licencia <a href={l.url}>{l.nombre}</a>.
+    Texto: © {AUTOR}, bajo licencia <a href={l.url}>{l.nombre}</a>.
     {condicionesTexto(l)}
   </p>
   {creditos.piezasConOtraLicencia.length > 0 && (

@@ -4,16 +4,16 @@ Onyon Knight usa dos licencias, según el tipo de material.
 1. Apuntes: carpeta contenido/
 ================================================================================
 
-© Alejandro Bartolomé
+Onyon Knight © 2026 de Alejandro Bartolomé Fernández
+(https://github.com/kohee-dev)
 
 Los apuntes se distribuyen bajo la licencia Creative Commons
-Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0):
-https://creativecommons.org/licenses/by-sa/4.0/legalcode.es
+Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0):
+https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.es
 
 Excepciones:
 - Una pieza que declare otra licencia en su cabecera (campo «licencia») se rige
-  por esa licencia. Por ejemplo, los apuntes adaptados de materiales
-  CC BY-NC-SA 4.0 conservan esa licencia.
+  por esa licencia.
 - Cada imagen se rige por la licencia indicada en su ficha (.yml), junto a la
   imagen, con el autor y la fuente.
 
@@ -23,7 +23,7 @@ Excepciones:
 
 MIT License
 
-Copyright (c) 2026 Alejandro Bartolomé
+Copyright (c) 2026 Alejandro Bartolomé Fernández
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

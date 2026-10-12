@@ -2,7 +2,7 @@
 import Menu from '../components/Menu.astro';
 import Recursos from '../components/Recursos.astro';
 import Base from '../layouts/Base.astro';
-import { licenciaPorId } from '../licencias';
+import { AUTOR, licenciaPorId } from '../licencias';
 import { creditosDe } from '../lib/creditos';
 import { cargarSitio } from '../lib/sitio';
 
@@ -12,8 +12,8 @@ const creditos = creditosDe([...sitio.sueltas.values()]);
 <Base titulo="Licencias">
   <h1>Licencias y fuentes</h1>
   <p>
-    Salvo indicación expresa, los contenidos de este sitio son © Alejandro Bartolomé y se publican bajo
-    <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es">CC BY-SA 4.0</a>. Cada imagen o recurso de
+    Salvo indicación expresa, los contenidos de este sitio son © {AUTOR} y se publican bajo
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es">CC BY-NC-SA 4.0</a>. Cada imagen o recurso de
     terceros indica su autor, su licencia y su fuente junto a él y en esta página.
   </p>
   <Recursos creditos={creditos} titulo="Contenidos" />

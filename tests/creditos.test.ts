@@ -42,7 +42,7 @@ describe('creditosDe', () => {
 
   it('señala las piezas con otra licencia', () => {
     const c = creditosDe([entrada('a', {}), entrada('b', { licencia: 'CC-BY-4.0' })]);
-    expect(c.licenciaTexto.id).toBe('CC-BY-SA-4.0');
+    expect(c.licenciaTexto.id).toBe('CC-BY-NC-SA-4.0');
     expect(c.piezasConOtraLicencia).toEqual([{ id: 'b', titulo: 'T b', licencia: licenciaPorId('CC-BY-4.0') }]);
   });
 

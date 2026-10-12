@@ -7,6 +7,7 @@ import { CATEGORIAS } from '../categorias';
 import BotonMenu from '../components/BotonMenu.astro';
 import BotonTema from '../components/BotonTema.astro';
 import DesplegableModulos from '../components/DesplegableModulos.astro';
+import { AUTOR, AUTOR_URL } from '../licencias';
 
 interface Props {
   titulo: string;
@@ -16,6 +17,8 @@ interface Props {
 }
 const { titulo, descripcion, progreso = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const urlSitio = new URL(base, Astro.site).href;
+const cc = ['cc', 'by', 'nc', 'sa'];
 
 // Colores de categoría generados desde src/categorias.ts (única fuente).
 const cssCategorias = Object.values(CATEGORIAS)
@@ -61,7 +64,10 @@ const cssCategorias = Object.values(CATEGORIAS)
       <slot />
     </main>
     <footer class="pie">
-      <p>© Alejandro Bartolomé · CC BY-SA 4.0, salvo indicación expresa</p>
+      <p class="pie-licencia">
+        <a href={urlSitio}>Onyon Knight</a> © 2026 de <a href={AUTOR_URL}>{AUTOR}</a> está bajo licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>{cc.map((i) => <img class="cc-icono" src={`https://mirrors.creativecommons.org/presskit/icons/${i}.svg`} alt="" />)}
+      </p>
+      <p>Salvo indicación expresa en cada recurso.</p>
       <p><a href={`${base}licencias/`}>Licencias y fuentes</a></p>
     </footer>
     <script>

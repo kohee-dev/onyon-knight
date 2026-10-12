@@ -3,7 +3,9 @@ import { join, resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { construir } from './util';
 
-const PIE = '© Alejandro Bartolomé · CC BY-SA 4.0, salvo indicación expresa';
+// Pie de licencia de Creative Commons (enlaces y nombre exactos).
+const PIE =
+  '<a href="https://ej.es/ok/">Onyon Knight</a> © 2026 de <a href="https://github.com/kohee-dev">Alejandro Bartolomé Fernández</a> está bajo licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>';
 let dist = '';
 const leer = (ruta: string) => readFileSync(join(dist, ruta), 'utf8');
 
@@ -57,7 +59,7 @@ describe('páginas', () => {
     expect(h).not.toContain('id="procesos-linux"'); // borrador
     expect(h).toContain('href="#procesos-estados"');
     expect(h).toContain('Licencias y fuentes');
-    expect(h).toContain('CC BY-SA 4.0');
+    expect(h).toContain('CC BY-NC-SA 4.0');
     expect(h).toContain('Stallings, Operating Systems');
     expect(h).toContain('Usuario «Ehamberg», Wikimedia Commons');
     expect(h).toContain('href="#procesos-concepto"'); // enlace wiki dentro de la unidad
@@ -183,7 +185,7 @@ describe('páginas', () => {
       expect(lic).not.toMatch(/<li>«Caso LDAP en Elpis»:/); // la licencia del texto del caso no va en la unidad
       expect(lic).toContain('Autora portada'); // la portada sí se acredita
       // El caso es su única pieza: su licencia es la del texto de la página.
-      expect(leer('aso/ut1/casos/caso-ldap/index.html')).toMatch(/Texto: © Alejandro Bartolomé, bajo licencia <a[^>]*>CC BY 4\.0<\/a>/);
+      expect(leer('aso/ut1/casos/caso-ldap/index.html')).toMatch(/Texto: © Alejandro Bartolomé Fernández, bajo licencia <a[^>]*>CC BY 4\.0<\/a>/);
     });
 
     it('una unidad solo con casos no tiene PDF de teoría ni botón de índice', () => {

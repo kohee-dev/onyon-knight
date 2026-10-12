@@ -15,7 +15,7 @@ Hay dos tipos de contenido:
 
 ## Compartir
 
-Todo el material es abierto. Cualquiera puede leerlo, imprimirlo, usarlo en clase y adaptarlo, siempre que respete su licencia.
+Todo el material es abierto. Cualquiera puede leerlo, imprimirlo, usarlo en clase y adaptarlo, sin fines comerciales y siempre que respete su licencia.
 
 Por eso cada recurso dice de dónde viene:
 
@@ -31,7 +31,7 @@ Si encuentras un error o tienes una sugerencia, abre una [incidencia](https://gi
 
 ## Licencia
 
-- **Apuntes** (`contenido/`): © Alejandro Bartolomé, bajo [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.es), salvo que la pieza o la ficha de la imagen indiquen otra licencia.
+- **Apuntes** (`contenido/`): [Onyon Knight](https://kohee-dev.github.io/onyon-knight/) © 2026 de [Alejandro Bartolomé Fernández](https://github.com/kohee-dev) está bajo licencia [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/), salvo que la ficha de una imagen indique otra licencia.
 - **Código de la web** (todo lo demás): [MIT](LICENSE).
 
 Los detalles están en [LICENSE](LICENSE) y en la página [Licencias y fuentes](https://kohee-dev.github.io/onyon-knight/licencias/).

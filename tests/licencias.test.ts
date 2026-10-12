@@ -15,10 +15,10 @@ function mensajeDe(fn: () => unknown): string {
 }
 
 describe('validarFicha', () => {
-  it('autor propio aplica CC BY-SA 4.0 sin exigir fuente', () => {
+  it('autor propio aplica CC BY-NC-SA 4.0 sin exigir fuente', () => {
     const f = validarFicha({ autor: 'propio' }, F);
     expect(f.propio).toBe(true);
-    expect(f.licencia.id).toBe('CC-BY-SA-4.0');
+    expect(f.licencia.id).toBe('CC-BY-NC-SA-4.0');
     expect(f.fuente).toBeUndefined();
   });
 

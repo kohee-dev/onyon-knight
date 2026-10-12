@@ -99,7 +99,7 @@ describe('imágenes', () => {
 
   it('acredita las imágenes propias sin fuente', async () => {
     const t = texto((await render('![x](./img/propia.png)')).html);
-    expect(t).toContain('Alejandro Bartolomé · CC BY-SA 4.0');
+    expect(t).toContain('Alejandro Bartolomé Fernández · CC BY-NC-SA 4.0');
     expect(t).not.toContain('Fuente');
   });
 });

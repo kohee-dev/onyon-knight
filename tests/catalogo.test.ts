@@ -229,7 +229,7 @@ describe('esquemas', () => {
   });
 
   it('aplica los valores por defecto', () => {
-    expect(esquemaPieza.parse({ titulo: 'x' })).toEqual({ titulo: 'x', tipo: 'teoria', borrador: false, fuentes: [], licencia: 'CC-BY-SA-4.0' });
+    expect(esquemaPieza.parse({ titulo: 'x' })).toEqual({ titulo: 'x', tipo: 'teoria', borrador: false, fuentes: [], licencia: 'CC-BY-NC-SA-4.0' });
   });
 
   it('exige un icono en el módulo', () => {

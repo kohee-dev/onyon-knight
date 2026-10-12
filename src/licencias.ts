@@ -73,7 +73,10 @@ export const LICENCIAS: Record<string, Licencia> = Object.fromEntries(
   ].map((l) => [l.id, l]),
 );
 
-export const LICENCIA_PROPIA = 'CC-BY-SA-4.0';
+export const LICENCIA_PROPIA = 'CC-BY-NC-SA-4.0';
+/** Autoría del contenido propio, tal como figura en la licencia. */
+export const AUTOR = 'Alejandro Bartolomé Fernández';
+export const AUTOR_URL = 'https://github.com/kohee-dev';
 
 export function licenciaPorId(id: string): Licencia | undefined {
   return Object.hasOwn(LICENCIAS, id) ? LICENCIAS[id] : undefined;
@@ -120,7 +123,7 @@ export function validarFicha(datos: unknown, archivo: string): Ficha {
   if (problemas.length) throw new ErrorContenido(problemas);
 
   return {
-    autor: propio ? 'Alejandro Bartolomé' : d.autor,
+    autor: propio ? AUTOR : d.autor,
     propio,
     fuente: d.fuente,
     licencia: licencia!,

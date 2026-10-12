@@ -1,4 +1,5 @@
 ---
+import { AUTOR } from '../../../licencias';
 import Distintivo from '../../../components/Distintivo.astro';
 import Menu from '../../../components/Menu.astro';
 import TarjetaCaso from '../../../components/TarjetaCaso.astro';
@@ -37,7 +38,7 @@ const entradas = [
     <h1 class="portada-titulo">{u.titulo}</h1>
     <p class="portada-unidad">{u.pie}</p>
     <Fecha fecha={u.fecha} />
-    <p class="portada-licencia">© Alejandro Bartolomé · {u.creditos.licenciaTexto.nombre}, salvo indicación expresa.<br />{sitio.sitioUrl}{u.url.slice(1)}</p>
+    <p class="portada-licencia">© {AUTOR} · {u.creditos.licenciaTexto.nombre}, salvo indicación expresa.<br />{sitio.sitioUrl}{u.url.slice(1)}</p>
   </section>
   <p class="migas"><a href={sitio.base}>Inicio</a> › <a href={`${sitio.base}${m.id}/`}>{m.datos.nombre}</a></p>
   <header class="unidad-cabecera">

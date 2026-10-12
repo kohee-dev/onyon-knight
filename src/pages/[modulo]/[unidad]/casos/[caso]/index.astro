@@ -1,4 +1,5 @@
 ---
+import { AUTOR } from '../../../../../licencias';
 import Fecha from '../../../../../components/Fecha.astro';
 import ImagenCaso from '../../../../../components/ImagenCaso.astro';
 import Menu from '../../../../../components/Menu.astro';
@@ -31,7 +32,7 @@ const entradas = render.titulos.filter((t) => t.nivel <= 2).map((t) => ({ id: t.
     <p><span class="chip-caso">Caso práctico</span> {formatearHoras(fuente.datos.horas!)}</p>
     <h1 class="portada-titulo">{fuente.datos.titulo}</h1>
     <Fecha fecha={fecha} />
-    <p class="portada-licencia">© Alejandro Bartolomé · {c.creditos.licenciaTexto.nombre}, salvo indicación expresa.<br />{new URL(c.url, sitio.sitioUrl).href}</p>
+    <p class="portada-licencia">© {AUTOR} · {c.creditos.licenciaTexto.nombre}, salvo indicación expresa.<br />{new URL(c.url, sitio.sitioUrl).href}</p>
   </section>
   <p class="migas"><a href={sitio.base}>Inicio</a> › <a href={`${sitio.base}${m.id}/`}>{m.datos.nombre}</a> › <a href={u.url}>{u.titulo}</a></p>
   <div class="banner"><ImagenCaso imagen={render.cabecera} modulo={m} proporcion="cabecera" titulo={fuente.datos.titulo} /></div>
