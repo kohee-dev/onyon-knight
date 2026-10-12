@@ -48,10 +48,10 @@ Estos son los usuarios que hay que crear o comprobar. Los nombres van en **minú
 | Tipo | Usuarios |
 | --- | --- |
 | Instrumentos | `oboe`, `clarinete`, `flauta`, `corno`, `violin`, `cello`, `contrabajo`, `guitarra`, `sistro`, `timbal`, `conductor` |
-| Artistas | `maria`, `ralse`, `jay`, `narrador` |
+| Artistas | `maria`, `raul`, `jay`, `octavio` |
 | Público | `espectador` (se crea en la tarea 2) |
 
-Los grupos de la orquesta son `cuerda`, `viento_madera`, `viento_metal`, `percusion`, `conductor`, `orquesta` y `artistas`. El grupo `orquesta` incluye a todos los instrumentos y `artistas` incluye a María, Ralse, Jay y el narrador.
+Los grupos de la orquesta son `cuerda`, `viento_madera`, `viento_metal`, `percusion`, `conductor`, `orquesta` y `artistas`. El grupo `orquesta` incluye a todos los instrumentos y `artistas` incluye a María, Raul, Jay y Octavio.
 
 | Instrumento | cuerda | viento_madera | viento_metal | percusion | conductor |
 | --- | :-: | :-: | :-: | :-: | :-: |
@@ -134,11 +134,11 @@ Después, demuestra que funciona **probando con los distintos usuarios** (con `s
 En `ensayos` y en `tablon` los permisos de los archivos nuevos dependen de la `umask` de quien los crea. Piensa qué `umask` necesita cada uno de los dos casos.
 :::
 
-# Acto II: Aria di Mezzo Carattere
+# Acto II: Aria de la suplente
 
 El primer acto salió bien, pero alguien ha tirado todas las carpetas al suelo y han quedado mezcladas las partituras. Además, el Impresario ha decidido que es peligroso que María actúe, y **Andrea Windrose** la sustituirá durante este acto.
 
-Como Jay ya ha terminado la Obertura, solo hay que gestionar las partituras del *Aria di Mezzo Carattere*. El director te encarga ordenar los documentos rápidamente. Se pueden dar cuatro casos:
+Como Jay ya ha terminado la Obertura, solo hay que gestionar las partituras del *Aria de la suplente*. El director te encarga ordenar los documentos rápidamente. Se pueden dar cuatro casos:
 
 **1. La carpeta de un instrumento no tiene partituras.** Hay que construir esta estructura en el directorio personal del usuario (ejemplo para `oboe`):
 
@@ -216,7 +216,7 @@ Pide a al menos dos compañeros que vengan a ver la obra, cada uno con su clave,
 
 El script debe funcionar tanto si existe `/var/log/auth.log` como si hay que consultar el diario del sistema con `journalctl`.
 
-# Acto III: Wedding Waltz ~ Duel
+# Acto III: Vals de las sombras
 
 La actuación de Andrea Windrose ha salido a la perfección gracias a ti, pero misteriosamente están desapareciendo las partituras de todos los actos.
 
