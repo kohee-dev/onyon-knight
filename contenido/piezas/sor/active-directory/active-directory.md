@@ -220,7 +220,7 @@ Una vez unido, en la pantalla de inicio de sesión tienes dos opciones:
 
 | | Inicio de sesión de dominio | Inicio de sesión local |
 | --- | --- | --- |
-| Cómo se escribe | `EMPRESA\ana` o `ana@empresa.local` | `.\ana` o `NOMBRE-EQUIPO\ana` |
+| Cómo se escribe | `EMPRESA\andrea` o `andrea@empresa.local` | `.\andrea` o `NOMBRE-EQUIPO\andrea` |
 | Quién comprueba la contraseña | El controlador de dominio | El propio equipo |
 | Qué cuentas usa | Las del directorio | Las que existen solo en ese equipo |
 | Aplica directivas de grupo | Sí | No (solo las locales) |
@@ -289,7 +289,7 @@ Con todo lo anterior se puede montar un sistema ordenado que se conoce por sus s
 
 Dicho en palabras: **las personas van a grupos de función; los grupos de función van a grupos de permiso; los permisos se dan solo a los grupos de permiso**.
 
-¿Por qué tanto lío? Imagina que Ana pasa de Contabilidad a Ventas. Si le diste permisos uno a uno sobre veinte carpetas, tendrás que quitárselos todos a mano. Con AGDLP, solo la cambias de grupo global y todo se ajusta solo. Y si mañana quieres cambiar el permiso de una carpeta, tocas un único grupo local de dominio.
+¿Por qué tanto lío? Imagina que Andrea pasa de Contabilidad a Ventas. Si le diste permisos uno a uno sobre veinte carpetas, tendrás que quitárselos todos a mano. Con AGDLP, solo la cambias de grupo global y todo se ajusta solo. Y si mañana quieres cambiar el permiso de una carpeta, tocas un único grupo local de dominio.
 
 :::nota
 En el bloque 5 verás cómo se comparten carpetas y la diferencia entre permisos NTFS y permisos de recurso compartido. AGDLP se aplica igual en ambos casos: los permisos se asignan a los grupos locales de dominio.
@@ -301,13 +301,13 @@ Los usuarios y equipos se ordenan en OU según cómo se administren. Los grupos 
 
 # 7. Perfiles y carpetas personales
 
-Cuando un usuario inicia sesión por primera vez en un equipo, Windows le crea un **perfil**: una carpeta (`C:\Users\ana`) con su escritorio, documentos, descargas y configuración personal. El problema es que ese perfil está solo en ese equipo. Si Ana se sienta en otro ordenador del aula, empieza de cero.
+Cuando un usuario inicia sesión por primera vez en un equipo, Windows le crea un **perfil**: una carpeta (`C:\Users\andrea`) con su escritorio, documentos, descargas y configuración personal. El problema es que ese perfil está solo en ese equipo. Si Andrea se sienta en otro ordenador del aula, empieza de cero.
 
 En un dominio hay varias formas de resolverlo.
 
 ## Perfiles móviles
 
-Con un **perfil móvil** (*roaming profile*), el perfil se guarda en una carpeta compartida del servidor. Al iniciar sesión se copia al equipo, y al cerrar sesión se copia de vuelta. Así Ana ve lo mismo allí donde se siente.
+Con un **perfil móvil** (*roaming profile*), el perfil se guarda en una carpeta compartida del servidor. Al iniciar sesión se copia al equipo, y al cerrar sesión se copia de vuelta. Así Andrea ve lo mismo allí donde se siente.
 
 Funciona, pero tiene un inconveniente: si el perfil es grande (documentos, imágenes, descargas), iniciar y cerrar sesión puede tardar mucho, porque se copia entero cada vez.
 
@@ -481,9 +481,9 @@ La gran ventaja de [PowerShell](https://es.wikipedia.org/wiki/PowerShell) es que
 
 ```powershell
 New-ADOrganizationalUnit -Name "Aula1" -Path "DC=empresa,DC=local"
-New-ADUser -Name "Ana Pérez" -SamAccountName "ana.perez" -Path "OU=Aula1,DC=empresa,DC=local" -AccountPassword (Read-Host -AsSecureString) -Enabled $true
+New-ADUser -Name "Andrea Windrose" -SamAccountName "andrea.windrose" -Path "OU=Aula1,DC=empresa,DC=local" -AccountPassword (Read-Host -AsSecureString) -Enabled $true
 New-ADGroup -Name "GG_Aula1" -GroupScope Global -Path "OU=Aula1,DC=empresa,DC=local"
-Add-ADGroupMember -Identity "GG_Aula1" -Members "ana.perez"
+Add-ADGroupMember -Identity "GG_Aula1" -Members "andrea.windrose"
 Get-ADUser -Filter * -SearchBase "OU=Aula1,DC=empresa,DC=local"
 ```
 

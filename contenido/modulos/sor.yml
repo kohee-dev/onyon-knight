@@ -16,3 +16,6 @@ unidades:
   - id: ut3
     titulo: Active Directory
     piezas: [active-directory, aldea-goblins]
+  - id: ut4
+    titulo: "Linux: usuarios, permisos y acceso remoto"
+    piezas: [usuarios-linux]
