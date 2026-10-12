@@ -2,8 +2,9 @@
 titulo: "Procesos y concurrencia"
 licencia: CC-BY-NC-SA-4.0
 fuentes:
-  - "Vicente Martínez (IES Doctor Balmis), apuntes de Programación de Servicios y Procesos, CC BY-NC-SA 4.0: https://psp2dam.github.io/psp_sources/es/"
+  - "Vicente Martínez (IES Doctor Balmis), «1.1 Procesos, programas, hilos», «1.2 Concurrencia» y «1.3 Procesos en el SO», CC BY-NC-SA 4.0: https://psp2dam.github.io/psp_sources/es/"
   - "Luis del Moral Martínez, «01. Programación multiproceso» (v. 20.10), CC BY-NC-SA 4.0"
+  - "Cambios en la adaptación «Procesos y concurrencia»: apartados repetidos unificados, explicaciones reformuladas, esquemas reconstruidos en texto, erratas de conceptos, comandos y cálculos corregidas, y figuras originales sustituidas por esquemas y tablas editables"
 ---
 
 # 1. De un programa a un proceso
@@ -443,12 +444,3 @@ Tras `fork()`, padre e hijo tienen espacios de memoria separados, aunque el sist
 5. Explica por qué `contador++` puede necesitar protección cuando se comparte.
 6. Justifica el orden S1/S2 → S3 → S4 mediante sus lecturas y escrituras.
 7. Indica una ventaja y un coste de distribuir una aplicación entre equipos.
-
-# Procedencia y licencia
-
-Adaptación y unificación docente de **Alejandro Bartolomé** a partir de:
-
-- **Vicente Martínez, IES Doctor Balmis:** *1.1 Procesos, programas, hilos*, *1.2 Concurrencia* y *1.3 Procesos en el SO*, aportados en PDF. [Apuntes originales de PSP](https://psp2dam.github.io/psp_sources/es/).
-- **Luis del Moral Martínez:** *01. Programación multiproceso*, versión 20.10, archivo `UA1-Programacion multiproceso.pdf` del material complementario aportado.
-
-Ambas fuentes indican licencia **[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es)**. Esta adaptación se distribuye bajo la misma licencia. Se han unificado apartados repetidos, reformulado explicaciones, reconstruido esquemas en texto y corregido erratas de conceptos, comandos y cálculos. Las figuras originales se han sustituido por esquemas y tablas editables.

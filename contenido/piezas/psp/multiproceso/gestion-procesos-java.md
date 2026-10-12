@@ -2,8 +2,10 @@
 titulo: "Gestión de procesos en Java"
 licencia: CC-BY-NC-SA-4.0
 fuentes:
-  - "Vicente Martínez (IES Doctor Balmis), apuntes de Programación de Servicios y Procesos, CC BY-NC-SA 4.0: https://psp2dam.github.io/psp_sources/es/"
+  - "Vicente Martínez (IES Doctor Balmis), «2.1 Comunicación entre procesos», «2.2 Gestión de procesos en Java - ProcessBuilder y Process», «2.3 Gestión de la E-S de un proceso», «2.4 Anexo I - Propiedades del sistema y programación en consola» y «2.5 Anexo II - Curl», CC BY-NC-SA 4.0: https://psp2dam.github.io/psp_sources/es/"
   - "Luis del Moral Martínez, «01. Programación multiproceso» (v. 20.10), CC BY-NC-SA 4.0"
+  - "Sesión «Procesos en Java: Runtime.exec y ProcessBuilder»"
+  - "Cambios en la adaptación «Gestión de procesos en Java»: apartados agrupados, ejemplos completos reconstruidos, argumentos revisados (espacios, directorios, entorno, codificaciones, redirecciones y terminación) e instrucciones de IDE expresadas también por consola"
 ---
 
 # 1. De la teoría al lanzamiento de procesos
@@ -759,15 +761,7 @@ public class ConsultaCurl {
 
 Necesita curl instalado y conectividad. Las redirecciones mantienen el HTML separado de los diagnósticos y evitan esperar con tuberías sin atender. El límite de la operación se solicita a curl mediante sus opciones.
 
-# Procedencia, adaptación y referencias
-
-Adaptación docente de **Alejandro Bartolomé** a partir de los PDF de **Vicente Martínez, IES Doctor Balmis**: *2.1 Comunicación entre procesos*, *2.2 Gestión de procesos en Java - ProcessBuilder y Process*, *2.3 Gestión de la E-S de un proceso*, *2.4 Anexo I - Propiedades del sistema y programación en consola* y *2.5 Anexo II - Curl*. [Apuntes originales de PSP](https://psp2dam.github.io/psp_sources/es/).
-
-Complementado con *01. Programación multiproceso*, versión 20.10, de **Luis del Moral Martínez**, y con la sesión local *Procesos en Java: Runtime.exec y ProcessBuilder*. Los materiales de ambos autores indican **[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es)**; esta adaptación conserva la misma licencia.
-
-Se han agrupado apartados, reconstruido ejemplos completos y revisado argumentos con espacios, directorios, entorno, codificaciones, redirecciones y terminación. Las instrucciones de IDE se expresan también mediante consola para que no dependan de un proyecto concreto. Los anexos se mantienen como consulta y ampliación.
-
-Referencias técnicas de contraste:
+# Referencias
 
 - [Java: ProcessBuilder](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/ProcessBuilder.html).
 - [Java: Process](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Process.html).

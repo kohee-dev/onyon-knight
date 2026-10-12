@@ -235,36 +235,11 @@ Si el usuario es partituras deberá borrar todas las partituras del acto indicad
 
 Crea `finale-locke.sh` para que cree los usuarios que no existan antes de que se ejecute `act03-locke.sh`
 
-# Tarea 6
+# Entrega
 
-Corrige los scripts y envíalos por Esemtia junto con una guía de cada uno de los actos como pdf. Mucho ánimo.
+Entrega por Esemtia:
 
++ Todos los scripts que hayas creado (`.sh`).
++ Todos los documentos que hayas modificado durante la práctica.
 
-::: nota
-Recuerda que tienes que subir los .sh creados 
-:::
-
-::: tip
-Esto es un consejo
-:::
-
-::: aviso
-Esto es un aviso
-:::
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Mucho ánimo.
