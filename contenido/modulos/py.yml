@@ -1,0 +1,9 @@
+nombre: Programación en Python
+codigo: "CMO-316"
+ciclo: SMR
+curso: 2
+icono: code
+unidades:
+  - id: ut1
+    titulo: Fundamentos de Python
+    piezas: [fundamentos-python, tienda-rpg, aventura-rescate]

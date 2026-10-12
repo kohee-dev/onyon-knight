@@ -1,0 +1,12 @@
+nombre: Montaje y mantenimiento de sistemas y componentes informáticos
+codigo: "3029"
+ciclo: GB
+curso: 1
+icono: tool
+unidades:
+  - id: ut1
+    titulo: Componentes
+    piezas: [componentes-electricos]
+  - id: ut2
+    titulo: Componentes de sistemas microinformáticos
+    piezas: [componentes-sistemas-microinformaticos]

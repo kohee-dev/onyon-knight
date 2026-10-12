@@ -1,0 +1,9 @@
+nombre: Sistemas de gestión empresarial
+codigo: "0491"
+ciclo: DAM
+curso: 2
+icono: maletin
+unidades:
+  - id: ut1
+    titulo: Odoo
+    piezas: [odoo-instalacion, odoo-modulo, odoo-vistas]

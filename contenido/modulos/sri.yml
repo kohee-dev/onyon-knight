@@ -1,0 +1,9 @@
+nombre: Servicios de red e Internet
+codigo: "0375"
+ciclo: ASIR
+curso: 2
+icono: globo
+unidades:
+  - id: ut1
+    titulo: DHCP
+    piezas: [dhcp, kea-dhcp, amarres-innsmouth]

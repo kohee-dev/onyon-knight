@@ -1,0 +1,12 @@
+nombre: Implantación de sistemas operativos
+codigo: "0369"
+ciclo: ASIR
+curso: 1
+icono: disco
+unidades:
+  - id: ut1
+    titulo: Introducción a los sistemas operativos
+    piezas: [intro-sistemas-operativos]
+  - id: ut2
+    titulo: Configuración del software de base
+    piezas: [configuracion-software-base, consola-escritorio]

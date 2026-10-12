@@ -1,0 +1,9 @@
+nombre: Programación de servicios y procesos
+codigo: "0490"
+ciclo: DAM
+curso: 2
+icono: chip
+unidades:
+  - id: ut1
+    titulo: Programación multiproceso
+    piezas: [procesos-concurrencia, gestion-procesos-java]

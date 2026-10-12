@@ -1,0 +1,12 @@
+nombre: Instalación y mantenimiento de redes para transmisión de datos
+codigo: "3016"
+ciclo: GB
+curso: 2
+icono: link
+unidades:
+  - id: ut1
+    titulo: Elementos de las redes de voz y datos
+    piezas: [elementos-redes-voz-datos]
+  - id: ut2
+    titulo: Montaje de canalizaciones, soportes y armarios
+    piezas: [montaje-canalizaciones-soportes-armarios]

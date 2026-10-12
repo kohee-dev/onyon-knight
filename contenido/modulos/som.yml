@@ -1,0 +1,12 @@
+nombre: Sistemas operativos monopuesto
+codigo: "0222"
+ciclo: SMR
+curso: 1
+icono: monitor
+unidades:
+  - id: ut1
+    titulo: Introducción a los sistemas operativos
+    piezas: [intro-sistemas-operativos]
+  - id: ut4
+    titulo: Linux
+    piezas: [anil]
