@@ -1,5 +1,5 @@
 ---
-import type { Creditos } from '../lib/creditos';
+import { condicionesTexto, type Creditos } from '../lib/creditos';
 interface Props { creditos: Creditos; titulo?: string }
 const { creditos, titulo = 'Licencias y fuentes' } = Astro.props;
 const { licenciaTexto: l } = creditos;
@@ -8,7 +8,7 @@ const { licenciaTexto: l } = creditos;
   <h2>{titulo}</h2>
   <p>
     Texto: © Alejandro Bartolomé, bajo licencia <a href={l.url}>{l.nombre}</a>.
-    Puedes copiarlo y adaptarlo citando la autoría y compartiendo con la misma licencia.
+    {condicionesTexto(l)}
   </p>
   {creditos.piezasConOtraLicencia.length > 0 && (
     <ul>

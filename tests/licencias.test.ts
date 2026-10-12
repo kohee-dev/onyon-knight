@@ -80,6 +80,10 @@ describe('licenciaPorId', () => {
     expect(licenciaPorId('OLDAP-2.8')?.url).toBe('https://www.openldap.org/software/release/license.html');
   });
 
+  it('incluye CC BY 2.0 (fotos antiguas de Wikimedia Commons)', () => {
+    expect(licenciaPorId('CC-BY-2.0')?.url).toBe('https://creativecommons.org/licenses/by/2.0/deed.es');
+  });
+
   it('devuelve undefined para ids desconocidos', () => {
     expect(licenciaPorId('nada')).toBeUndefined();
     expect(licenciaPorId('CC0-1.0')?.permiteCambios).toBe(true);

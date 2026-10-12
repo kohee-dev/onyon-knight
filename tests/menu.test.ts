@@ -125,6 +125,20 @@ describe('desplegable de módulos', () => {
     await p.close();
   });
 
+  it('en una pantalla baja no se sale de la ventana y se puede desplazar', async () => {
+    const p = await abrir('/ok/aso/ut1/', 1440);
+    await p.setViewportSize({ width: 1440, height: 200 });
+    await p.click('.modulos-boton');
+    const caja = await p.evaluate(() => {
+      const l = document.getElementById('lista-modulos')!;
+      return { abajo: l.getBoundingClientRect().bottom, alto: innerHeight, desborda: l.scrollHeight > l.clientHeight, scroll: getComputedStyle(l).overflowY };
+    });
+    expect(caja.abajo).toBeLessThanOrEqual(caja.alto);
+    expect(caja.desborda).toBe(true);
+    expect(caja.scroll).toBe('auto');
+    await p.close();
+  });
+
   it('en móvil, los módulos están dentro del menú', async () => {
     const p = await abrir('/ok/aso/ut1/', 375);
     expect(await p.isVisible('.modulos-boton')).toBe(false);

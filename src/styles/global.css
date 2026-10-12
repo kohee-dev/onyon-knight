@@ -990,7 +990,12 @@ blockquote {
   left: 0;
   z-index: 45;
   min-width: 20rem;
+  /* La cabecera es fija: en pantallas bajas el panel se desplaza en vez de salirse. */
+  max-height: calc(100dvh - 100% - 1.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   flex-direction: column;
+  flex-wrap: nowrap;
   gap: 0;
   padding: 0.4rem;
   background: var(--superficie);

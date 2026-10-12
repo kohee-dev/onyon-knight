@@ -15,18 +15,21 @@ export interface Creditos {
 export function creditosDe(piezas: { fuente: PiezaFuente; render: PiezaRenderizada }[]): Creditos {
   const bibliografia = new Set<string>();
   const recursos = new Map<string, Creditos['recursos'][number]>();
+  // Si todas las piezas comparten licencia, esa es la del texto; si no, la propia con excepciones.
+  const ids = new Set(piezas.map((p) => p.fuente.datos.licencia));
+  const idTexto = ids.size === 1 ? [...ids][0] : LICENCIA_PROPIA;
   const piezasConOtraLicencia: Creditos['piezasConOtraLicencia'] = [];
   for (const { fuente, render } of piezas) {
     for (const f of fuente.datos.fuentes) bibliografia.add(f);
     for (const i of render.imagenes) {
       if (!i.ficha.propio && !recursos.has(i.rutaAbs)) recursos.set(i.rutaAbs, { url: i.url, alt: i.alt, ficha: i.ficha });
     }
-    if (fuente.datos.licencia !== LICENCIA_PROPIA) {
+    if (fuente.datos.licencia !== idTexto) {
       piezasConOtraLicencia.push({ id: fuente.id, titulo: fuente.datos.titulo, licencia: licenciaPorId(fuente.datos.licencia)! });
     }
   }
   return {
-    licenciaTexto: licenciaPorId(LICENCIA_PROPIA)!,
+    licenciaTexto: licenciaPorId(idTexto)!,
     piezasConOtraLicencia,
     bibliografia: [...bibliografia],
     recursos: [...recursos.values()],
@@ -43,4 +46,14 @@ export function conImagenes(c: Creditos, imagenes: { rutaAbs: string; url: strin
     recursos.push({ url: i.url, alt: i.alt, ficha: i.ficha });
   }
   return { ...c, recursos };
+}
+
+/** Frase con lo que permite la licencia del texto (CC BY, BY-SA, BY-NC, BY-NC-SA…). */
+export function condicionesTexto(l: Licencia): string {
+  const partes = ['citando la autoría'];
+  if (l.noComercial) partes.push('sin fines comerciales');
+  if (/-SA-/.test(l.id)) partes.push('compartiendo con la misma licencia');
+  const ultima = partes.pop()!;
+  const condiciones = partes.length ? `${partes.join(', ')} y ${ultima}` : ultima;
+  return `Puedes ${l.permiteCambios ? 'copiarlo y adaptarlo' : 'copiarlo sin modificarlo'} ${condiciones}.`;
 }

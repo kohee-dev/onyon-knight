@@ -25,6 +25,7 @@ export const LICENCIAS: Record<string, Licencia> = Object.fromEntries(
       requiereTitular: false,
     },
     cc('CC-BY-4.0', 'CC BY 4.0', 'licenses/by/4.0/deed.es'),
+    cc('CC-BY-2.0', 'CC BY 2.0', 'licenses/by/2.0/deed.es'),
     cc('CC-BY-SA-4.0', 'CC BY-SA 4.0', 'licenses/by-sa/4.0/deed.es'),
     cc('CC-BY-SA-3.0', 'CC BY-SA 3.0', 'licenses/by-sa/3.0/deed.es'),
     cc('CC-BY-NC-4.0', 'CC BY-NC 4.0', 'licenses/by-nc/4.0/deed.es', { noComercial: true }),

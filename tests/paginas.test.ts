@@ -182,7 +182,8 @@ describe('páginas', () => {
       const lic = h.slice(h.indexOf('id="licencias-y-fuentes"'), h.indexOf('id="casos-de-esta-unidad"'));
       expect(lic).not.toMatch(/<li>«Caso LDAP en Elpis»:/); // la licencia del texto del caso no va en la unidad
       expect(lic).toContain('Autora portada'); // la portada sí se acredita
-      expect(leer('aso/ut1/casos/caso-ldap/index.html')).toMatch(/<li>«Caso LDAP en Elpis»: <a[^>]*>CC BY 4\.0/);
+      // El caso es su única pieza: su licencia es la del texto de la página.
+      expect(leer('aso/ut1/casos/caso-ldap/index.html')).toMatch(/Texto: © Alejandro Bartolomé, bajo licencia <a[^>]*>CC BY 4\.0<\/a>/);
     });
 
     it('una unidad solo con casos no tiene PDF de teoría ni botón de índice', () => {

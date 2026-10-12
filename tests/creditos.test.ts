@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { licenciaPorId, validarFicha } from '../src/licencias';
-import { creditosDe } from '../src/lib/creditos';
+import { condicionesTexto, creditosDe } from '../src/lib/creditos';
 import { esquemaPieza } from '../src/lib/esquemas';
 import type { ImagenUsada, PiezaRenderizada } from '../src/lib/markdown';
 import type { PiezaFuente } from '../src/lib/tipos';
@@ -44,6 +44,21 @@ describe('creditosDe', () => {
     const c = creditosDe([entrada('a', {}), entrada('b', { licencia: 'CC-BY-4.0' })]);
     expect(c.licenciaTexto.id).toBe('CC-BY-SA-4.0');
     expect(c.piezasConOtraLicencia).toEqual([{ id: 'b', titulo: 'T b', licencia: licenciaPorId('CC-BY-4.0') }]);
+  });
+
+  it('si todas las piezas comparten otra licencia, esa es la del texto', () => {
+    const c = creditosDe([entrada('a', { licencia: 'CC-BY-NC-SA-4.0' }), entrada('b', { licencia: 'CC-BY-NC-SA-4.0' })]);
+    expect(c.licenciaTexto.id).toBe('CC-BY-NC-SA-4.0');
+    expect(c.piezasConOtraLicencia).toEqual([]);
+  });
+});
+
+describe('condicionesTexto', () => {
+  it('describe CC BY-SA y CC BY-NC-SA', () => {
+    expect(condicionesTexto(licenciaPorId('CC-BY-SA-4.0')!)).toBe('Puedes copiarlo y adaptarlo citando la autoría y compartiendo con la misma licencia.');
+    expect(condicionesTexto(licenciaPorId('CC-BY-NC-SA-4.0')!)).toBe(
+      'Puedes copiarlo y adaptarlo citando la autoría, sin fines comerciales y compartiendo con la misma licencia.',
+    );
   });
 });
 
