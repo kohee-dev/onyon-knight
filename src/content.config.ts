@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { defineCollection } from 'astro:content';
 import type { Loader } from 'astro/loaders';
 import { glob } from 'astro/loaders';
@@ -9,8 +10,9 @@ import { raizContenido as contenido, raizPrivada as privado } from './lib/raices
 
 // Las piezas se cargan como datos: Astro no procesa su Markdown (ni sus imágenes); lo hace src/lib/markdown.
 const piezasEn = (base: string) => defineCollection({ loader: piezasMarkdown(base), schema: esquemaPieza });
+// Como URL: Astro resuelve `base` con `new URL()`, y en Windows «C:\...» se tomaría por un esquema «c:».
 const modulosEn = (base: string) =>
-  defineCollection({ loader: glob({ pattern: '*.yml', base }), schema: esquemaModulo });
+  defineCollection({ loader: glob({ pattern: '*.yml', base: pathToFileURL(base) }), schema: esquemaModulo });
 
 /** Sin carpeta privada, las colecciones privadas existen pero se vacían: así no sobrevive nada de una sesión anterior. */
 const vacia: Loader = { name: 'onyon-vacia', load: async ({ store }) => store.clear() };

@@ -23,8 +23,8 @@ describe('privacidad en el build', () => {
   });
 });
 
-import { spawn } from 'node:child_process';
-import { entornoLimpio } from './util';
+import { execFileSync, spawn } from 'node:child_process';
+import { ASTRO, entornoLimpio } from './util';
 
 /**
  * Arranca un `astro dev` propio (proceso hijo, --ignore-lock) y devuelve la portada.
@@ -32,9 +32,10 @@ import { entornoLimpio } from './util';
  */
 async function portadaDev(extra: Record<string, string>): Promise<string> {
   const env = entornoLimpio({ ONYON_CONTENIDO: resolve('tests/fixtures/valido'), ...extra });
-  const hijo = spawn('npx', ['astro', 'dev', '--ignore-lock', '--host', '127.0.0.1', '--port', '4397'], {
+  const hijo = spawn(process.execPath, [ASTRO, 'dev', '--ignore-lock', '--host', '127.0.0.1', '--port', '4397'], {
     env,
-    detached: true,
+    // Grupo propio para matarlo entero; en Windows, `detached` abriría otra consola y se usa taskkill /T.
+    detached: process.platform !== 'win32',
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let registro = '';
@@ -49,7 +50,8 @@ async function portadaDev(extra: Record<string, string>): Promise<string> {
     throw new Error(`astro dev no respondió en 90 s. Registro:\n${registro.slice(-3000)}`);
   } finally {
     try {
-      process.kill(-hijo.pid!, 'SIGTERM'); // todo el grupo: npx y astro
+      if (process.platform === 'win32') execFileSync('taskkill', ['/pid', String(hijo.pid), '/T', '/F'], { stdio: 'ignore' });
+      else process.kill(-hijo.pid!, 'SIGTERM'); // todo el grupo: astro y sus hijos
     } catch {
       /* ya terminado */
     }

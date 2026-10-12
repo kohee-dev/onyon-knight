@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { listarImagenes, urlImagen } from '../src/lib/imagenes-url';
 import { renderizarPieza } from '../src/lib/markdown';
@@ -113,7 +113,7 @@ describe('urlImagen y listarImagenes', () => {
 
   it('lista las imágenes de las carpetas dadas', () => {
     const lista = listarImagenes([resolve('tests/fixtures/img'), resolve('no-existe')]);
-    expect(lista.map((r) => r.split('/').at(-1)).sort()).toEqual(['cabecera.png', 'cpu.png', 'mala.png', 'mod.png', 'nc.png', 'portada.png', 'propia.png', 'sin-ficha.png']);
+    expect(lista.map((r) => basename(r)).sort()).toEqual(['cabecera.png', 'cpu.png', 'mala.png', 'mod.png', 'nc.png', 'portada.png', 'propia.png', 'sin-ficha.png']);
   });
 });
 

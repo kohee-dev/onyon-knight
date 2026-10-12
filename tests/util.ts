@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 /**
  * Entorno del proceso sin las variables que Vitest/Vite inyectan (BASE_URL, MODE, NODE_ENV…) ni las de agentes
@@ -17,10 +17,13 @@ export function entornoLimpio(extra: Record<string, string> = {}): NodeJS.Proces
   return { ...env, ...extra };
 }
 
+/** CLI de Astro, lanzada con `node`: en Windows `npx` es un .cmd que execFile/spawn no ejecutan sin shell. */
+export const ASTRO = resolve('node_modules/astro/bin/astro.mjs');
+
 /** Ejecuta `astro build` en un directorio temporal y devuelve su ruta. */
 export function construir(extra: Record<string, string> = {}): string {
   const salida = mkdtempSync(join(tmpdir(), 'onyon-build-'));
-  execFileSync('npx', ['astro', 'build', '--outDir', salida], {
+  execFileSync(process.execPath, [ASTRO, 'build', '--outDir', salida], {
     env: entornoLimpio(extra),
     stdio: 'pipe',
   });

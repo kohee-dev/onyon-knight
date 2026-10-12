@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { relative } from 'node:path';
+import { relative, sep } from 'node:path';
 import { load } from 'js-yaml';
 
 /** Salida de `git log --format=%x00%aI --name-only` (fecha de autor) → ruta relativa → fecha más reciente. */
@@ -74,8 +74,11 @@ export async function leerFechas(raizRepo: string): Promise<IndiceFechas> {
     avisos.push('git no está disponible o no hay historial: todas las fechas se muestran como «Sin publicar»');
   }
 
+  // Git siempre separa con «/»; en Windows, `relative` lo hace con «\».
+  const relGit = (rutaAbs: string) => relative(raizRepo, rutaAbs).split(sep).join('/');
+
   const fechaRel = (rutaAbs: string): Date | null => {
-    const rel = relative(raizRepo, rutaAbs);
+    const rel = relGit(rutaAbs);
     if (rel.startsWith('..') || sucios.has(rel)) return null;
     return fechas.get(rel) ?? null;
   };
@@ -84,7 +87,7 @@ export async function leerFechas(raizRepo: string): Promise<IndiceFechas> {
   const bloquesDe = (rutaModuloAbs: string) => {
     let m = cacheBloques.get(rutaModuloAbs);
     if (m) return m;
-    const rel = relative(raizRepo, rutaModuloAbs);
+    const rel = relGit(rutaModuloAbs);
     const versiones: { fecha: Date | null; yaml: string }[] = [];
     if (!rel.startsWith('..')) {
       try {
