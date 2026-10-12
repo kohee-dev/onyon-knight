@@ -142,7 +142,7 @@ sudo systemctl reload nginx
 
 ```bash
 sudo apt install apache2-utils
-sudo htpasswd -c /etc/nginx/.htpasswd ana
+sudo htpasswd -c /etc/nginx/.htpasswd andrea
 ```
 
 nginx no trae `htpasswd`, así que se instala el paquete de utilidades de Apache solo para esa herramienta. `-c` crea el fichero (**solo la primera vez**). En el bloque `server` de `intranet.ejemplo.test.conf`:

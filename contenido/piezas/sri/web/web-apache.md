@@ -169,7 +169,7 @@ sudo systemctl reload apache2
 
 ```bash
 sudo apt install apache2-utils
-sudo htpasswd -c /etc/apache2/.htpasswd ana
+sudo htpasswd -c /etc/apache2/.htpasswd andrea
 ```
 
 - `htpasswd`: gestiona un fichero de usuarios con las contraseñas cifradas.
@@ -208,7 +208,7 @@ Envía las credenciales en Base64, que es reversible. Solo es aceptable **sobre 
 ```bash
 curl -I http://www.ejemplo.test
 curl -k https://www.ejemplo.test
-curl -k -u ana https://intranet.ejemplo.test
+curl -k -u andrea https://intranet.ejemplo.test
 ```
 
 - La primera debe dar `301` con la cabecera `Location` hacia HTTPS.
