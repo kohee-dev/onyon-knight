@@ -17,7 +17,7 @@
   --tip-etiqueta: #35689b;
   --nota: #c2a14d;
   --nota-fondo: #f8f1de;
-  --nota-etiqueta: #8a6a14;
+  --nota-etiqueta: #836410;
   --aviso: #c0392b;
   --aviso-fondo: #fbe7e3;
   --aviso-etiqueta: #c0392b;
@@ -672,8 +672,10 @@ pre code {
   padding: 0;
   font-size: inherit;
 }
+/* Los diagramas usan el fondo de la página y el tema de Mermaid que le corresponde. */
 pre.mermaid {
-  background: #fff;
+  background: transparent;
+  border: none;
   text-align: center;
 }
 .contenido table,

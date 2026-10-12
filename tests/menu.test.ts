@@ -148,6 +148,26 @@ describe('desplegable de módulos', () => {
   });
 });
 
+describe('diagramas', () => {
+  const diagrama = (p: Page) =>
+    p.evaluate(() => {
+      const pre = document.querySelector('pre.mermaid')!;
+      return { fondo: getComputedStyle(pre).backgroundColor, claro: /#ECECFF/i.test(pre.querySelector('svg')?.innerHTML ?? '') };
+    });
+
+  it('usan el fondo de la página y se redibujan al cambiar de tema', async () => {
+    const p = await navegador.newPage({ viewport: { width: 1440, height: 800 } });
+    await p.addInitScript(() => localStorage.setItem('onyon-tema', 'oscuro'));
+    await p.goto(origen + '/ok/aso/ut1/');
+    await p.waitForFunction('window.__onyonListo === true');
+    expect(await diagrama(p)).toEqual({ fondo: 'rgba(0, 0, 0, 0)', claro: false });
+    await p.click('.cabecera .tema-boton');
+    await p.waitForFunction(() => /#ECECFF/i.test(document.querySelector('pre.mermaid svg')?.innerHTML ?? ''));
+    expect((await diagrama(p)).claro).toBe(true);
+    await p.close();
+  });
+});
+
 describe('tablas anchas', () => {
   it.each([1280, 1440])('a %i px ninguna tabla sale de la columna', async (ancho) => {
     const p = await abrir('/ok/aso/ut1/', ancho);

@@ -14,3 +14,8 @@ Como vimos en [[procesos-concepto]], un proceso pasa por varios estados.
 :::ejercicio
 Muestra los procesos con `ps aux`.
 :::
+
+```mermaid
+flowchart LR
+  Listo --> Ejecucion --> Bloqueado --> Listo
+```

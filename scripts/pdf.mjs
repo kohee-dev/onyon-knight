@@ -61,8 +61,9 @@ async function generar(entrada) {
   }
   const pagina = await navegador.newPage();
   try {
-    await pagina.goto(origen + entrada.ruta, { waitUntil: 'load', timeout: TIEMPO_MAXIMO });
+    // Antes de cargar: el tema (y el de los diagramas) se decide al abrir la página.
     await pagina.emulateMedia({ media: 'print', colorScheme: 'light' });
+    await pagina.goto(origen + entrada.ruta, { waitUntil: 'load', timeout: TIEMPO_MAXIMO });
     await pagina.waitForFunction('window.__onyonListo === true', null, { timeout: TIEMPO_MAXIMO });
     const error = await pagina.evaluate('window.__onyonError');
     if (error) throw new Error(`la página informó de un error: ${error}`);
