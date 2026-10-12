@@ -6,7 +6,7 @@ icono: terminal
 unidades:
   - id: ut0
     titulo: Linux
-    piezas: [opera-jidoor]
+    piezas: [opera-garnier]
   - id: ut1
     titulo: Servicios de directorio
     piezas: [servicios-directorio, openldap, active-directory, caso-servicios-directorio, gatos-elpis, expediente-02-llaves-almacen]
