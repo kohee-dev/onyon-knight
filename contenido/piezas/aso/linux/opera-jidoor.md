@@ -1,5 +1,6 @@
 ---
 titulo: "La Ópera de Jidoor"
+licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 10
 ---

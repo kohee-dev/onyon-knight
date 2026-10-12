@@ -1,5 +1,6 @@
 ---
 titulo: "Amarres: el puerto de Innsmouth"
+licencia: CC-BY-NC-SA-4.0
 tipo: "caso"
 horas: 10
 ---

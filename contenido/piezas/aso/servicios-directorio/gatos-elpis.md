@@ -1,5 +1,6 @@
 ---
 titulo: "Gatos: los gatos de Elpis"
+licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 5
 ---

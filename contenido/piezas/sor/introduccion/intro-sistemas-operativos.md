@@ -1,5 +1,6 @@
 ---
 titulo: "Introducción a los Sistemas Operativos"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 # 1. Introducción

@@ -1,6 +1,6 @@
 ---
 titulo: "Procesos y concurrencia"
-licencia: "CC-BY-NC-SA-4.0"
+licencia: CC-BY-NC-SA-4.0
 fuentes:
   - "Vicente Martínez (IES Doctor Balmis), apuntes de Programación de Servicios y Procesos, CC BY-NC-SA 4.0: https://psp2dam.github.io/psp_sources/es/"
   - "Luis del Moral Martínez, «01. Programación multiproceso» (v. 20.10), CC BY-NC-SA 4.0"

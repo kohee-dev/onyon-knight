@@ -1,5 +1,6 @@
 ---
 titulo: "Elementos de las redes de voz y datos"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 Para conectar los ordenadores de un aula necesitamos algo más que equipos y cables. También debemos organizar el recorrido del cableado, preparar puntos de conexión y elegir elementos que permitan sujetar y proteger la instalación.

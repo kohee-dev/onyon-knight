@@ -1,5 +1,6 @@
 ---
 titulo: "Teoría DHCP"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 # 1. ¿Qué es DHCP?

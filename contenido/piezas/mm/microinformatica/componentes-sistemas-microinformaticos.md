@@ -1,5 +1,6 @@
 ---
 titulo: "Componentes de sistemas microinformáticos"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 Seguro que alguna vez has oído frases como «este portátil tiene 16 GB de RAM», «le he puesto un SSD y ahora va volando» o «la gráfica no cabe en la caja». En este tema vas a entender qué significan.

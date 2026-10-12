@@ -1,5 +1,6 @@
 ---
 titulo: "Primeros programas en Python"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 # 1. Programar para resolver un problema

@@ -1,5 +1,6 @@
 ---
 titulo: "Virtualización"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 El funcionamiento de los servidores hoy día no tiene nada que ver con lo que sucedía hace unos pocos años. Se ha pasado de un alojamiento en máquinas reales, las cuales incluso albergaban varios servicios, a trabajar con máquinas simuladas que ofrecen únicamente un servicio. Estas técnicas reciben el nombre de *Virtualización*. La virtualización de sistemas es una potente técnica de abstracción mediante la cual podemos crear una capa intermedia que se encarga de posibilitar la comunicación entre una máquina física (anfitrión o host) y el sistema o sistemas huésped (guest) virtuales.

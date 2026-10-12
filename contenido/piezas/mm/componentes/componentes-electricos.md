@@ -1,5 +1,6 @@
 ---
 titulo: "Componentes eléctricos y electrónicos"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 En este tema aprenderemos a **reconocer componentes, explicar para qué sirven y elegir las herramientas adecuadas para trabajar con ellos de forma segura**. Relacionaremos lo aprendido con cables, fuentes de alimentación, placas y otros elementos de los equipos informáticos.

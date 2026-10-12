@@ -1,5 +1,6 @@
 ---
 titulo: "Servicios de Impresion en Windows"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 # 1. Impresora compartida

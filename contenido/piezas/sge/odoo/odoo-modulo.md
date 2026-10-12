@@ -1,5 +1,6 @@
 ---
 titulo: "La tienda de nº 163: creación de un módulo"
+licencia: CC-BY-NC-SA-4.0
 tipo: "caso"
 horas: 3
 ---

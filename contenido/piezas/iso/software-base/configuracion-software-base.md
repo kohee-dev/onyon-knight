@@ -1,5 +1,6 @@
 ---
 titulo: "Configuración del software de base"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 Instalar un sistema operativo permite comenzar a utilizarlo, pero no deja resueltas todas las necesidades de un puesto de trabajo. Debemos decidir quién puede acceder, qué privilegios necesita, qué servicios estarán disponibles y cómo se conectará el equipo a la red.

@@ -1,5 +1,6 @@
 ---
 titulo: "Procesos del sistema en Linux"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 Este documento aterriza en **GNU/Linux** los conceptos generales del tema. Damos

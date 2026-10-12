@@ -1,5 +1,6 @@
 ---
 titulo: "De la consola al escritorio"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 Si has llegado hasta aquí, tienes un Arch Linux instalado a mano que arranca y te deja entrar como `root`. Poco más. No hay red, no hay más usuario que el administrador y, desde luego, nada parecido a un escritorio con ventanas. Es un sistema operativo en el sentido más estricto: funciona, pero todavía no sirve para trabajar.

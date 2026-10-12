@@ -1,5 +1,6 @@
 ---
 titulo: "Las llaves del almacén"
+licencia: CC-BY-NC-SA-4.0
 borrador: true
 ---
 

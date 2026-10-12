@@ -1,5 +1,6 @@
 ---
 titulo: "Procesos del sistema"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 Cada vez que arrancas el ordenador, antes incluso de que veas el escritorio, hay

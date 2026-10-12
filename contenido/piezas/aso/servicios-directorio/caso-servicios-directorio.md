@@ -1,5 +1,6 @@
 ---
 titulo: "Caso práctico: administración de una empresa"
+licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 2
 borrador: true

@@ -1,5 +1,6 @@
 ---
 titulo: "Aventura de Código: Rescate"
+licencia: CC-BY-NC-SA-4.0
 tipo: "caso"
 horas: 2
 ---

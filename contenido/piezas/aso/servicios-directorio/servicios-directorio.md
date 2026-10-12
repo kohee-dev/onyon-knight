@@ -1,5 +1,6 @@
 ---
 titulo: "Servicios de Directorio"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 # Servicios de directorio

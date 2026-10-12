@@ -1,5 +1,6 @@
 ---
 titulo: "Kea DHCP"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 # 1. Del protocolo al servidor

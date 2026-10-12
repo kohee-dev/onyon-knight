@@ -1,5 +1,6 @@
 ---
 titulo: "Sala de máquinas"
+licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 4
 borrador: true

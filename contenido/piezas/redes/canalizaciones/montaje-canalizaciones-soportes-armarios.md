@@ -1,5 +1,6 @@
 ---
 titulo: "Montaje de canalizaciones, soportes y armarios"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 Una oficina necesita conectar sus ordenadores, pero todavía no tiene tomas de red ni un lugar preparado para los equipos de comunicaciones. Antes de tender los cables debemos decidir por dónde pasarán, dónde estarán las cajas y cómo sujetaremos todos los elementos.

@@ -1,5 +1,6 @@
 ---
 titulo: "Procesos del sistema en Windows"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 Este documento aterriza en **Windows** los conceptos generales del tema. Damos por

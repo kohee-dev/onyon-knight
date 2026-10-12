@@ -1,5 +1,6 @@
 ---
 titulo: "Introducción de OpenLDAP"
+licencia: CC-BY-NC-SA-4.0
 ---
 
 # 1. Introducción a OpenLDAP
