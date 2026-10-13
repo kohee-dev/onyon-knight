@@ -254,6 +254,14 @@ describe('páginas', () => {
     expect(publicadas.some((n) => n.includes('huerfana'))).toBe(false);
   });
 
+  it('el logo lleva la ilustración del caballero, decorativa y acreditada', () => {
+    const h = leer('index.html');
+    expect(h).toMatch(/<a class="marca" href="\/ok\/"><img class="marca-imagen" src="\/ok\/img\/caballero-96\.webp" srcset="\/ok\/img\/caballero-192\.webp 2x" alt="" width="122" height="96"[^>]*><span>Onyon Knight<\/span><\/a>/);
+    expect(existsSync(join(dist, 'img', 'caballero-96.webp'))).toBe(true);
+    expect(existsSync(join(dist, 'img', 'caballero-192.webp'))).toBe(true);
+    expect(leer('licencias/index.html')).toContain('Caballero junto a la hoguera');
+  });
+
   it('los iconos de la licencia se sirven desde el propio sitio', () => {
     const h = leer('index.html');
     for (const i of ['cc', 'by', 'nc', 'sa']) {

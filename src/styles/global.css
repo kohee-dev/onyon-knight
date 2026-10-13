@@ -139,9 +139,18 @@ html {
   gap: 0.5rem;
 }
 .marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 800;
   color: var(--texto);
   text-decoration: none;
+}
+/* Ilustración del caballero junto al nombre (decorativa). */
+.marca-imagen {
+  width: auto;
+  height: 2.5rem;
+  margin-block: -0.4rem;
 }
 /* Barra de progreso de lectura: solo el tramo dorado, sobre el borde inferior. */
 .progreso {
