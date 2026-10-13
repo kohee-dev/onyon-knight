@@ -19,3 +19,7 @@ Muestra los procesos con `ps aux`.
 flowchart LR
   Listo --> Ejecucion --> Bloqueado --> Listo
 ```
+
+```bash
+ps aux | grep sshd
+```
