@@ -34,6 +34,9 @@ describe('páginas', () => {
     expect(h).toMatch(/<span class="tema-a-oscuro">Modo oscuro<\/span>/);
     expect(h).toMatch(/<span class="tema-a-claro">Modo claro<\/span>/);
     expect(h).toContain('aria-label="Cambiar a modo oscuro"');
+    // El casco del favicon, como máscara: toma el color del botón en cada tema.
+    expect(h).toMatch(/<button class="tema-boton"[^>]*><span class="tema-icono" aria-hidden="true"><\/span>/);
+    expect(readdirSync(join(dist, '_astro')).some((n) => /^casco-tema\..*\.png$/.test(n))).toBe(true);
     expect(h).not.toMatch(/Paladín|Caballero/);
     // El tema se aplica antes de pintar: script en línea en <head>.
     expect(h).toMatch(/<head>[\s\S]*data-tema[\s\S]*<\/head>/);
@@ -252,6 +255,16 @@ describe('páginas', () => {
     const publicadas = readdirSync(join(dist, 'img'));
     expect(publicadas.some((n) => n.endsWith('-cpu.png'))).toBe(true);
     expect(publicadas.some((n) => n.includes('huerfana'))).toBe(false);
+  });
+
+  it('todas las páginas enlazan el favicon del casco', () => {
+    for (const r of ['index.html', 'aso/ut1/index.html', 'licencias/index.html']) {
+      const h = leer(r);
+      expect(h).toContain('<link rel="icon" type="image/png" sizes="32x32" href="/ok/favicon-32.png">');
+      expect(h).toContain('<link rel="icon" type="image/png" sizes="512x512" href="/ok/icono-512.png">');
+      expect(h).toContain('<link rel="apple-touch-icon" href="/ok/apple-touch-icon.png">');
+    }
+    for (const f of ['favicon-32.png', 'icono-512.png', 'apple-touch-icon.png']) expect(existsSync(join(dist, f))).toBe(true);
   });
 
   it('el logo lleva la ilustración del caballero, decorativa y acreditada', () => {

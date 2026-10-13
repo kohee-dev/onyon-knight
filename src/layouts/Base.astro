@@ -36,6 +36,9 @@ const cssCategorias = Object.values(CATEGORIAS)
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo} · Onyon Knight</title>
     {descripcion && <meta name="description" content={descripcion} />}
+    <link rel="icon" type="image/png" sizes="32x32" href={`${base}favicon-32.png`} />
+    <link rel="icon" type="image/png" sizes="512x512" href={`${base}icono-512.png`} />
+    <link rel="apple-touch-icon" href={`${base}apple-touch-icon.png`} />
     <script is:inline>
       // Tema antes de pintar: elección guardada o, si no hay, la preferencia del sistema.
       (function () {

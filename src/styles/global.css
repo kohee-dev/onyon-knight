@@ -201,10 +201,14 @@ html {
   background: var(--tema-boton);
   color: var(--tema-boton-texto);
 }
-.tema-icono svg {
-  width: 1.1em;
-  height: 1.1em;
+/* Casco del favicon como máscara: se pinta con el color del botón en cada estado. */
+.tema-icono {
   display: block;
+  width: 1.45em;
+  height: 1.15em;
+  background: currentColor;
+  -webkit-mask: url('../iconos/casco-tema.png') center / contain no-repeat;
+  mask: url('../iconos/casco-tema.png') center / contain no-repeat;
 }
 .tema-a-claro,
 :root[data-tema='oscuro'] .tema-a-oscuro {
