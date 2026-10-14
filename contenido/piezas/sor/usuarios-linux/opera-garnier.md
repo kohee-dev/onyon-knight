@@ -3,6 +3,8 @@ titulo: "La Ópera de Garnier"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 14
+portada: ./img/opera-portada.webp
+cabecera: ./img/opera-cabecera.webp
 ---
 
 :::aviso[Antes de empezar]
