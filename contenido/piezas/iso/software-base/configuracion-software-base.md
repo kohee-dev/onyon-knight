@@ -7,7 +7,7 @@ Instalar un sistema operativo permite comenzar a utilizarlo, pero no deja resuel
 
 El **RA2** consiste en configurar el software de base según las necesidades de uso del sistema. Trabajaremos con Windows y GNU/Linux, comparando sus herramientas y comprobando el resultado de cada cambio.
 
-En esta unidad administraremos **cuentas y configuraciones locales**. Los dominios, las identidades centralizadas y las directivas de grupo se desarrollarán posteriormente. Utilizaremos máquinas virtuales como laboratorio, sin dedicar un bloque independiente a virtualización.
+En esta unidad administraremos **cuentas y configuraciones locales**. Los dominios, las identidades centralizadas y las directivas de grupo se desarrollarán posteriormente. Utilizaremos máquinas virtuales como laboratorio; su funcionamiento se estudia a fondo en la unidad [[fundamentos-virtualizacion]].
 
 ## 1. Configurar con un objetivo
 
