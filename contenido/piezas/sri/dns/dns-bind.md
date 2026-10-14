@@ -1,7 +1,6 @@
 ---
 titulo: "Implantación de DNS con BIND en Linux"
 licencia: CC-BY-NC-SA-4.0
-borrador: true
 ---
 
 :::nota[Objetivo]
