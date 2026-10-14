@@ -10,3 +10,6 @@ unidades:
   - id: ut2
     titulo: Configuración del software de base
     piezas: [configuracion-software-base, consola-escritorio]
+  - id: ut3
+    titulo: Virtualización
+    piezas: [fundamentos-virtualizacion]
