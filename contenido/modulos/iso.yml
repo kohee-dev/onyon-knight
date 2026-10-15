@@ -13,3 +13,6 @@ unidades:
   - id: ut3
     titulo: Virtualización
     piezas: [fundamentos-virtualizacion]
+  - id: ut4
+    titulo: Almacenamiento
+    piezas: [discos-raid, zfs-pools-datasets, cifrado-datos, permisos-acl, instantaneas-copias, compartir-linux, compartir-windows, monitorizacion-almacenamiento, minerva]
