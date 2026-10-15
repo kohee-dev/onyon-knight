@@ -19,3 +19,6 @@ unidades:
   - id: ut4
     titulo: "Linux: usuarios, permisos y acceso remoto"
     piezas: [usuarios-linux, opera-garnier]
+  - id: ut5
+    titulo: Almacenamiento
+    piezas: [discos-raid, zfs-pools-datasets, cifrado-datos, permisos-acl, instantaneas-copias, compartir-linux, compartir-windows, monitorizacion-almacenamiento, minerva]

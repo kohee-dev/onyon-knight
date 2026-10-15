@@ -3,6 +3,8 @@ titulo: "Minerva, la ciudad del conocimiento"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 12
+portada: ./img/minerva-portada.webp
+cabecera: ./img/minerva-cabecera.webp
 ---
 
 :::aviso[Antes de empezar]
