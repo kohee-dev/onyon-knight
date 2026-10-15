@@ -12,7 +12,7 @@ unidades:
     piezas: [intro-sistemas-operativos]
   - id: ut2
     titulo: Introducción a los sistemas operativos en red
-    piezas: [intro-sistemas-operativos-red, virtualizacion]
+    piezas: [intro-sistemas-operativos-red, fundamentos-virtualizacion]
   - id: ut3
     titulo: Active Directory
     piezas: [active-directory, aldea-goblins]
