@@ -1,6 +1,6 @@
-import { basename, dirname, extname, relative, resolve, sep } from 'node:path';
+import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
 import { getCollection } from 'astro:content';
-import { dificultadFinal, lectorBloques } from './bloques';
+import { dificultadFinal, lectorBloques, valorFinal } from './bloques';
 import { raizContenido, raizPrivada as privado } from './raices';
 import type { ModuloFuente, PiezaFuente } from './tipos';
 
@@ -34,7 +34,11 @@ export async function cargarFuentes(): Promise<{ piezas: PiezaFuente[]; modulos:
       const dir = dirname(r.rutaAbs);
       const bloque = (esPrivado ? 'privado:' : '') + relative(raizPiezas, dir).split(sep).join('/');
       const dificultad = dificultadFinal(e.data.dificultad, dir, leerBloque);
-      piezas.push({ ...r, datos: e.data, cuerpo: e.body ?? '', privado: esPrivado, bloque, dificultad });
+      const tema = valorFinal(e.data.tema, 'tema', dir, leerBloque);
+      const rutaBloque = join(dir, 'bloque.yml');
+      const archivoBloque = esPrivado && privado ? `privado:${relative(privado, rutaBloque)}` : relative(raiz, rutaBloque);
+      const origenTema = e.data.tema ? r.archivo : tema ? archivoBloque : undefined;
+      piezas.push({ ...r, datos: e.data, cuerpo: e.body ?? '', privado: esPrivado, bloque, dificultad, tema, origenTema });
     }
   }
   for (const [nombre, esPrivado] of conPrivado([['modulos', false], ['modulosPrivados', true]])) {

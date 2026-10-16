@@ -3,7 +3,8 @@ import { licenciaPorId } from '../licencias';
 import { ICONOS } from './iconos';
 import { ErrorContenido, type Aparicion, type Catalogo, type Modo, type ModuloFuente, type PiezaFuente, type Problema } from './tipos';
 
-export const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+import { SLUG } from './esquemas';
+export { SLUG };
 
 /** Ids que usa la propia página; una pieza con uno de ellos duplicaría ids y rompería anclas y aria-controls. */
 export const IDS_RESERVADOS = ['menu', 'lista-modulos', 'casos-practicos', 'casos-de-esta-unidad', 'licencias-y-fuentes'];

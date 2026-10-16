@@ -33,8 +33,8 @@ export interface Ficha {
   titular?: string;
 }
 
-import type { CabeceraModulo, CabeceraPieza, Dificultad } from './esquemas';
-export type { CabeceraModulo, CabeceraPieza, Dificultad };
+import type { CabeceraModulo, CabeceraPieza, Dificultad, Tema } from './esquemas';
+export type { CabeceraModulo, CabeceraPieza, Dificultad, Tema };
 
 export type Modo = 'desarrollo' | 'publicacion';
 
@@ -50,6 +50,10 @@ export interface PiezaFuente {
   bloque: string;
   /** Dificultad final: la de la pieza o, si no tiene, la de su bloque.yml. */
   dificultad?: Dificultad;
+  /** Tema final (id de temas.yml): el de la pieza o el de su bloque.yml. */
+  tema?: string;
+  /** Archivo, para mensajes, del que sale el tema: la pieza o su bloque.yml. */
+  origenTema?: string;
 }
 
 export interface ModuloFuente {
