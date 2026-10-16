@@ -14,6 +14,6 @@ const nivel = dificultad ? NIVELES[dificultad] : undefined;
     <span class="barras" aria-hidden="true">
       {[1, 2, 3].map((i) => <span class={i <= nivel.n ? 'barra llena' : 'barra'} />)}
     </span>
-    {nivel.texto}
+    <span class="solo-lector">{'Dificultad: '}</span>{nivel.texto}
   </span>
 )}

@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { load, YAMLException } from 'js-yaml';
 import { problemasZod } from '../licencias';
-import { esquemaBloque, type CabeceraBloque } from './esquemas';
+import { esquemaBloque, type CabeceraBloque, type Dificultad } from './esquemas';
 import { ErrorContenido } from './tipos';
 
 /** Lee y valida el bloque.yml de una carpeta de piezas; sin archivo (o vacío), {}. */
@@ -32,4 +32,10 @@ export function lectorBloques(): (dir: string) => CabeceraBloque {
     if (!cache.has(dir)) cache.set(dir, leerBloque(dir));
     return cache.get(dir)!;
   };
+}
+
+/** Dificultad final de una pieza: la suya o la de su bloque. El bloque.yml se valida siempre, aunque no se use. */
+export function dificultadFinal(propia: Dificultad | undefined, dir: string, leer: (dir: string) => CabeceraBloque): Dificultad | undefined {
+  const delBloque = leer(dir).dificultad;
+  return propia ?? delBloque;
 }

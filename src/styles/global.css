@@ -1145,3 +1145,12 @@ blockquote {
 .dificultad .barra:nth-child(2) { height: 9px; }
 .dificultad .barra:nth-child(3) { height: 12px; }
 .dificultad .barra.llena { background: currentColor; }
+/* Texto solo para lectores de pantalla. */
+.solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

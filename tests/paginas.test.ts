@@ -340,6 +340,10 @@ describe('dificultad', () => {
     expect(tarjeta('caso-sin-imagenes')).not.toContain('class="dificultad');
   });
 
+  it('el lector de pantalla oye «Dificultad:» antes del nivel', () => {
+    expect(seccion('procesos-concepto')).toMatch(/<span class="solo-lector"[^>]*>Dificultad: <\/span>/);
+  });
+
   it('página del caso', () => {
     expect(leer('aso/ut1/casos/caso-ldap/index.html')).toContain('dificultad-intermedio');
   });

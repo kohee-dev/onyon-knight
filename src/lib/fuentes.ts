@@ -1,6 +1,6 @@
 import { basename, dirname, extname, relative, resolve, sep } from 'node:path';
 import { getCollection } from 'astro:content';
-import { lectorBloques } from './bloques';
+import { dificultadFinal, lectorBloques } from './bloques';
 import { raizContenido, raizPrivada as privado } from './raices';
 import type { ModuloFuente, PiezaFuente } from './tipos';
 
@@ -33,7 +33,7 @@ export async function cargarFuentes(): Promise<{ piezas: PiezaFuente[]; modulos:
       const r = rutas(e.filePath, esPrivado);
       const dir = dirname(r.rutaAbs);
       const bloque = (esPrivado ? 'privado:' : '') + relative(raizPiezas, dir).split(sep).join('/');
-      const dificultad = e.data.dificultad ?? leerBloque(dir).dificultad;
+      const dificultad = dificultadFinal(e.data.dificultad, dir, leerBloque);
       piezas.push({ ...r, datos: e.data, cuerpo: e.body ?? '', privado: esPrivado, bloque, dificultad });
     }
   }

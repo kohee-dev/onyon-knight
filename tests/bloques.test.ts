@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { leerBloque, lectorBloques } from '../src/lib/bloques';
+import { dificultadFinal, leerBloque, lectorBloques } from '../src/lib/bloques';
 import { DIFICULTADES, esquemaPieza } from '../src/lib/esquemas';
 import { ErrorContenido } from '../src/lib/tipos';
 
@@ -72,5 +72,19 @@ describe('leerBloque', () => {
     rmSync(join(dir, 'bloque.yml'));
     expect(leer(dir)).toEqual({ dificultad: 'basico' });
     expect(lectorBloques()(dir)).toEqual({});
+  });
+});
+
+describe('dificultadFinal', () => {
+  it('la de la pieza tiene prioridad sobre la del bloque', () => {
+    expect(dificultadFinal('avanzado', carpeta('dificultad: basico\n'), lectorBloques())).toBe('avanzado');
+  });
+
+  it('sin la de la pieza, hereda la del bloque', () => {
+    expect(dificultadFinal(undefined, carpeta('dificultad: basico\n'), lectorBloques())).toBe('basico');
+  });
+
+  it('valida el bloque.yml aunque la pieza tenga la suya', () => {
+    expect(error(() => dificultadFinal('avanzado', carpeta('titulo: X\n'), lectorBloques()))).toContain('bloque.yml');
   });
 });
