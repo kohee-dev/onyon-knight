@@ -72,6 +72,8 @@ export interface Aparicion {
 }
 
 export interface Catalogo {
+  /** Lista cerrada de temas (contenido/temas.yml), en su orden. */
+  temas: Tema[];
   /** Piezas publicables en el modo dado. */
   piezas: Map<string, PiezaFuente>;
   /** Todas las piezas cargadas (incluye borradores), para enlaces y avisos. */

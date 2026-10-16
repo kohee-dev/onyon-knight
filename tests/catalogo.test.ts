@@ -81,6 +81,36 @@ describe('aviso de dificultad por bloque', () => {
   });
 });
 
+describe('temas en el catálogo', () => {
+  const m = () => [modulo('aso', [{ id: 'ut1', piezas: ['a', 'b'] }])];
+  const T = [{ id: 'redes', nombre: 'Redes' }];
+
+  it('tema desconocido en la pieza cita la pieza', () => {
+    const msg = problemas(() => construirCatalogo([pieza('a', { tema: 'nada', origenTema: 'contenido/piezas/a.md' }), pieza('b')], m(), 'publicacion', T));
+    expect(msg).toContain('contenido/piezas/a.md');
+    expect(msg).toContain('tema desconocido «nada»');
+  });
+
+  it('tema heredado desconocido cita bloque.yml', () => {
+    const msg = problemas(() => construirCatalogo([pieza('a', { tema: 'nada', origenTema: 'contenido/piezas/iso/b/bloque.yml' }), pieza('b')], m(), 'publicacion', T));
+    expect(msg).toContain('contenido/piezas/iso/b/bloque.yml');
+  });
+
+  it('tema desconocido falla aunque sea borrador', () => {
+    const msg = problemas(() => construirCatalogo([pieza('a'), pieza('b', { borrador: true, tema: 'nada', origenTema: 'x/b.md' })], m(), 'publicacion', T));
+    expect(msg).toContain('tema desconocido «nada»');
+  });
+
+  it('avisa de bloque sin tema', () => {
+    expect(construirCatalogo([pieza('a'), pieza('b')], m(), 'publicacion', T).avisos).toContain('bloque sin tema: iso/b (2 piezas sin el suyo)');
+    expect(construirCatalogo([pieza('a'), pieza('b', { tema: 'redes' })], m(), 'publicacion', T).avisos).toContain('bloque sin tema: iso/b (1 pieza sin el suyo)');
+  });
+
+  it('expone los temas', () => {
+    expect(construirCatalogo([pieza('a'), pieza('b')], m(), 'publicacion', T).temas).toEqual(T);
+  });
+});
+
 describe('construirCatalogo', () => {
   it('detecta ids de pieza duplicados citando ambos archivos', () => {
     const a = pieza('procesos', { archivo: 'contenido/piezas/a/procesos.md' });

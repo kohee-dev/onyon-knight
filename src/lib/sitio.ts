@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { load } from 'js-yaml';
 import { construirCatalogo } from './catalogo';
+import { leerTemas } from './temas';
 import { conImagenes, creditosDe, type Creditos } from './creditos';
 import { leerFechas, type IndiceFechas } from './fechas';
 import { cargarFuentes } from './fuentes';
@@ -75,7 +76,7 @@ const masReciente = (fechas: (Date | null)[]): Date | null =>
 async function construirSitio(): Promise<Sitio> {
   const modo: Modo = import.meta.env.PROD ? 'publicacion' : 'desarrollo';
   const { piezas, modulos } = await cargarFuentes();
-  const catalogo = construirCatalogo(piezas, modulos, modo);
+  const catalogo = construirCatalogo(piezas, modulos, modo, leerTemas(resolve(raizContenido, 'temas.yml')));
   const fechas = await leerFechas(process.cwd());
   const ctxBase: Omit<ContextoRender, 'unidad'> = { catalogo, modo, base, sitioUrl, raices: raicesPiezas };
 

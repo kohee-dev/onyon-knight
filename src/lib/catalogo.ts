@@ -1,7 +1,7 @@
 import { categoriaDe } from '../categorias';
 import { licenciaPorId } from '../licencias';
 import { ICONOS } from './iconos';
-import { ErrorContenido, type Aparicion, type Catalogo, type Modo, type ModuloFuente, type PiezaFuente, type Problema } from './tipos';
+import { ErrorContenido, type Aparicion, type Catalogo, type Modo, type ModuloFuente, type PiezaFuente, type Problema, type Tema } from './tipos';
 
 import { SLUG } from './esquemas';
 export { SLUG };
@@ -9,7 +9,7 @@ export { SLUG };
 /** Ids que usa la propia página; una pieza con uno de ellos duplicaría ids y rompería anclas y aria-controls. */
 export const IDS_RESERVADOS = ['menu', 'lista-modulos', 'casos-practicos', 'casos-de-esta-unidad', 'licencias-y-fuentes'];
 
-export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[], modo: Modo): Catalogo {
+export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[], modo: Modo, temas: Tema[] = []): Catalogo {
   const problemas: Problema[] = [];
   const publicacion = modo === 'publicacion';
 
@@ -83,7 +83,16 @@ export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[]
     resultado.push({ ...m, datos: { ...m.datos, unidades } });
   }
 
+  const idsTemas = new Set(temas.map((t) => t.id));
+  for (const p of todas.values()) {
+    if (p.tema && !idsTemas.has(p.tema)) problemas.push({ archivo: p.origenTema ?? p.archivo, mensaje: `tema desconocido «${p.tema}» (no está en temas.yml)` });
+  }
+
   if (problemas.length) throw new ErrorContenido(problemas);
+
+  const sinTema = new Map<string, number>();
+  for (const p of visibles.values()) if (!p.tema) sinTema.set(p.bloque, (sinTema.get(p.bloque) ?? 0) + 1);
+  for (const [bloque, n] of sinTema) avisos.push(`bloque sin tema: ${bloque} (${n} ${n === 1 ? 'pieza' : 'piezas'} sin el suyo)`);
 
   const sinDificultad = new Map<string, number>();
   for (const p of visibles.values()) if (!p.dificultad) sinDificultad.set(p.bloque, (sinDificultad.get(p.bloque) ?? 0) + 1);
@@ -106,5 +115,5 @@ export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[]
     .filter((p) => !p.privado && !referenciadas.has(p.id))
     .map((p) => `pieza sin módulo: ${p.id}`);
 
-  return { piezas: visibles, todas, modulos: resultado, apariciones, avisos, informe };
+  return { piezas: visibles, todas, modulos: resultado, apariciones, avisos, informe, temas };
 }
