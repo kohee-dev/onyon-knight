@@ -302,3 +302,45 @@ describe('páginas', () => {
     ]);
   });
 });
+
+describe('dificultad', () => {
+  const trozo = (h: string, inicio: string, fin: string) => {
+    const i = h.indexOf(inicio);
+    expect(i).toBeGreaterThan(-1);
+    return h.slice(i, h.indexOf(fin, i));
+  };
+  const seccion = (id: string) => trozo(leer('aso/ut1/index.html'), `id="${id}"`, '</section>');
+  const tarjeta = (caso: string) => {
+    const h = leer('aso/ut1/index.html');
+    const i = h.indexOf(`/ok/aso/ut1/casos/${caso}/`);
+    expect(i).toBeGreaterThan(-1);
+    return h.slice(h.lastIndexOf('<li class="tarjeta-caso"', i), h.indexOf('</li>', i));
+  };
+
+  it('teoría: hereda la dificultad del bloque', () => {
+    const s = seccion('procesos-concepto');
+    expect(s).toContain('dificultad-basico');
+    expect(s).toContain('Básico');
+  });
+
+  it('teoría: la pieza sustituye la del bloque', () => {
+    const s = seccion('procesos-estados');
+    expect(s).toContain('dificultad-avanzado');
+    expect(s).toContain('Avanzado');
+    expect(s).not.toContain('dificultad-basico');
+  });
+
+  it('tarjeta de caso con dificultad', () => {
+    const t = tarjeta('caso-ldap');
+    expect(t).toContain('dificultad-intermedio');
+    expect(t).toContain('Intermedio');
+  });
+
+  it('sin dificultad no pinta nada', () => {
+    expect(tarjeta('caso-sin-imagenes')).not.toContain('class="dificultad');
+  });
+
+  it('página del caso', () => {
+    expect(leer('aso/ut1/casos/caso-ldap/index.html')).toContain('dificultad-intermedio');
+  });
+});

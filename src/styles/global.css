@@ -1116,3 +1116,32 @@ blockquote {
 .contenido :is(td, th) code {
   overflow-wrap: anywhere;
 }
+
+/* Dificultad: barras + texto (no depende solo del color). Reutiliza los tonos de las etiquetas de recuadros. */
+.dificultad {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+  color: var(--dificultad-color);
+}
+.dificultad-basico { --dificultad-color: var(--ejercicio-etiqueta); }
+.dificultad-intermedio { --dificultad-color: var(--nota-etiqueta); }
+.dificultad-avanzado { --dificultad-color: var(--aviso-etiqueta); }
+.dificultad .barras {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.dificultad .barra {
+  width: 4px;
+  border: 1px solid currentColor;
+  border-radius: 1px;
+}
+.dificultad .barra:nth-child(1) { height: 6px; }
+.dificultad .barra:nth-child(2) { height: 9px; }
+.dificultad .barra:nth-child(3) { height: 12px; }
+.dificultad .barra.llena { background: currentColor; }

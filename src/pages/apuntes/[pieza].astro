@@ -1,4 +1,5 @@
 ---
+import Dificultad from '../../components/Dificultad.astro';
 import Menu from '../../components/Menu.astro';
 import Distintivo from '../../components/Distintivo.astro';
 import Fecha from '../../components/Fecha.astro';
@@ -25,10 +26,10 @@ const moduloRef = sitio.catalogo.modulos.find((m) => m.id === apariciones[0]?.mo
   {esCaso && (
     <>
       <div class="banner"><ImagenCaso imagen={p.render.cabecera} modulo={moduloRef} proporcion="cabecera" titulo={p.fuente.datos.titulo} /></div>
-      <p class="meta"><span class="chip-caso">Caso práctico</span> {formatearHoras(p.fuente.datos.horas!)}</p>
+      <p class="meta"><span class="chip-caso">Caso práctico</span> {formatearHoras(p.fuente.datos.horas!)} <Dificultad dificultad={p.fuente.dificultad} /></p>
     </>
   )}
-  <h1>{p.fuente.datos.titulo} <Distintivo pieza={p.fuente} /></h1>
+  <h1>{p.fuente.datos.titulo} <Distintivo pieza={p.fuente} />{p.fuente.datos.tipo === 'teoria' && <Dificultad dificultad={p.fuente.dificultad} />}</h1>
   <Fecha fecha={p.fecha} />
   {apariciones.length > 0 && (
     <p class="aparece">

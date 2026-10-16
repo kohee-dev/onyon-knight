@@ -74,6 +74,7 @@ titulo: "Contenedores con Docker"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso        # teoria (por defecto) o caso
 horas: 3          # obligatorio en los casos
+dificultad: intermedio  # basico, intermedio o avanzado (opcional)
 resumen: Una frase sobre lo que se hace.
 fuentes:
   - "Autor. Título. https://…"
@@ -81,6 +82,14 @@ fuentes:
 ```
 
 Otros campos: `borrador: true` (la pieza se ve en `npm run dev`, pero no se publica) y, solo en los casos, `portada` y `cabecera` con la ruta de una imagen.
+
+**Dificultad.** Cada carpeta de piezas es un *bloque*. Un archivo `bloque.yml` en ella fija la dificultad de todas sus piezas:
+
+```yaml
+dificultad: intermedio
+```
+
+Una pieza que indique `dificultad` en su cabecera sustituye la del bloque. Si no hay ni una ni otra, no se muestra el indicador, y al generar la web aparece el aviso `bloque sin dificultad: <carpeta> (N piezas sin la suya)`.
 
 Para que una pieza aparezca en la web, añade su identificador a las `piezas` de una unidad en el `.yml` del módulo. Una misma pieza puede estar en varios módulos.
 

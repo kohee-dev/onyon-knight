@@ -1,4 +1,5 @@
 ---
+dificultad: avanzado
 titulo: Estados de un proceso
 fuentes:
   - "Silberschatz, Operating System Concepts, 10.ª ed."
