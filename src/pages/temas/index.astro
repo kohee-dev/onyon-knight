@@ -1,0 +1,19 @@
+---
+import Menu from '../../components/Menu.astro';
+import Base from '../../layouts/Base.astro';
+import { temasConPiezas } from '../../lib/agrupar-temas';
+import { cargarSitio } from '../../lib/sitio';
+
+const sitio = await cargarSitio();
+const temas = temasConPiezas(sitio);
+---
+<Base titulo="Temas" descripcion="Apuntes clasificados por tema">
+  <p class="migas"><a href={sitio.base}>Inicio</a> › Temas</p>
+  <h1>Temas</h1>
+  <ul class="lista-temas">
+    {temas.map(({ tema, n }) => (
+      <li><a href={`${sitio.base}temas/${tema.id}/`}>{tema.nombre}</a> <span class="contexto">{n} {n === 1 ? 'pieza' : 'piezas'}</span></li>
+    ))}
+  </ul>
+  <Menu />
+</Base>

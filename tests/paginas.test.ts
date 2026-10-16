@@ -348,3 +348,33 @@ describe('dificultad', () => {
     expect(leer('aso/ut1/casos/caso-ldap/index.html')).toContain('dificultad-intermedio');
   });
 });
+
+describe('temas', () => {
+  it('índice de temas', () => {
+    const h = leer('temas/index.html');
+    expect(h.indexOf('href="/ok/temas/procesos/"')).toBeGreaterThan(-1);
+    expect(h.indexOf('href="/ok/temas/procesos/"')).toBeLessThan(h.indexOf('href="/ok/temas/servicios/"'));
+    expect(h).toContain('1 pieza');
+    expect(h).not.toContain('sin-piezas');
+  });
+
+  it('tema sin piezas no tiene página', () => {
+    expect(existsSync(join(dist, 'temas/sin-piezas/index.html'))).toBe(false);
+  });
+
+  it('página de tema: teoría enlazada a su punto', () => {
+    expect(leer('temas/procesos/index.html')).toContain('href="/ok/aso/ut1/#procesos-concepto"');
+  });
+
+  it('página de tema: pieza en varios módulos', () => {
+    const h = leer('temas/procesos/index.html');
+    expect(h).toContain('href="/ok/som/ut3/#procesos-concepto"');
+    expect(h).not.toContain('/ok/sri/');
+  });
+
+  it('página de tema: casos como tarjetas', () => {
+    const h = leer('temas/servicios/index.html');
+    expect(h).toContain('class="tarjeta-caso"');
+    expect(h).toContain('caso-ldap');
+  });
+});

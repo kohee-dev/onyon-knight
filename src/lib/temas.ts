@@ -1,8 +1,9 @@
 import { existsSync } from 'node:fs';
-import { relative } from 'node:path';
+import { relative, resolve } from 'node:path';
 import { problemasZod } from '../licencias';
 import { cargarYaml } from './bloques';
 import { esquemaTema, type Tema } from './esquemas';
+import { raizContenido } from './raices';
 import { ErrorContenido } from './tipos';
 
 /** Lista cerrada de temas (contenido/temas.yml); sin archivo o vacío, []. */
@@ -16,3 +17,6 @@ export function leerTemas(ruta: string): Tema[] {
   if (problemas.length) throw new ErrorContenido(problemas);
   return r.data;
 }
+
+/** Temas del contenido activo (contenido/temas.yml o el de ONYON_CONTENIDO). */
+export const temasDelSitio = (): Tema[] => leerTemas(resolve(raizContenido, 'temas.yml'));

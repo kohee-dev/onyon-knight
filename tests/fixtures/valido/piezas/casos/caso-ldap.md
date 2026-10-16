@@ -1,4 +1,5 @@
 ---
+tema: servicios
 dificultad: intermedio
 titulo: Caso LDAP en Elpis
 tipo: caso

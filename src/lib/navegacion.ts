@@ -1,3 +1,4 @@
+import { temasDelSitio } from './temas';
 import { CATEGORIAS, categoriaDe } from '../categorias';
 import { construirCatalogo } from './catalogo';
 import { cargarFuentes } from './fuentes';
@@ -18,7 +19,7 @@ async function calcular(): Promise<ModuloNavegacion[]> {
   const modo: Modo = import.meta.env.PROD ? 'publicacion' : 'desarrollo';
   const { piezas, modulos } = await cargarFuentes();
   // Solo el catálogo (sin renderizar): los módulos activos con alguna unidad publicada.
-  return construirCatalogo(piezas, modulos, modo).modulos.map((m) => ({
+  return construirCatalogo(piezas, modulos, modo, temasDelSitio()).modulos.map((m) => ({
     id: m.id,
     sigla: m.id.toUpperCase(),
     nombre: m.datos.nombre,
