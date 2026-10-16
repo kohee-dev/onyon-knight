@@ -4,6 +4,7 @@ licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 3
 portada: ./img/docker-portada.webp
+cabecera: ./img/docker-cabecera.webp
 resumen: Se instala Docker, se publica una web con nginx, se compara un contenedor con una máquina virtual y se despliega un blog WordPress con Docker Compose.
 fuentes:
   - "Docker Inc. Install Docker Engine on Ubuntu. https://docs.docker.com/engine/install/ubuntu/"
