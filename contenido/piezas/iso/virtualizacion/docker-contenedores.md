@@ -1,9 +1,10 @@
 ---
-titulo: "Contenedores con Docker: de un servidor web a un blog"
+titulo: "Contenedores con Docker"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 3
-resumen: Se instala Docker, se publica la web del alumno con nginx, se gestionan los contenedores con Portainer, se compara un contenedor con una máquina virtual y se despliega un blog con WordPress y MariaDB mediante Docker Compose.
+portada: ./img/docker-portada.webp
+resumen: Se instala Docker, se publica una web con nginx, se compara un contenedor con una máquina virtual y se despliega un blog WordPress con Docker Compose.
 fuentes:
   - "Docker Inc. Install Docker Engine on Ubuntu. https://docs.docker.com/engine/install/ubuntu/"
   - "Docker Inc. Imagen oficial nginx (Docker Hub). https://hub.docker.com/_/nginx"
