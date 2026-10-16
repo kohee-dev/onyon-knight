@@ -1,6 +1,7 @@
-import { basename, extname, relative, resolve } from 'node:path';
+import { basename, dirname, extname, relative, resolve, sep } from 'node:path';
 import { getCollection } from 'astro:content';
-import { raizPrivada as privado } from './raices';
+import { lectorBloques } from './bloques';
+import { raizContenido, raizPrivada as privado } from './raices';
 import type { ModuloFuente, PiezaFuente } from './tipos';
 
 const raiz = process.cwd();
@@ -23,11 +24,17 @@ async function coleccion(nombre: string): Promise<any[]> {
 export async function cargarFuentes(): Promise<{ piezas: PiezaFuente[]; modulos: ModuloFuente[] }> {
   const piezas: PiezaFuente[] = [];
   const modulos: ModuloFuente[] = [];
+  const leerBloque = lectorBloques();
   // Sin carpeta privada activa (siempre en build), las colecciones privadas ni se leen.
   const conPrivado = <T,>(lista: readonly (readonly [string, boolean])[]) => lista.filter(([, p]) => !p || privado);
   for (const [nombre, esPrivado] of conPrivado([['piezas', false], ['piezasPrivadas', true]])) {
+    const raizPiezas = resolve(esPrivado && privado ? privado : raizContenido, 'piezas');
     for (const e of await coleccion(nombre)) {
-      piezas.push({ ...rutas(e.filePath, esPrivado), datos: e.data, cuerpo: e.body ?? '', privado: esPrivado });
+      const r = rutas(e.filePath, esPrivado);
+      const dir = dirname(r.rutaAbs);
+      const bloque = (esPrivado ? 'privado:' : '') + relative(raizPiezas, dir).split(sep).join('/');
+      const dificultad = e.data.dificultad ?? leerBloque(dir).dificultad;
+      piezas.push({ ...r, datos: e.data, cuerpo: e.body ?? '', privado: esPrivado, bloque, dificultad });
     }
   }
   for (const [nombre, esPrivado] of conPrivado([['modulos', false], ['modulosPrivados', true]])) {

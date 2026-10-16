@@ -84,6 +84,12 @@ export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[]
 
   if (problemas.length) throw new ErrorContenido(problemas);
 
+  const sinDificultad = new Map<string, number>();
+  for (const p of visibles.values()) if (!p.dificultad) sinDificultad.set(p.bloque, (sinDificultad.get(p.bloque) ?? 0) + 1);
+  for (const [bloque, n] of sinDificultad) {
+    avisos.push(`bloque sin dificultad: ${bloque} (${n} ${n === 1 ? 'pieza' : 'piezas'} sin la suya)`);
+  }
+
   const apariciones = new Map<string, Aparicion[]>();
   for (const m of resultado) {
     for (const u of m.datos.unidades) {

@@ -12,6 +12,7 @@ function pieza(id: string, extra: Partial<PiezaFuente> & { borrador?: boolean } 
     datos: esquemaPieza.parse({ titulo: `T ${id}`, borrador }),
     cuerpo: '',
     privado: false,
+    bloque: 'iso/b',
     ...resto,
   };
 }
@@ -43,6 +44,42 @@ function problemas(fn: () => unknown): string {
   }
   throw new Error('no lanzó error');
 }
+
+describe('aviso de dificultad por bloque', () => {
+  const avisosBloque = (c: { avisos: string[] }) => c.avisos.filter((a) => a.startsWith('bloque sin dificultad'));
+
+  it('avisa de un bloque con piezas sin dificultad', () => {
+    const c = construirCatalogo([pieza('a'), pieza('b'), pieza('c', { dificultad: 'basico' })], [modulo('aso', [{ id: 'ut1', piezas: ['a', 'b', 'c'] }])], 'publicacion');
+    expect(c.avisos).toContain('bloque sin dificultad: iso/b (2 piezas sin la suya)');
+  });
+
+  it('usa el singular con una pieza', () => {
+    const c = construirCatalogo([pieza('a')], [modulo('aso', [{ id: 'ut1', piezas: ['a'] }])], 'publicacion');
+    expect(c.avisos).toContain('bloque sin dificultad: iso/b (1 pieza sin la suya)');
+  });
+
+  it('no avisa si todas tienen dificultad', () => {
+    const c = construirCatalogo([pieza('a', { dificultad: 'avanzado' })], [modulo('aso', [{ id: 'ut1', piezas: ['a'] }])], 'publicacion');
+    expect(avisosBloque(c)).toEqual([]);
+  });
+
+  it('no cuenta borradores al publicar', () => {
+    const c = construirCatalogo([pieza('a'), pieza('b', { borrador: true })], [modulo('aso', [{ id: 'ut1', piezas: ['a', 'b'] }])], 'publicacion');
+    expect(avisosBloque(c)).toEqual(['bloque sin dificultad: iso/b (1 pieza sin la suya)']);
+  });
+
+  it('agrupa por etiqueta de bloque', () => {
+    const c = construirCatalogo(
+      [pieza('a', { bloque: 'iso/almacenamiento' }), pieza('b', { bloque: 'sor/almacenamiento' })],
+      [modulo('aso', [{ id: 'ut1', piezas: ['a', 'b'] }])],
+      'publicacion',
+    );
+    expect(avisosBloque(c)).toEqual([
+      'bloque sin dificultad: iso/almacenamiento (1 pieza sin la suya)',
+      'bloque sin dificultad: sor/almacenamiento (1 pieza sin la suya)',
+    ]);
+  });
+});
 
 describe('construirCatalogo', () => {
   it('detecta ids de pieza duplicados citando ambos archivos', () => {
