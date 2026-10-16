@@ -12,7 +12,7 @@ unidades:
     piezas: [configuracion-software-base, consola-escritorio]
   - id: ut3
     titulo: Virtualización
-    piezas: [fundamentos-virtualizacion]
+    piezas: [fundamentos-virtualizacion, docker-contenedores]
   - id: ut4
     titulo: Almacenamiento
     piezas: [discos-raid, zfs-pools-datasets, cifrado-datos, permisos-acl, instantaneas-copias, compartir-linux, compartir-windows, monitorizacion-almacenamiento, minerva]
