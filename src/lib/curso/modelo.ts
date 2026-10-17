@@ -23,18 +23,20 @@ export class ClaveAusente extends Error {
   }
 }
 
-/** Texto de un rechazo cualquiera: el proveedor puede rechazar con algo que no es un Error. */
+/** Texto de un rechazo cualquiera. Un objeto que no es un Error no se vuelca entero: podría llevar cabeceras o la clave. */
 function detalle(e: unknown): string {
   if (e instanceof Error) return e.message;
   if (typeof e === 'string') return e;
-  try {
-    return JSON.stringify(e) ?? String(e);
-  } catch {
-    return String(e);
+  if (typeof e === 'object' && e !== null) {
+    const campos = (['status', 'code', 'statusText', 'message'] as const)
+      .map((campo) => (e as Record<string, unknown>)[campo])
+      .filter((valor) => typeof valor === 'string' || typeof valor === 'number');
+    return campos.length ? campos.join(' ') : 'rechazo sin detalle';
   }
+  return String(e);
 }
 
-/** Envuelve el modelo para que sus fallos de transporte lleguen al autor con qué comprobar, sin ocultar la causa. */
+/** Envuelve el modelo para que sus fallos (de transporte o de otro tipo: no se distinguen) lleguen al autor con qué comprobar, sin ocultar la causa. */
 export function conErroresClaros(modelo: Modelo): Modelo {
   return {
     async completar(instruccion, entrada) {

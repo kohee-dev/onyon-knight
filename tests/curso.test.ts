@@ -146,8 +146,25 @@ describe('generarCurso', () => {
   });
 
   it('un proveedor caído da un mensaje que dice qué comprobar y conserva la causa', async () => {
-    const caido: Modelo = { completar: () => Promise.reject(new Error('503')) };
-    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(/proveedor.*503.*(comprueba|reintenta|vuelve)/is);
+    const original = new Error('503');
+    const caido: Modelo = { completar: () => Promise.reject(original) };
+    const rechazo = generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido });
+    await expect(rechazo).rejects.toThrow(/proveedor.*503.*(comprueba|reintenta|vuelve)/is);
+    await expect(rechazo).rejects.toMatchObject({ cause: original });
+  });
+
+  it('un rechazo que no es un Error no vuelca sus cabeceras ni su clave en el mensaje', async () => {
+    const caido: Modelo = { completar: () => Promise.reject({ status: 401, headers: { authorization: 'Bearer sk-SECRETO' } }) };
+    const rechazo = generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido });
+    await expect(rechazo).rejects.toThrow(/401/);
+    await expect(rechazo).rejects.not.toThrow(/SECRETO/);
+  });
+
+  it('un rechazo imposible de describir (prototipo nulo y circular) sigue dando el mensaje accionable', async () => {
+    const raro = Object.create(null);
+    raro.self = raro;
+    const caido: Modelo = { completar: () => Promise.reject(raro) };
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(/ha fallado.*vuelve a intentarlo/);
   });
 
   it.each([['texto', 'cuota agotada', /ha fallado \(cuota agotada\)/], ['objeto', { status: 429 }, /ha fallado \(.*429/], ['undefined', undefined, /ha fallado.*vuelve a intentarlo/]])('un proveedor que rechaza con %s (no un Error) también da el mensaje accionable', async (_caso, rechazo, mensaje) => {
