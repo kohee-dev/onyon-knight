@@ -150,6 +150,11 @@ describe('generarCurso', () => {
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(/proveedor.*503.*(comprueba|reintenta|vuelve)/is);
   });
 
+  it.each([['texto', 'cuota agotada', /ha fallado \(cuota agotada\)/], ['objeto', { status: 429 }, /ha fallado \(.*429/], ['undefined', undefined, /ha fallado.*vuelve a intentarlo/]])('un proveedor que rechaza con %s (no un Error) también da el mensaje accionable', async (_caso, rechazo, mensaje) => {
+    const caido: Modelo = { completar: () => Promise.reject(rechazo) };
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(mensaje);
+  });
+
   it('una clave ausente nombra la variable de entorno que hay que definir', async () => {
     const sinClave: Modelo = { completar: () => Promise.reject(new ClaveAusente('MI_CLAVE_API')) };
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: sinClave })).rejects.toThrow(/define.*MI_CLAVE_API/i);

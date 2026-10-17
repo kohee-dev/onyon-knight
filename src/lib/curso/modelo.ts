@@ -23,6 +23,17 @@ export class ClaveAusente extends Error {
   }
 }
 
+/** Texto de un rechazo cualquiera: el proveedor puede rechazar con algo que no es un Error. */
+function detalle(e: unknown): string {
+  if (e instanceof Error) return e.message;
+  if (typeof e === 'string') return e;
+  try {
+    return JSON.stringify(e) ?? String(e);
+  } catch {
+    return String(e);
+  }
+}
+
 /** Envuelve el modelo para que sus fallos de transporte lleguen al autor con qué comprobar, sin ocultar la causa. */
 export function conErroresClaros(modelo: Modelo): Modelo {
   return {
@@ -31,7 +42,7 @@ export function conErroresClaros(modelo: Modelo): Modelo {
         return await modelo.completar(instruccion, entrada);
       } catch (e) {
         if (e instanceof ClaveAusente) throw e;
-        throw new Error(`el proveedor del modelo ha fallado (${(e as Error).message}); comprueba la conexión, la cuota y la clave, y vuelve a intentarlo`, { cause: e });
+        throw new Error(`el proveedor del modelo ha fallado (${detalle(e)}); comprueba la conexión, la cuota y la clave, y vuelve a intentarlo`, { cause: e });
       }
     },
   };
