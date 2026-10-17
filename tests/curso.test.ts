@@ -75,6 +75,12 @@ describe('generarCurso', () => {
     }
   });
 
+  it('acepta la respuesta del modelo envuelta en un bloque ```json', async () => {
+    const envuelta = ['```json', JSON.stringify(propuestaBuena), '```'].join('\n');
+    const { modulo } = await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, modelo: falso(envuelta).modelo });
+    expect(modulo.unidades).toHaveLength(2);
+  });
+
   it('falla con una respuesta mal formada, sin propuesta o con un proveedor caído', async () => {
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, modelo: falso('no es json').modelo })).rejects.toThrow(/respuesta/i);
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, modelo: falso({ unidades: [] }).modelo })).rejects.toThrow(/ninguna pieza/i);
