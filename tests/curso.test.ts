@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { load } from 'js-yaml';
 import { afterEach, describe, expect, it } from 'vitest';
 import { generarCurso, type Modelo } from '../src/lib/curso/generar';
+import { ClaveAusente } from '../src/lib/curso/modelo';
 import { ejecutarCurso, formatearJustificacion } from '../src/lib/curso/cli';
 import { esquemaModulo } from '../src/lib/esquemas';
 
@@ -142,6 +143,17 @@ describe('generarCurso', () => {
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: falso({ unidades: [] }).modelo })).rejects.toThrow(/ninguna pieza/i);
     const caido: Modelo = { completar: () => Promise.reject(new Error('503')) };
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(/503/);
+  });
+
+  it('un proveedor caído da un mensaje que dice qué comprobar y conserva la causa', async () => {
+    const caido: Modelo = { completar: () => Promise.reject(new Error('503')) };
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(/proveedor.*503.*(comprueba|reintenta|vuelve)/is);
+  });
+
+  it('una clave ausente nombra la variable de entorno que hay que definir', async () => {
+    const sinClave: Modelo = { completar: () => Promise.reject(new ClaveAusente('MI_CLAVE_API')) };
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: sinClave })).rejects.toThrow(/define.*MI_CLAVE_API/i);
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: sinClave })).rejects.not.toThrow(/ha fallado/);
   });
 
   it('las piezas propuestas salen de la vecindad del grafo y la justificación lista las entidades', async () => {
@@ -296,6 +308,13 @@ describe('ejecutarCurso (comando)', () => {
   it('si la generación falla, no escribe nada', async () => {
     const raiz = copia();
     const { modelo } = falso('basura');
+    await expect(ejecutarCurso({ argumentos: ['Tema'], raizContenido: raiz, dirCache: cache(), modelo })).rejects.toThrow();
+    expect(existsSync(join(raiz, 'modulos', 'tema.yml'))).toBe(false);
+  });
+
+  it.each([['proveedor caído', new Error('503')], ['clave ausente', new ClaveAusente('MI_CLAVE_API')]])('con %s no escribe nada', async (_caso, error) => {
+    const raiz = copia();
+    const modelo: Modelo = { completar: () => Promise.reject(error) };
     await expect(ejecutarCurso({ argumentos: ['Tema'], raizContenido: raiz, dirCache: cache(), modelo })).rejects.toThrow();
     expect(existsSync(join(raiz, 'modulos', 'tema.yml'))).toBe(false);
   });

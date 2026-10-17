@@ -15,3 +15,24 @@ export function leerJson<T extends z.ZodType>(texto: string, esquema: T, esperad
     throw new Error(`respuesta del modelo no válida (se esperaba JSON con ${esperado}): ${texto.slice(0, 200)}`);
   }
 }
+
+/** La clave de API del proveedor no está en la variable de entorno esperada. */
+export class ClaveAusente extends Error {
+  constructor(readonly variable: string) {
+    super(`falta la clave de API: define la variable de entorno ${variable} y vuelve a ejecutar el comando`);
+  }
+}
+
+/** Envuelve el modelo para que sus fallos de transporte lleguen al autor con qué comprobar, sin ocultar la causa. */
+export function conErroresClaros(modelo: Modelo): Modelo {
+  return {
+    async completar(instruccion, entrada) {
+      try {
+        return await modelo.completar(instruccion, entrada);
+      } catch (e) {
+        if (e instanceof ClaveAusente) throw e;
+        throw new Error(`el proveedor del modelo ha fallado (${(e as Error).message}); comprueba la conexión, la cuota y la clave, y vuelve a intentarlo`, { cause: e });
+      }
+    },
+  };
+}
