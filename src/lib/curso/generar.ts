@@ -56,6 +56,8 @@ export async function generarCurso({ tema, raizContenido, modelo }: OpcionesGene
   if (!SLUG.test(id)) throw new Error(`el tema «${tema}» no da un identificador válido`);
 
   const { piezas, modulos } = leerCorpus(raizContenido);
+  // Un corpus ya roto (ids duplicados…) se detecta antes de pagar una llamada al modelo.
+  construirCatalogo(piezas, modulos, 'desarrollo');
   const candidatas = new Map(piezas.filter((p) => !p.datos.borrador).map((p) => [p.id, p]));
   const entrada = JSON.stringify({
     tema,

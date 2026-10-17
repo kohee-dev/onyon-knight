@@ -1,27 +1,29 @@
-import { cpSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { load } from 'js-yaml';
-import { describe, expect, it } from 'vitest';
-import { construirCatalogo } from '../src/lib/catalogo';
+import { afterEach, describe, expect, it } from 'vitest';
 import { generarCurso, type Modelo } from '../src/lib/curso/generar';
 import { ejecutarCurso } from '../src/lib/curso/cli';
 import { esquemaModulo } from '../src/lib/esquemas';
-import { leerCorpus } from '../src/lib/curso/corpus';
 
 const FIXTURES = resolve('tests/fixtures/curso/contenido');
 
 /** Modelo falso: responde con la propuesta dada y apunta qué piezas se le ofrecieron. */
 function falso(propuesta: unknown) {
   const ofrecidas: string[] = [];
+  let llamadas = 0;
+  const contador = { get llamadas() { return llamadas; } };
   const modelo: Modelo = {
     async completar(_instruccion, entrada) {
+      llamadas++;
       const { piezas } = JSON.parse(entrada) as { piezas: { id: string }[] };
       ofrecidas.push(...piezas.map((p) => p.id));
       return typeof propuesta === 'string' ? propuesta : JSON.stringify(propuesta);
     },
   };
-  return { modelo, ofrecidas };
+  return { modelo, ofrecidas, contador };
 }
 
 const propuestaBuena = {
@@ -31,15 +33,25 @@ const propuestaBuena = {
   ],
 };
 
+const temporales: string[] = [];
+afterEach(() => {
+  for (const d of temporales.splice(0)) rmSync(d, { recursive: true, force: true });
+});
+
+function copia() {
+  const dir = mkdtempSync(join(tmpdir(), 'onyon-curso-'));
+  temporales.push(dir);
+  cpSync(FIXTURES, dir, { recursive: true });
+  return dir;
+}
+
 describe('generarCurso', () => {
-  it('produce un módulo que supera esquemaModulo y construirCatalogo en modo desarrollo', async () => {
+  it('produce un módulo que supera esquemaModulo (generarCurso ya lo valida con construirCatalogo)', async () => {
     const { modelo } = falso(propuestaBuena);
     const { id, modulo } = await generarCurso({ tema: 'Seguridad en redes para ASIR', raizContenido: FIXTURES, modelo });
     expect(id).toBe('seguridad-en-redes-para-asir');
     expect(() => esquemaModulo.parse(modulo)).not.toThrow();
-    const { piezas, modulos } = leerCorpus(FIXTURES);
-    const generado = { id, archivo: `${id}.yml`, rutaAbs: `/x/${id}.yml`, datos: modulo, privado: false };
-    expect(() => construirCatalogo(piezas, [...modulos, generado], 'desarrollo')).not.toThrow();
+    expect(modulo.unidades.map((u) => [u.id, u.piezas])).toEqual([['seguridad-del-perimetro', ['firewall', 'vpn']], ['acceso-remoto', ['ssh']]]);
   });
 
   it('nace desactivado, con ids de unidad slug únicos y sin piezas repetidas en una unidad', async () => {
@@ -69,14 +81,36 @@ describe('generarCurso', () => {
     const caido: Modelo = { completar: () => Promise.reject(new Error('503')) };
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, modelo: caido })).rejects.toThrow(/503/);
   });
+
+  it('hereda ciclo, curso e icono del módulo con más piezas elegidas', async () => {
+    const smr = await generarCurso({ tema: 'T', raizContenido: FIXTURES, modelo: falso({ unidades: [{ titulo: 'U', piezas: ['ssh', 'usuarios', 'vpn'] }] }).modelo });
+    expect(smr.modulo).toMatchObject({ ciclo: 'SMR', curso: 1, icono: 'terminal' });
+    const asir = await generarCurso({ tema: 'T', raizContenido: FIXTURES, modelo: falso({ unidades: [{ titulo: 'U', piezas: ['firewall', 'vpn', 'ssh'] }] }).modelo });
+    expect(asir.modulo).toMatchObject({ ciclo: 'ASIR', curso: 2, icono: 'globo' });
+  });
+
+  it('en empate de módulos de origen elige el primero por id', async () => {
+    const { modulo } = await generarCurso({ tema: 'T', raizContenido: FIXTURES, modelo: falso({ unidades: [{ titulo: 'U', piezas: ['ssh', 'firewall'] }] }).modelo });
+    expect(modulo).toMatchObject({ ciclo: 'ASIR', codigo: 'POR-DEFINIR' });
+  });
+
+  it('un tema sin caracteres válidos falla antes de llamar al modelo', async () => {
+    const { modelo, contador } = falso(propuestaBuena);
+    await expect(generarCurso({ tema: '???', raizContenido: FIXTURES, modelo })).rejects.toThrow(/identificador/);
+    expect(contador.llamadas).toBe(0);
+  });
+
+  it('un corpus con ids de pieza duplicados falla antes de llamar al modelo', async () => {
+    const raiz = copia();
+    mkdirSync(join(raiz, 'piezas', 'otra'));
+    cpSync(join(raiz, 'piezas', 'redes', 'vpn.md'), join(raiz, 'piezas', 'otra', 'vpn.md'));
+    const { modelo, contador } = falso(propuestaBuena);
+    await expect(generarCurso({ tema: 'Tema', raizContenido: raiz, modelo })).rejects.toThrow(/duplicado/);
+    expect(contador.llamadas).toBe(0);
+  });
 });
 
 describe('ejecutarCurso (comando)', () => {
-  function copia() {
-    const dir = mkdtempSync(join(tmpdir(), 'onyon-curso-'));
-    cpSync(FIXTURES, dir, { recursive: true });
-    return dir;
-  }
 
   it('escribe contenido/modulos/<id>.yml desactivado', async () => {
     const raiz = copia();
@@ -103,9 +137,20 @@ describe('ejecutarCurso (comando)', () => {
     expect(existsSync(join(raiz, 'modulos', 'tema.yml'))).toBe(false);
   });
 
-  it('exige exactamente un tema', async () => {
+  it.each([[[]], [['a', 'b']], [['  ']]])('exige exactamente un tema (%j)', async (argumentos) => {
     const { modelo } = falso(propuestaBuena);
-    await expect(ejecutarCurso({ argumentos: [], raizContenido: FIXTURES, modelo })).rejects.toThrow(/tema/);
-    await expect(ejecutarCurso({ argumentos: ['a', 'b'], raizContenido: FIXTURES, modelo })).rejects.toThrow(/tema/);
+    await expect(ejecutarCurso({ argumentos, raizContenido: FIXTURES, modelo })).rejects.toThrow(/tema/);
+  });
+
+  it('sin proveedor de modelo configurado lo dice claramente', async () => {
+    await expect(ejecutarCurso({ argumentos: ['Tema'], raizContenido: copia() })).rejects.toThrow(/proveedor/);
+  });
+});
+
+describe('scripts/curso.mjs', () => {
+  it('se ejecuta bajo Vite y sin argumentos sale con el mensaje de uso', () => {
+    const r = spawnSync(process.execPath, ['scripts/curso.mjs'], { encoding: 'utf8' });
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain('uso: node scripts/curso.mjs');
   });
 });
