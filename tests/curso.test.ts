@@ -197,6 +197,14 @@ describe('ejecutarCurso (comando)', () => {
     expect(escrito.activo).toBe(false);
   });
 
+  it('devuelve, por pieza escrita, las entidades que la justificaron', async () => {
+    const raiz = copia();
+    const { modelo } = falso({ unidades: [{ titulo: 'Perímetro', piezas: ['firewall', 'vpn'] }] }, grafoRedes);
+    const { destino, justificacion } = await ejecutarCurso({ argumentos: ['Cortafuegos'], raizContenido: raiz, dirCache: cache(), modelo });
+    expect(destino).toBe(join(raiz, 'modulos', 'cortafuegos.yml'));
+    expect(justificacion).toEqual({ firewall: ['Cortafuegos', 'Reglas'], vpn: ['Cortafuegos', 'VPN'] });
+  });
+
   it('si el destino ya existe, falla y no lo toca', async () => {
     const raiz = copia();
     const ruta = join(raiz, 'modulos', 'tema.yml');

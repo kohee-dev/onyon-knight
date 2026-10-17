@@ -16,7 +16,7 @@ function modeloPorDefecto(): Modelo {
 }
 
 /** Capa fina del comando: valida el argumento, llama a generarCurso y escribe `modulos/<id>.yml` sin sobrescribir. */
-export async function ejecutarCurso({ argumentos, raizContenido, dirCache, modelo }: OpcionesCli): Promise<string> {
+export async function ejecutarCurso({ argumentos, raizContenido, dirCache, modelo }: OpcionesCli): Promise<{ destino: string; justificacion: Record<string, string[]> }> {
   if (argumentos.length !== 1 || !argumentos[0].trim()) throw new Error('uso: node scripts/curso.mjs "tema"  (un único tema entre comillas)');
   const raiz = resolve(raizContenido ?? process.env.ONYON_CONTENIDO ?? 'contenido');
   const tema = argumentos[0].trim();
@@ -25,19 +25,20 @@ export async function ejecutarCurso({ argumentos, raizContenido, dirCache, model
   const previo = join(raiz, 'modulos', `${slug(tema)}.yml`);
   if (existsSync(previo)) throw new Error(`el módulo ya existe: ${previo}`);
 
-  const { id, modulo } = await generarCurso({ tema, raizContenido: raiz, dirCache: dirCache ?? resolve('.cache/curso'), modelo: modelo ?? modeloPorDefecto() });
+  const { id, modulo, justificacion } = await generarCurso({ tema, raizContenido: raiz, dirCache: dirCache ?? resolve('.cache/curso'), modelo: modelo ?? modeloPorDefecto() });
   const destino = join(raiz, 'modulos', `${id}.yml`);
   mkdirSync(dirname(destino), { recursive: true });
   // «wx»: aunque otro proceso lo cree entretanto, nunca se sobrescribe.
   writeFileSync(destino, dump(modulo, { lineWidth: -1 }), { encoding: 'utf8', flag: 'wx' });
-  return destino;
+  return { destino, justificacion };
 }
 
 /** Punto de entrada de scripts/curso.mjs. */
 export async function main(argumentos: string[]): Promise<void> {
   try {
-    const destino = await ejecutarCurso({ argumentos });
+    const { destino, justificacion } = await ejecutarCurso({ argumentos });
     console.log(`Módulo escrito (desactivado) en ${destino}`);
+    for (const [pieza, entidades] of Object.entries(justificacion)) console.log(`  ${pieza}: ${entidades.join(', ')}`);
   } catch (e) {
     console.error(`Error: ${(e as Error).message}`);
     process.exitCode = 1;
