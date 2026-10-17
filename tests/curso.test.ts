@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { load } from 'js-yaml';
 import { afterEach, describe, expect, it } from 'vitest';
 import { generarCurso, type Modelo } from '../src/lib/curso/generar';
+import { ClaveAusente } from '../src/lib/curso/modelo';
 import { ejecutarCurso, formatearJustificacion } from '../src/lib/curso/cli';
 import { esquemaModulo } from '../src/lib/esquemas';
 
@@ -142,6 +143,44 @@ describe('generarCurso', () => {
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: falso({ unidades: [] }).modelo })).rejects.toThrow(/ninguna pieza/i);
     const caido: Modelo = { completar: () => Promise.reject(new Error('503')) };
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(/503/);
+  });
+
+  it('un proveedor caído da un mensaje que dice qué comprobar y conserva la causa', async () => {
+    const original = new Error('503');
+    const caido: Modelo = { completar: () => Promise.reject(original) };
+    const rechazo = generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido });
+    await expect(rechazo).rejects.toThrow(/proveedor.*503.*(comprueba|reintenta|vuelve)/is);
+    await expect(rechazo).rejects.toMatchObject({ cause: original });
+  });
+
+  it('un rechazo que no es un Error no vuelca sus cabeceras ni su clave en el mensaje', async () => {
+    const caido: Modelo = { completar: () => Promise.reject({ status: 401, headers: { authorization: 'Bearer sk-SECRETO' } }) };
+    const rechazo = generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido });
+    await expect(rechazo).rejects.toThrow(/401/);
+    await expect(rechazo).rejects.not.toThrow(/SECRETO/);
+  });
+
+  it('un rechazo imposible de describir (prototipo nulo y circular) sigue dando el mensaje accionable', async () => {
+    const raro = Object.create(null);
+    raro.self = raro;
+    const caido: Modelo = { completar: () => Promise.reject(raro) };
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(/ha fallado.*vuelve a intentarlo/);
+  });
+
+  it.each([['texto', 'cuota agotada', /ha fallado \(cuota agotada\)/], ['objeto', { status: 429 }, /ha fallado \(.*429/], ['undefined', undefined, /ha fallado.*vuelve a intentarlo/]])('un proveedor que rechaza con %s (no un Error) también da el mensaje accionable', async (_caso, rechazo, mensaje) => {
+    const caido: Modelo = { completar: () => Promise.reject(rechazo) };
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(mensaje);
+  });
+
+  it('un rechazo cuyo campo lanza al leerlo (getter) sigue dando el mensaje accionable', async () => {
+    const caido: Modelo = { completar: () => Promise.reject({ get status(): number { throw new Error('boom'); } }) };
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(/ha fallado.*vuelve a intentarlo/);
+  });
+
+  it('una clave ausente nombra la variable de entorno que hay que definir', async () => {
+    const sinClave: Modelo = { completar: () => Promise.reject(new ClaveAusente('MI_CLAVE_API')) };
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: sinClave })).rejects.toThrow(/define.*MI_CLAVE_API/i);
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: sinClave })).rejects.not.toThrow(/ha fallado/);
   });
 
   it('las piezas propuestas salen de la vecindad del grafo y la justificación lista las entidades', async () => {
@@ -296,6 +335,13 @@ describe('ejecutarCurso (comando)', () => {
   it('si la generación falla, no escribe nada', async () => {
     const raiz = copia();
     const { modelo } = falso('basura');
+    await expect(ejecutarCurso({ argumentos: ['Tema'], raizContenido: raiz, dirCache: cache(), modelo })).rejects.toThrow();
+    expect(existsSync(join(raiz, 'modulos', 'tema.yml'))).toBe(false);
+  });
+
+  it.each([['proveedor caído', new Error('503')], ['clave ausente', new ClaveAusente('MI_CLAVE_API')]])('con %s no escribe nada', async (_caso, error) => {
+    const raiz = copia();
+    const modelo: Modelo = { completar: () => Promise.reject(error) };
     await expect(ejecutarCurso({ argumentos: ['Tema'], raizContenido: raiz, dirCache: cache(), modelo })).rejects.toThrow();
     expect(existsSync(join(raiz, 'modulos', 'tema.yml'))).toBe(false);
   });

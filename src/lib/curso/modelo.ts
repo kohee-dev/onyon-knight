@@ -15,3 +15,42 @@ export function leerJson<T extends z.ZodType>(texto: string, esquema: T, esperad
     throw new Error(`respuesta del modelo no válida (se esperaba JSON con ${esperado}): ${texto.slice(0, 200)}`);
   }
 }
+
+/** La clave de API del proveedor no está en la variable de entorno esperada. */
+export class ClaveAusente extends Error {
+  constructor(readonly variable: string) {
+    super(`falta la clave de API: define la variable de entorno ${variable} y vuelve a ejecutar el comando`);
+  }
+}
+
+/** Texto de un rechazo cualquiera. Un objeto que no es un Error no se vuelca entero: podría llevar cabeceras o la clave. */
+function detalle(e: unknown): string {
+  try {
+    if (e instanceof Error) return e.message;
+    if (typeof e === 'string') return e;
+    if (typeof e === 'object' && e !== null) {
+      const campos = (['status', 'code', 'statusText', 'message'] as const)
+        .map((campo) => (e as Record<string, unknown>)[campo])
+        .filter((valor) => typeof valor === 'string' || typeof valor === 'number');
+      return campos.length ? campos.join(' ') : 'rechazo sin detalle';
+    }
+    return String(e);
+  } catch {
+    // Un getter que lanza o un Proxy hostil no debe tapar el aviso accionable.
+    return 'rechazo sin detalle';
+  }
+}
+
+/** Envuelve el modelo para que sus fallos (de transporte o de otro tipo: no se distinguen) lleguen al autor con qué comprobar, sin ocultar la causa. */
+export function conErroresClaros(modelo: Modelo): Modelo {
+  return {
+    async completar(instruccion, entrada) {
+      try {
+        return await modelo.completar(instruccion, entrada);
+      } catch (e) {
+        if (e instanceof ClaveAusente) throw e;
+        throw new Error(`el proveedor del modelo ha fallado (${detalle(e)}); comprueba la conexión, la cuota y la clave, y vuelve a intentarlo`, { cause: e });
+      }
+    },
+  };
+}

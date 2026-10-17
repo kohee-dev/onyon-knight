@@ -5,7 +5,7 @@ import { componer } from './compositor';
 import { leerCorpus } from './corpus';
 import { extraer, type Extraccion } from './extractor';
 import { Grafo, type Justificacion } from './grafo';
-import type { Modelo } from './modelo';
+import { conErroresClaros, type Modelo } from './modelo';
 import { recuperar } from './recuperador';
 
 export type { Modelo } from './modelo';
@@ -37,12 +37,13 @@ function moduloDeOrigen(modulos: ModuloFuente[], recuperadas: Set<string>): Modu
 }
 
 /** Propone un módulo nuevo (desactivado) que reordena piezas públicas ya existentes. Solo escribe el grafo en `dirCache`. */
-export async function generarCurso({ tema, raizContenido, modelo, dirCache }: OpcionesGenerar): Promise<{
+export async function generarCurso({ tema, raizContenido, modelo: modeloCrudo, dirCache }: OpcionesGenerar): Promise<{
   id: string;
   modulo: CabeceraModulo;
   /** Por cada pieza propuesta, las entidades de la vecindad del tema que la justificaron. */
   justificacion: Justificacion;
 }> {
+  const modelo = conErroresClaros(modeloCrudo);
   const id = slug(tema);
   if (!SLUG.test(id)) throw new Error(`el tema «${tema}» no da un identificador válido`);
 

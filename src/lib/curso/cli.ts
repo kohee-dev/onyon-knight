@@ -13,7 +13,7 @@ export interface OpcionesCli {
 
 /** El proveedor real aún no está decidido (API de Claude o modelo local): hasta entonces el comando no puede llamar a ninguno. */
 function modeloPorDefecto(): Modelo {
-  throw new Error('no hay proveedor de modelo configurado todavía');
+  throw new Error('no hay proveedor de modelo configurado todavía (el adaptador real está pendiente, issue #7)');
 }
 
 /** Capa fina del comando: valida el argumento, llama a generarCurso y escribe `modulos/<id>.yml` sin sobrescribir. */
