@@ -6,6 +6,7 @@ import { generarCurso, slug, type Modelo } from './generar';
 export interface OpcionesCli {
   argumentos: string[];
   raizContenido?: string;
+  dirCache?: string;
   modelo?: Modelo;
 }
 
@@ -15,7 +16,7 @@ function modeloPorDefecto(): Modelo {
 }
 
 /** Capa fina del comando: valida el argumento, llama a generarCurso y escribe `modulos/<id>.yml` sin sobrescribir. */
-export async function ejecutarCurso({ argumentos, raizContenido, modelo }: OpcionesCli): Promise<string> {
+export async function ejecutarCurso({ argumentos, raizContenido, dirCache, modelo }: OpcionesCli): Promise<string> {
   if (argumentos.length !== 1 || !argumentos[0].trim()) throw new Error('uso: node scripts/curso.mjs "tema"  (un único tema entre comillas)');
   const raiz = resolve(raizContenido ?? process.env.ONYON_CONTENIDO ?? 'contenido');
   const tema = argumentos[0].trim();
@@ -24,7 +25,7 @@ export async function ejecutarCurso({ argumentos, raizContenido, modelo }: Opcio
   const previo = join(raiz, 'modulos', `${slug(tema)}.yml`);
   if (existsSync(previo)) throw new Error(`el módulo ya existe: ${previo}`);
 
-  const { id, modulo } = await generarCurso({ tema, raizContenido: raiz, modelo: modelo ?? modeloPorDefecto() });
+  const { id, modulo } = await generarCurso({ tema, raizContenido: raiz, dirCache: dirCache ?? resolve('.cache/curso'), modelo: modelo ?? modeloPorDefecto() });
   const destino = join(raiz, 'modulos', `${id}.yml`);
   mkdirSync(dirname(destino), { recursive: true });
   // «wx»: aunque otro proceso lo cree entretanto, nunca se sobrescribe.
