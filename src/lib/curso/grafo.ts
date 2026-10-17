@@ -21,8 +21,10 @@ export class Grafo {
       .normalize('NFD')
       .replace(/\p{Diacritic}/gu, '')
       .toLowerCase()
-      // Un punto que no precede a una letra o cifra (final de frase, siglas) no forma parte del nombre.
-      .replace(/\.(?![\p{L}\p{N}])/gu, ' ')
+      // Un punto que no precede a una letra o cifra (final de frase o de sigla) o que sigue a otro punto no forma parte del nombre.
+      .replace(/\.(?![\p{L}\p{N}])|(?<=\.)\./gu, ' ')
+      // Las siglas con puntos (S.O., e.g.) valen lo mismo que sin ellos.
+      .replace(/(?<![\p{L}\p{N}])(\p{L})\.(?=\p{L}(?![\p{L}\p{N}]))/gu, '$1')
       // +, # y el punto interno distinguen C, C++, C#, Node.js: se conservan tal cual, sin sustituirlos por palabras.
       .replace(/[^\p{L}\p{N}+#.]+/gu, ' ')
       .trim();
@@ -40,7 +42,8 @@ export class Grafo {
 
   private nodo(nombre: string): Nodo | undefined {
     const clave = Grafo.clave(nombre);
-    if (!clave) return undefined;
+    // Sin letras ni cifras (p. ej. «#» suelto) no es un concepto: enlazaría piezas sin relación.
+    if (!/[\p{L}\p{N}]/u.test(clave)) return undefined;
     let n = this.nodos.get(clave);
     if (!n) this.nodos.set(clave, (n = { nombre: nombre.trim(), piezas: [], vecinos: [] }));
     return n;
@@ -49,8 +52,8 @@ export class Grafo {
   private unir(a: string, b: string) {
     const ka = Grafo.clave(a);
     const kb = Grafo.clave(b);
-    if (!ka || !kb || ka === kb) return;
-    const [na, nb] = [this.nodo(a)!, this.nodo(b)!];
+    const [na, nb] = [this.nodo(a), this.nodo(b)];
+    if (!na || !nb || ka === kb) return;
     if (!na.vecinos.includes(kb)) na.vecinos.push(kb);
     if (!nb.vecinos.includes(ka)) nb.vecinos.push(ka);
   }

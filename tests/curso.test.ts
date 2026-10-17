@@ -190,6 +190,26 @@ describe('generarCurso', () => {
     expect(compuestas.sort()).toEqual(['firewall', 'ssh']);
   });
 
+  it('las siglas con puntos se unen a su forma sin puntos (S.O. = SO) y los puntos repetidos no dejan restos (a..b = a b)', async () => {
+    const guion: Guion = {
+      extraccion: { firewall: { entidades: ['S.O.'] }, vpn: { entidades: ['SO'] }, ssh: { entidades: ['Alfa..Beta'] }, usuarios: { entidades: ['Alfa Beta'] } },
+      semillas: ['SO', 'Alfa Beta'],
+    };
+    const { modelo, compuestas } = falso({ unidades: [{ titulo: 'U', piezas: ['firewall', 'vpn', 'ssh', 'usuarios'] }] }, guion);
+    await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: cache(), modelo });
+    expect(compuestas.sort()).toEqual(['firewall', 'ssh', 'usuarios', 'vpn']);
+    expect(compuestas.length).toBe(4);
+  });
+
+  it('una entidad hecha solo de símbolos («#») no crea un nodo que enlace piezas', async () => {
+    const guion: Guion = {
+      extraccion: { firewall: { entidades: ['#'] }, vpn: { entidades: ['#'] }, ssh: { entidades: ['Otra'] }, usuarios: { entidades: ['Otra'] } },
+      semillas: ['#'],
+    };
+    const { modelo } = falso({ unidades: [{ titulo: 'U', piezas: ['firewall', 'vpn'] }] }, guion);
+    await expect(generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: cache(), modelo })).rejects.toThrow(/ninguna pieza/i);
+  });
+
   it('deduce ciclo, curso e icono del módulo con más piezas recuperadas, no solo elegidas', async () => {
     // Se recuperan las cuatro piezas (empate alfa/beta → alfa), aunque el compositor use solo las de beta.
     const { modulo } = await generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: falso({ unidades: [{ titulo: 'U', piezas: ['ssh', 'usuarios'] }] }, { semillas: ['Seguridad'] }).modelo });
