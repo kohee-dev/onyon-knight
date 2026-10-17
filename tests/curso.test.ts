@@ -95,6 +95,23 @@ describe('generarCurso', () => {
     expect(modulo.unidades[0].piezas).toEqual(['vpn']);
   });
 
+  it('los títulos de unidad se recortan', async () => {
+    const { modelo } = falso({ unidades: [{ titulo: '  Núcleo  ', piezas: ['vpn'] }] });
+    const { modulo } = await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: cache(), modelo });
+    expect(modulo.unidades[0].titulo).toBe('Núcleo');
+  });
+
+  it('el nombre del módulo se recorta', async () => {
+    const { modelo } = falso(propuestaBuena);
+    const { id, modulo } = await generarCurso({ tema: '  VPN  ', raizContenido: FIXTURES, dirCache: cache(), modelo });
+    expect([id, modulo.nombre]).toEqual(['vpn', 'VPN']);
+  });
+
+  it.each([['en blanco', '   '], ['solo caracteres invisibles', '​⁠']])('un título de unidad %s se rechaza', async (_caso, titulo) => {
+    const { modelo } = falso({ unidades: [{ titulo, piezas: ['vpn'] }] });
+    await expect(generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: cache(), modelo })).rejects.toThrow(/título/i);
+  });
+
   it('no ofrece al modelo los borradores', async () => {
     const { modelo, extraidas, compuestas } = falso(propuestaBuena);
     await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, modelo, dirCache: cache() });

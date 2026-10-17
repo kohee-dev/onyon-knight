@@ -33,7 +33,7 @@ export function slug(texto: string): string {
 function moduloDeOrigen(modulos: ModuloFuente[], recuperadas: Set<string>): ModuloFuente {
   if (modulos.length === 0) throw new Error('no hay módulos de origen de los que deducir ciclo, curso e icono');
   const cuenta = (m: ModuloFuente) => m.datos.unidades.flatMap((u) => u.piezas).filter((p) => recuperadas.has(p)).length;
-  return [...modulos].sort((a, b) => cuenta(b) - cuenta(a) || a.id.localeCompare(b.id))[0];
+  return [...modulos].sort((a, b) => cuenta(b) - cuenta(a) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))[0];
 }
 
 /** Propone un módulo nuevo (desactivado) que reordena piezas públicas ya existentes. Solo escribe el grafo en `dirCache`. */
@@ -70,17 +70,19 @@ export async function generarCurso({ tema, raizContenido, modelo, dirCache }: Op
     if (desconocidas.length) throw new Error(`el modelo cita piezas que no se recuperaron del grafo, no existen o son borradores: ${desconocidas.join(', ')}`);
     if (ids.length === 0) return [];
     ids.forEach((p) => elegidas.add(p));
-    const base = slug(u.titulo) || 'unidad';
+    const titulo = u.titulo.trim();
+    if (!titulo.replace(/[\p{White_Space}\p{Cf}]/gu, '')) throw new Error('el modelo propone una unidad con el título en blanco');
+    const base = slug(titulo) || 'unidad';
     let unidadId = base;
     for (let n = 2; idsUnidad.has(unidadId); n++) unidadId = `${base}-${n}`;
     idsUnidad.add(unidadId);
-    return [{ id: unidadId, titulo: u.titulo, piezas: ids }];
+    return [{ id: unidadId, titulo, piezas: ids }];
   });
   if (unidades.length === 0) throw new Error(`ninguna pieza del corpus es relevante para «${tema}»`);
 
   const origen = moduloDeOrigen(modulos, new Set(recuperadas.keys()));
   const modulo: CabeceraModulo = {
-    nombre: tema,
+    nombre: tema.trim(),
     codigo: CODIGO_POR_DEFINIR,
     ciclo: origen.datos.ciclo,
     curso: origen.datos.curso,
