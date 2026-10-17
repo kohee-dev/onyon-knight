@@ -70,11 +70,13 @@ export async function generarCurso({ tema, raizContenido, modelo, dirCache }: Op
     if (desconocidas.length) throw new Error(`el modelo cita piezas que no se recuperaron del grafo, no existen o son borradores: ${desconocidas.join(', ')}`);
     if (ids.length === 0) return [];
     ids.forEach((p) => elegidas.add(p));
-    const base = slug(u.titulo) || 'unidad';
+    const titulo = u.titulo.trim();
+    if (!titulo) throw new Error('el modelo propone una unidad con el título en blanco');
+    const base = slug(titulo) || 'unidad';
     let unidadId = base;
     for (let n = 2; idsUnidad.has(unidadId); n++) unidadId = `${base}-${n}`;
     idsUnidad.add(unidadId);
-    return [{ id: unidadId, titulo: u.titulo, piezas: ids }];
+    return [{ id: unidadId, titulo, piezas: ids }];
   });
   if (unidades.length === 0) throw new Error(`ninguna pieza del corpus es relevante para «${tema}»`);
 
