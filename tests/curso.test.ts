@@ -170,9 +170,29 @@ describe('generarCurso', () => {
     expect(justificacion).toEqual({ vpn: ['C#'] });
   });
 
+  it('un punto final no separa una entidad de su variante sin punto (Linux. = Linux)', async () => {
+    const guion: Guion = {
+      extraccion: { firewall: { entidades: ['Linux.'] }, vpn: { entidades: ['Linux'] }, ssh: { entidades: ['S.O.'] }, usuarios: { entidades: ['Otra'] } },
+      semillas: ['Linux'],
+    };
+    const { modelo, compuestas } = falso({ unidades: [{ titulo: 'U', piezas: ['firewall', 'vpn'] }] }, guion);
+    await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: cache(), modelo });
+    expect(compuestas.sort()).toEqual(['firewall', 'vpn']);
+  });
+
+  it('un punto interno distingue Node.js de NodeJS, y un símbolo no se confunde con su nombre (C. ≠ «C dot»)', async () => {
+    const guion: Guion = {
+      extraccion: { firewall: { entidades: ['Node.js'] }, vpn: { entidades: ['NodeJS'] }, ssh: { entidades: ['C dot'] }, usuarios: { entidades: ['C.'] } },
+      semillas: ['Node.js', 'C dot'],
+    };
+    const { modelo, compuestas } = falso({ unidades: [{ titulo: 'U', piezas: ['firewall', 'ssh'] }] }, guion);
+    await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: cache(), modelo });
+    expect(compuestas.sort()).toEqual(['firewall', 'ssh']);
+  });
+
   it('deduce ciclo, curso e icono del módulo con más piezas recuperadas, no solo elegidas', async () => {
     // Se recuperan las cuatro piezas (empate alfa/beta → alfa), aunque el compositor use solo las de beta.
-    const { modulo } = await generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: falso({ unidades: [{ titulo: 'U', piezas: ['ssh', 'usuarios'] }] }).modelo });
+    const { modulo } = await generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: falso({ unidades: [{ titulo: 'U', piezas: ['ssh', 'usuarios'] }] }, { semillas: ['Seguridad'] }).modelo });
     expect(modulo).toMatchObject({ ciclo: 'ASIR', curso: 2, icono: 'globo' });
   });
 

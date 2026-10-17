@@ -21,10 +21,10 @@ export class Grafo {
       .normalize('NFD')
       .replace(/\p{Diacritic}/gu, '')
       .toLowerCase()
-      .replace(/\+/g, ' plus ')
-      .replace(/#/g, ' sharp ')
-      .replace(/\./g, ' dot ')
-      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      // Un punto que no precede a una letra o cifra (final de frase, siglas) no forma parte del nombre.
+      .replace(/\.(?![\p{L}\p{N}])/gu, ' ')
+      // +, # y el punto interno distinguen C, C++, C#, Node.js: se conservan tal cual, sin sustituirlos por palabras.
+      .replace(/[^\p{L}\p{N}+#.]+/gu, ' ')
       .trim();
   }
 
