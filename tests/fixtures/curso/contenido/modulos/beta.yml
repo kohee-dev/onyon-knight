@@ -1,0 +1,9 @@
+nombre: Beta
+codigo: "0002"
+ciclo: SMR
+curso: 1
+icono: terminal
+unidades:
+  - id: ut1
+    titulo: Administración
+    piezas: [ssh, usuarios]

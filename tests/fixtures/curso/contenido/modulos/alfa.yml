@@ -1,0 +1,9 @@
+nombre: Alfa
+codigo: "0001"
+ciclo: ASIR
+curso: 2
+icono: globo
+unidades:
+  - id: ut1
+    titulo: Perímetro
+    piezas: [firewall, vpn]
