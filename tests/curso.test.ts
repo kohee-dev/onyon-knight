@@ -172,6 +172,11 @@ describe('generarCurso', () => {
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(mensaje);
   });
 
+  it('un rechazo cuyo campo lanza al leerlo (getter) sigue dando el mensaje accionable', async () => {
+    const caido: Modelo = { completar: () => Promise.reject({ get status(): number { throw new Error('boom'); } }) };
+    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(/ha fallado.*vuelve a intentarlo/);
+  });
+
   it('una clave ausente nombra la variable de entorno que hay que definir', async () => {
     const sinClave: Modelo = { completar: () => Promise.reject(new ClaveAusente('MI_CLAVE_API')) };
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: sinClave })).rejects.toThrow(/define.*MI_CLAVE_API/i);

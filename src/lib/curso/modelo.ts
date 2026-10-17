@@ -25,15 +25,20 @@ export class ClaveAusente extends Error {
 
 /** Texto de un rechazo cualquiera. Un objeto que no es un Error no se vuelca entero: podría llevar cabeceras o la clave. */
 function detalle(e: unknown): string {
-  if (e instanceof Error) return e.message;
-  if (typeof e === 'string') return e;
-  if (typeof e === 'object' && e !== null) {
-    const campos = (['status', 'code', 'statusText', 'message'] as const)
-      .map((campo) => (e as Record<string, unknown>)[campo])
-      .filter((valor) => typeof valor === 'string' || typeof valor === 'number');
-    return campos.length ? campos.join(' ') : 'rechazo sin detalle';
+  try {
+    if (e instanceof Error) return e.message;
+    if (typeof e === 'string') return e;
+    if (typeof e === 'object' && e !== null) {
+      const campos = (['status', 'code', 'statusText', 'message'] as const)
+        .map((campo) => (e as Record<string, unknown>)[campo])
+        .filter((valor) => typeof valor === 'string' || typeof valor === 'number');
+      return campos.length ? campos.join(' ') : 'rechazo sin detalle';
+    }
+    return String(e);
+  } catch {
+    // Un getter que lanza o un Proxy hostil no debe tapar el aviso accionable.
+    return 'rechazo sin detalle';
   }
-  return String(e);
 }
 
 /** Envuelve el modelo para que sus fallos (de transporte o de otro tipo: no se distinguen) lleguen al autor con qué comprobar, sin ocultar la causa. */
