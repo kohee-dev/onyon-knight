@@ -81,6 +81,11 @@ describe('generarCurso', () => {
     expect(modulo.unidades).toHaveLength(2);
   });
 
+  it('acepta el bloque ```json aunque la valla vaya pegada al JSON', async () => {
+    const { modulo } = await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, modelo: falso('```json' + JSON.stringify(propuestaBuena) + '```').modelo });
+    expect(modulo.unidades).toHaveLength(2);
+  });
+
   it('falla con una respuesta mal formada, sin propuesta o con un proveedor caído', async () => {
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, modelo: falso('no es json').modelo })).rejects.toThrow(/respuesta/i);
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, modelo: falso({ unidades: [] }).modelo })).rejects.toThrow(/ninguna pieza/i);
@@ -117,7 +122,6 @@ describe('generarCurso', () => {
 });
 
 describe('ejecutarCurso (comando)', () => {
-
   it('escribe contenido/modulos/<id>.yml desactivado', async () => {
     const raiz = copia();
     const { modelo } = falso(propuestaBuena);

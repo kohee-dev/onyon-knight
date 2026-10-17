@@ -38,8 +38,8 @@ export function slug(texto: string): string {
 function leerRespuesta(texto: string) {
   try {
     // Muchos modelos envuelven el JSON en un bloque de código aunque se les pida solo JSON.
-    const sinBloque = texto.trim().replace(/^```(?:json)?\s*\n/i, '').replace(/\n```$/, '');
-    return esquemaRespuesta.parse(JSON.parse(sinBloque));
+    const bloque = /^```(?:json)?\s*([\s\S]*?)\s*```$/i.exec(texto.trim());
+    return esquemaRespuesta.parse(JSON.parse(bloque ? bloque[1] : texto));
   } catch {
     throw new Error(`respuesta del modelo no válida (se esperaba JSON con «unidades»): ${texto.slice(0, 200)}`);
   }
