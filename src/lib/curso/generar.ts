@@ -22,7 +22,7 @@ const INSTRUCCION =
   'Elige solo las piezas relevantes para el tema y agrúpalas en unidades ordenadas, cada una con un título. ' +
   'Usa únicamente ids de la lista. Responde solo con JSON: {"unidades":[{"titulo":"...","piezas":["id"]}]}.';
 
-const respuesta = z.object({
+const esquemaRespuesta = z.object({
   unidades: z.array(z.object({ titulo: z.string().min(1), piezas: z.array(z.string()) })),
 });
 
@@ -37,7 +37,7 @@ export function slug(texto: string): string {
 
 function leerRespuesta(texto: string) {
   try {
-    return respuesta.parse(JSON.parse(texto));
+    return esquemaRespuesta.parse(JSON.parse(texto));
   } catch {
     throw new Error(`respuesta del modelo no válida (se esperaba JSON con «unidades»): ${texto.slice(0, 200)}`);
   }

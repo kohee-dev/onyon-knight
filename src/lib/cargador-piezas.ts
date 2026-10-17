@@ -7,11 +7,12 @@ import { load } from 'js-yaml';
 
 const CABECERA = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
 
-function listarMarkdown(dir: string): string[] {
+/** Archivos con esa extensión bajo `dir`, en profundidad. Vacío si la carpeta no existe. */
+export function listarArchivos(dir: string, extension: string): string[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir).flatMap((n) => {
     const r = join(dir, n);
-    return statSync(r).isDirectory() ? listarMarkdown(r) : n.endsWith('.md') ? [r] : [];
+    return statSync(r).isDirectory() ? listarArchivos(r, extension) : n.endsWith(extension) ? [r] : [];
   });
 }
 
@@ -33,7 +34,7 @@ export function piezasMarkdown(base: string): Loader {
       const raiz = fileURLToPath(config.root);
       const cargar = async () => {
         store.clear();
-        for (const ruta of listarMarkdown(base)) {
+        for (const ruta of listarArchivos(base, '.md')) {
           const filePath = relative(raiz, ruta);
           const texto = readFileSync(ruta, 'utf8');
           let separado;
