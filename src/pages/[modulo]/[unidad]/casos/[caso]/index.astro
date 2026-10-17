@@ -1,4 +1,5 @@
 ---
+import Dificultad from '../../../../../components/Dificultad.astro';
 import { AUTOR } from '../../../../../licencias';
 import Fecha from '../../../../../components/Fecha.astro';
 import ImagenCaso from '../../../../../components/ImagenCaso.astro';
@@ -29,7 +30,7 @@ const entradas = render.titulos.filter((t) => t.nivel <= 2).map((t) => ({ id: t.
     <div class="portada-imagen"><ImagenCaso imagen={render.cabecera} modulo={m} proporcion="cabecera" titulo={fuente.datos.titulo} /></div>
     <p class="portada-modulo">{m.datos.nombre} · {u.titulo}</p>
     <p class="portada-meta">{u.pie}</p>
-    <p><span class="chip-caso">Caso práctico</span> {formatearHoras(fuente.datos.horas!)}</p>
+    <p><span class="chip-caso">Caso práctico</span> {formatearHoras(fuente.datos.horas!)} <Dificultad dificultad={fuente.dificultad} /></p>
     <h1 class="portada-titulo">{fuente.datos.titulo}</h1>
     <Fecha fecha={fecha} />
     <p class="portada-licencia">© {AUTOR} · {c.creditos.licenciaTexto.nombre}, salvo indicación expresa.<br />{new URL(c.url, sitio.sitioUrl).href}</p>
@@ -38,7 +39,7 @@ const entradas = render.titulos.filter((t) => t.nivel <= 2).map((t) => ({ id: t.
   <div class="banner"><ImagenCaso imagen={render.cabecera} modulo={m} proporcion="cabecera" titulo={fuente.datos.titulo} /></div>
   <header class="unidad-cabecera caso-cabecera">
     <div class="cabecera-texto">
-      <p class="meta"><span class="chip-caso">Caso práctico</span> {formatearHoras(fuente.datos.horas!)}</p>
+      <p class="meta"><span class="chip-caso">Caso práctico</span> {formatearHoras(fuente.datos.horas!)} <Dificultad dificultad={fuente.dificultad} /></p>
       <h1>{fuente.datos.titulo}</h1>
       <Fecha fecha={fecha} />
     </div>

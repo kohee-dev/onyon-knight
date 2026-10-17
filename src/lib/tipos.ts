@@ -33,8 +33,8 @@ export interface Ficha {
   titular?: string;
 }
 
-import type { CabeceraModulo, CabeceraPieza } from './esquemas';
-export type { CabeceraModulo, CabeceraPieza };
+import type { CabeceraModulo, CabeceraPieza, Dificultad } from './esquemas';
+export type { CabeceraModulo, CabeceraPieza, Dificultad };
 
 export type Modo = 'desarrollo' | 'publicacion';
 
@@ -46,6 +46,10 @@ export interface PiezaFuente {
   datos: CabeceraPieza;
   cuerpo: string;
   privado: boolean;
+  /** Carpeta de la pieza relativa a la raíz de piezas (`privado:` delante si es privada). */
+  bloque: string;
+  /** Dificultad final: la de la pieza o, si no tiene, la de su bloque.yml. */
+  dificultad?: Dificultad;
 }
 
 export interface ModuloFuente {

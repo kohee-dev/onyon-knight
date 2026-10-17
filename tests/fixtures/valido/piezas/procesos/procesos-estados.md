@@ -1,4 +1,5 @@
 ---
+dificultad: avanzado
 titulo: Estados de un proceso
 fuentes:
   - "Silberschatz, Operating System Concepts, 10.ª ed."
@@ -18,4 +19,8 @@ Muestra los procesos con `ps aux`.
 ```mermaid
 flowchart LR
   Listo --> Ejecucion --> Bloqueado --> Listo
+```
+
+```bash
+ps aux | grep sshd
 ```

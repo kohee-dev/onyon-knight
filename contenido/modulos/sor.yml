@@ -12,10 +12,13 @@ unidades:
     piezas: [intro-sistemas-operativos]
   - id: ut2
     titulo: Introducción a los sistemas operativos en red
-    piezas: [intro-sistemas-operativos-red, virtualizacion]
+    piezas: [intro-sistemas-operativos-red, fundamentos-virtualizacion, docker-contenedores]
   - id: ut3
     titulo: Active Directory
     piezas: [active-directory, aldea-goblins]
   - id: ut4
     titulo: "Linux: usuarios, permisos y acceso remoto"
     piezas: [usuarios-linux, opera-garnier]
+  - id: ut5
+    titulo: Almacenamiento
+    piezas: [discos-raid, zfs-pools-datasets, cifrado-datos, permisos-acl, instantaneas-copias, compartir-linux, compartir-windows, monitorizacion-almacenamiento, minerva]

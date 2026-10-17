@@ -3,8 +3,8 @@ titulo: "Aldea de goblins"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 12
-portada: ./img/aldea-portada.svg
-cabecera: ./img/aldea-cabecera.svg
+portada: ./img/aldea-portada.webp
+cabecera: ./img/aldea-cabecera.webp
 ---
 
 # Contexto

@@ -5,3 +5,5 @@ dist/
 .env
 .superpowers/
 .DS_Store
+.claude/
+docs/superpowers/

@@ -36,6 +36,9 @@ const cssCategorias = Object.values(CATEGORIAS)
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo} · Onyon Knight</title>
     {descripcion && <meta name="description" content={descripcion} />}
+    <link rel="icon" type="image/png" sizes="32x32" href={`${base}favicon-32.png`} />
+    <link rel="icon" type="image/png" sizes="512x512" href={`${base}icono-512.png`} />
+    <link rel="apple-touch-icon" href={`${base}apple-touch-icon.png`} />
     <script is:inline>
       // Tema antes de pintar: elección guardada o, si no hay, la preferencia del sistema.
       (function () {
@@ -51,7 +54,7 @@ const cssCategorias = Object.values(CATEGORIAS)
     <header class="cabecera">
       <span class="cabecera-hueco" aria-hidden="true"></span>
       <div class="cabecera-inicio">
-        <a class="marca" href={base}>Onyon Knight</a>
+        <a class="marca" href={base}><img class="marca-imagen" src={`${base}img/caballero-96.webp`} srcset={`${base}img/caballero-192.webp 2x`} alt="" width="122" height="96" /><span>Onyon Knight</span></a>
         <DesplegableModulos />
       </div>
       <div class="cabecera-acciones">
@@ -88,6 +91,54 @@ const cssCategorias = Object.values(CATEGORIAS)
           }
         }),
       );
+
+      // Botón «Copiar» en cada bloque de código (los diagramas Mermaid no lo llevan).
+      const ICONO_COPIAR =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      const ICONO_HECHO =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+      const copiarRespaldo = (texto: string) => {
+        const area = document.createElement('textarea');
+        area.value = texto;
+        area.style.cssText = 'position:fixed;opacity:0';
+        document.body.append(area);
+        area.select();
+        const hecho = document.execCommand('copy');
+        area.remove();
+        return hecho;
+      };
+      for (const pre of document.querySelectorAll<HTMLElement>('main pre:not(.mermaid)')) {
+        const caja = document.createElement('div');
+        caja.className = 'codigo';
+        pre.replaceWith(caja);
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'copiar-codigo';
+        boton.setAttribute('aria-label', 'Copiar código');
+        boton.innerHTML = ICONO_COPIAR;
+        const aviso = document.createElement('span');
+        aviso.className = 'copiar-aviso';
+        aviso.setAttribute('aria-live', 'polite');
+        caja.append(pre, boton, aviso);
+        let espera: number | undefined;
+        boton.addEventListener('click', async () => {
+          const texto = ((pre.querySelector('code') ?? pre).textContent ?? '').replace(/\n$/, '');
+          try {
+            await navigator.clipboard.writeText(texto);
+          } catch {
+            if (!copiarRespaldo(texto)) return;
+          }
+          boton.classList.add('copiado');
+          boton.innerHTML = ICONO_HECHO;
+          aviso.textContent = 'Copiado';
+          clearTimeout(espera);
+          espera = window.setTimeout(() => {
+            boton.classList.remove('copiado');
+            boton.innerHTML = ICONO_COPIAR;
+            aviso.textContent = '';
+          }, 2000);
+        });
+      }
 
       // Barra de progreso de lectura.
       const progreso = document.querySelector<HTMLElement>('.progreso');

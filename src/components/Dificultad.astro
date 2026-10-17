@@ -1,0 +1,19 @@
+---
+import type { Dificultad } from '../lib/tipos';
+interface Props { dificultad?: Dificultad }
+const { dificultad } = Astro.props;
+const NIVELES: Record<Dificultad, { n: number; texto: string }> = {
+  basico: { n: 1, texto: 'Básico' },
+  intermedio: { n: 2, texto: 'Intermedio' },
+  avanzado: { n: 3, texto: 'Avanzado' },
+};
+const nivel = dificultad ? NIVELES[dificultad] : undefined;
+---
+{nivel && (
+  <span class={`dificultad dificultad-${dificultad}`}>
+    <span class="barras" aria-hidden="true">
+      {[1, 2, 3].map((i) => <span class={i <= nivel.n ? 'barra llena' : 'barra'} />)}
+    </span>
+    <span class="solo-lector">{'Dificultad: '}</span>{nivel.texto}
+  </span>
+)}

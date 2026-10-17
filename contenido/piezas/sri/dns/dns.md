@@ -1,7 +1,6 @@
 ---
 titulo: "DNS: Sistema de Nombres de Dominio"
 licencia: CC-BY-NC-SA-4.0
-borrador: true
 ---
 
 :::nota[Objetivo]

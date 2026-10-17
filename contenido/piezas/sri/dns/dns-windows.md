@@ -1,7 +1,6 @@
 ---
 titulo: "Implantación de DNS en Windows Server"
 licencia: CC-BY-NC-SA-4.0
-borrador: true
 ---
 
 :::nota[Objetivo]

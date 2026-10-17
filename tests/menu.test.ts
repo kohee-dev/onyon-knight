@@ -168,6 +168,24 @@ describe('diagramas', () => {
   });
 });
 
+describe('copiar código', () => {
+  it('copia el bloque entero, se pone verde y lo anuncia; Mermaid no lleva botón', async () => {
+    const contexto = await navegador.newContext({ viewport: { width: 1440, height: 800 }, permissions: ['clipboard-read', 'clipboard-write'] });
+    const p = await contexto.newPage();
+    await p.goto(origen + '/ok/aso/ut1/');
+    await p.waitForFunction('window.__onyonListo === true');
+    expect(await p.locator('pre.mermaid .copiar-codigo, pre.mermaid + .copiar-codigo').count()).toBe(0);
+    const boton = p.locator('.codigo .copiar-codigo').first();
+    expect(await boton.getAttribute('aria-label')).toBe('Copiar código');
+    await boton.click();
+    expect(await p.evaluate(() => navigator.clipboard.readText())).toBe('ps aux | grep sshd');
+    expect(await boton.getAttribute('class')).toContain('copiado');
+    expect(await p.locator('.codigo .copiar-aviso').first().textContent()).toBe('Copiado');
+    await p.waitForFunction(() => !document.querySelector('.copiar-codigo.copiado'), null, { timeout: 4000 });
+    await contexto.close();
+  });
+});
+
 describe('tablas anchas', () => {
   it.each([1280, 1440])('a %i px ninguna tabla sale de la columna', async (ancho) => {
     const p = await abrir('/ok/aso/ut1/', ancho);

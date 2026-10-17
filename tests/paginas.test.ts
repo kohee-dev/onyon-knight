@@ -34,6 +34,9 @@ describe('páginas', () => {
     expect(h).toMatch(/<span class="tema-a-oscuro">Modo oscuro<\/span>/);
     expect(h).toMatch(/<span class="tema-a-claro">Modo claro<\/span>/);
     expect(h).toContain('aria-label="Cambiar a modo oscuro"');
+    // El casco del favicon, como máscara: toma el color del botón en cada tema.
+    expect(h).toMatch(/<button class="tema-boton"[^>]*><span class="tema-icono" aria-hidden="true"><\/span>/);
+    expect(readdirSync(join(dist, '_astro')).some((n) => /^casco-tema\..*\.png$/.test(n))).toBe(true);
     expect(h).not.toMatch(/Paladín|Caballero/);
     // El tema se aplica antes de pintar: script en línea en <head>.
     expect(h).toMatch(/<head>[\s\S]*data-tema[\s\S]*<\/head>/);
@@ -254,6 +257,24 @@ describe('páginas', () => {
     expect(publicadas.some((n) => n.includes('huerfana'))).toBe(false);
   });
 
+  it('todas las páginas enlazan el favicon del casco', () => {
+    for (const r of ['index.html', 'aso/ut1/index.html', 'licencias/index.html']) {
+      const h = leer(r);
+      expect(h).toContain('<link rel="icon" type="image/png" sizes="32x32" href="/ok/favicon-32.png">');
+      expect(h).toContain('<link rel="icon" type="image/png" sizes="512x512" href="/ok/icono-512.png">');
+      expect(h).toContain('<link rel="apple-touch-icon" href="/ok/apple-touch-icon.png">');
+    }
+    for (const f of ['favicon-32.png', 'icono-512.png', 'apple-touch-icon.png']) expect(existsSync(join(dist, f))).toBe(true);
+  });
+
+  it('el logo lleva la ilustración del caballero, decorativa y acreditada', () => {
+    const h = leer('index.html');
+    expect(h).toMatch(/<a class="marca" href="\/ok\/"><img class="marca-imagen" src="\/ok\/img\/caballero-96\.webp" srcset="\/ok\/img\/caballero-192\.webp 2x" alt="" width="122" height="96"[^>]*><span>Onyon Knight<\/span><\/a>/);
+    expect(existsSync(join(dist, 'img', 'caballero-96.webp'))).toBe(true);
+    expect(existsSync(join(dist, 'img', 'caballero-192.webp'))).toBe(true);
+    expect(leer('licencias/index.html')).toContain('Caballero junto a la hoguera');
+  });
+
   it('los iconos de la licencia se sirven desde el propio sitio', () => {
     const h = leer('index.html');
     for (const i of ['cc', 'by', 'nc', 'sa']) {
@@ -279,5 +300,51 @@ describe('páginas', () => {
       { tipo: 'caso', modulo: 'aso', unidad: 'ut2', caso: 'caso-solo', ruta: '/ok/aso/ut2/casos/caso-solo/', salida: 'pdf/aso-ut2/caso-solo.pdf', pie: 'ASO · UT2 · Caso práctico' },
       { tipo: 'unidad', modulo: 'som', unidad: 'ut3', ruta: '/ok/som/ut3/', salida: 'pdf/som-ut3.pdf', pie: 'SOM · UT3' },
     ]);
+  });
+});
+
+describe('dificultad', () => {
+  const trozo = (h: string, inicio: string, fin: string) => {
+    const i = h.indexOf(inicio);
+    expect(i).toBeGreaterThan(-1);
+    return h.slice(i, h.indexOf(fin, i));
+  };
+  const seccion = (id: string) => trozo(leer('aso/ut1/index.html'), `id="${id}"`, '</section>');
+  const tarjeta = (caso: string) => {
+    const h = leer('aso/ut1/index.html');
+    const i = h.indexOf(`/ok/aso/ut1/casos/${caso}/`);
+    expect(i).toBeGreaterThan(-1);
+    return h.slice(h.lastIndexOf('<li class="tarjeta-caso"', i), h.indexOf('</li>', i));
+  };
+
+  it('teoría: hereda la dificultad del bloque', () => {
+    const s = seccion('procesos-concepto');
+    expect(s).toContain('dificultad-basico');
+    expect(s).toContain('Básico');
+  });
+
+  it('teoría: la pieza sustituye la del bloque', () => {
+    const s = seccion('procesos-estados');
+    expect(s).toContain('dificultad-avanzado');
+    expect(s).toContain('Avanzado');
+    expect(s).not.toContain('dificultad-basico');
+  });
+
+  it('tarjeta de caso con dificultad', () => {
+    const t = tarjeta('caso-ldap');
+    expect(t).toContain('dificultad-intermedio');
+    expect(t).toContain('Intermedio');
+  });
+
+  it('sin dificultad no pinta nada', () => {
+    expect(tarjeta('caso-sin-imagenes')).not.toContain('class="dificultad');
+  });
+
+  it('el lector de pantalla oye «Dificultad:» antes del nivel', () => {
+    expect(seccion('procesos-concepto')).toMatch(/<span class="solo-lector"[^>]*>Dificultad: <\/span>/);
+  });
+
+  it('página del caso', () => {
+    expect(leer('aso/ut1/casos/caso-ldap/index.html')).toContain('dificultad-intermedio');
   });
 });

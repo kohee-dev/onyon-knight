@@ -1,4 +1,4 @@
-// Iconos de línea de los módulos (Feather Icons, MIT) y casco del tema (SVG Repo, CC0). Ver contenido/creditos-sitio.yml.
+// Iconos de línea de los módulos (Feather Icons, MIT) y casco genérico de los casos (SVG Repo, CC0). Ver contenido/creditos-sitio.yml.
 const archivos = import.meta.glob('../iconos/*.svg', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 
 const porNombre = new Map(

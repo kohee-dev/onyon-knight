@@ -139,9 +139,18 @@ html {
   gap: 0.5rem;
 }
 .marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 800;
   color: var(--texto);
   text-decoration: none;
+}
+/* Ilustración del caballero junto al nombre (decorativa). */
+.marca-imagen {
+  width: auto;
+  height: 2.5rem;
+  margin-block: -0.4rem;
 }
 /* Barra de progreso de lectura: solo el tramo dorado, sobre el borde inferior. */
 .progreso {
@@ -192,10 +201,14 @@ html {
   background: var(--tema-boton);
   color: var(--tema-boton-texto);
 }
-.tema-icono svg {
-  width: 1.1em;
-  height: 1.1em;
+/* Casco del favicon como máscara: se pinta con el color del botón en cada estado. */
+.tema-icono {
   display: block;
+  width: 1.45em;
+  height: 1.15em;
+  background: currentColor;
+  -webkit-mask: url('../iconos/casco-tema.png') center / contain no-repeat;
+  mask: url('../iconos/casco-tema.png') center / contain no-repeat;
 }
 .tema-a-claro,
 :root[data-tema='oscuro'] .tema-a-oscuro {
@@ -677,6 +690,47 @@ pre {
   background: var(--codigo-fondo);
   border: 1px solid var(--borde);
 }
+/* Bloque de código con su botón de copiar (lo añade Base.astro). */
+.codigo {
+  position: relative;
+}
+.codigo > pre {
+  padding-right: 2.9rem;
+}
+.copiar-codigo {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  padding: 0.3rem;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  background: var(--superficie);
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+.copiar-codigo:hover,
+.copiar-codigo:focus-visible {
+  color: var(--acento);
+  border-color: var(--acento);
+}
+.copiar-codigo.copiado {
+  color: var(--ejercicio);
+  border-color: var(--ejercicio);
+}
+.copiar-codigo svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.copiar-aviso {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 pre code {
   background: none;
   padding: 0;
@@ -1061,4 +1115,42 @@ blockquote {
 }
 .contenido :is(td, th) code {
   overflow-wrap: anywhere;
+}
+
+/* Dificultad: barras + texto (no depende solo del color). Reutiliza los tonos de las etiquetas de recuadros. */
+.dificultad {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+  color: var(--dificultad-color);
+}
+.dificultad-basico { --dificultad-color: var(--ejercicio-etiqueta); }
+.dificultad-intermedio { --dificultad-color: var(--nota-etiqueta); }
+.dificultad-avanzado { --dificultad-color: var(--aviso-etiqueta); }
+.dificultad .barras {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.dificultad .barra {
+  width: 4px;
+  border: 1px solid currentColor;
+  border-radius: 1px;
+}
+.dificultad .barra:nth-child(1) { height: 6px; }
+.dificultad .barra:nth-child(2) { height: 9px; }
+.dificultad .barra:nth-child(3) { height: 12px; }
+.dificultad .barra.llena { background: currentColor; }
+/* Texto solo para lectores de pantalla. */
+.solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
