@@ -1,30 +1,24 @@
-import { z } from 'astro/zod';
 import { construirCatalogo, SLUG } from '../catalogo';
 import type { CabeceraModulo } from '../esquemas';
 import type { ModuloFuente } from '../tipos';
+import { componer } from './compositor';
 import { leerCorpus } from './corpus';
+import { extraer, type Extraccion } from './extractor';
+import { Grafo, type Justificacion } from './grafo';
+import type { Modelo } from './modelo';
+import { recuperar } from './recuperador';
 
-/** Puerto del modelo de lenguaje: cambiar de proveedor es escribir otro adaptador. */
-export interface Modelo {
-  completar(instruccion: string, entrada: string): Promise<string>;
-}
+export type { Modelo } from './modelo';
 
 export interface OpcionesGenerar {
   tema: string;
   raizContenido: string;
   modelo: Modelo;
+  /** Carpeta (ignorada por git) donde se guarda el grafo. */
+  dirCache: string;
 }
 
 export const CODIGO_POR_DEFINIR = 'POR-DEFINIR';
-
-const INSTRUCCION =
-  'Eres un asistente de autoría. Te doy un tema y la lista de piezas disponibles (id, titulo, resumen, tipo). ' +
-  'Elige solo las piezas relevantes para el tema y agrúpalas en unidades ordenadas, cada una con un título. ' +
-  'Usa únicamente ids de la lista. Responde solo con JSON: {"unidades":[{"titulo":"...","piezas":["id"]}]}.';
-
-const esquemaRespuesta = z.object({
-  unidades: z.array(z.object({ titulo: z.string().min(1), piezas: z.array(z.string()) })),
-});
 
 export function slug(texto: string): string {
   return texto
@@ -35,44 +29,45 @@ export function slug(texto: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-function leerRespuesta(texto: string) {
-  try {
-    // Muchos modelos envuelven el JSON en un bloque de código aunque se les pida solo JSON.
-    const bloque = /^```(?:json)?\s*([\s\S]*?)\s*```$/i.exec(texto.trim());
-    return esquemaRespuesta.parse(JSON.parse(bloque ? bloque[1] : texto));
-  } catch {
-    throw new Error(`respuesta del modelo no válida (se esperaba JSON con «unidades»): ${texto.slice(0, 200)}`);
-  }
-}
-
-/** Módulo con más piezas entre las elegidas; en empate, el primero por id. */
-function moduloDeOrigen(modulos: ModuloFuente[], elegidas: Set<string>): ModuloFuente {
+/** Módulo con más piezas entre las recuperadas del grafo; en empate, el primero por id. */
+function moduloDeOrigen(modulos: ModuloFuente[], recuperadas: Set<string>): ModuloFuente {
   if (modulos.length === 0) throw new Error('no hay módulos de origen de los que deducir ciclo, curso e icono');
-  const cuenta = (m: ModuloFuente) => m.datos.unidades.flatMap((u) => u.piezas).filter((p) => elegidas.has(p)).length;
+  const cuenta = (m: ModuloFuente) => m.datos.unidades.flatMap((u) => u.piezas).filter((p) => recuperadas.has(p)).length;
   return [...modulos].sort((a, b) => cuenta(b) - cuenta(a) || a.id.localeCompare(b.id))[0];
 }
 
-/** Propone un módulo nuevo (desactivado) que reordena piezas públicas ya existentes. No escribe nada. */
-export async function generarCurso({ tema, raizContenido, modelo }: OpcionesGenerar): Promise<{ id: string; modulo: CabeceraModulo }> {
+/** Propone un módulo nuevo (desactivado) que reordena piezas públicas ya existentes. Solo escribe el grafo en `dirCache`. */
+export async function generarCurso({ tema, raizContenido, modelo, dirCache }: OpcionesGenerar): Promise<{
+  id: string;
+  modulo: CabeceraModulo;
+  /** Por cada pieza propuesta, las entidades de la vecindad del tema que la justificaron. */
+  justificacion: Justificacion;
+}> {
   const id = slug(tema);
   if (!SLUG.test(id)) throw new Error(`el tema «${tema}» no da un identificador válido`);
 
   const { piezas, modulos } = leerCorpus(raizContenido);
   // Un corpus ya roto (ids duplicados…) se detecta antes de pagar una llamada al modelo.
   construirCatalogo(piezas, modulos, 'desarrollo');
-  const candidatas = new Map(piezas.filter((p) => !p.datos.borrador).map((p) => [p.id, p]));
-  const entrada = JSON.stringify({
-    tema,
-    piezas: [...candidatas.values()].map((p) => ({ id: p.id, titulo: p.datos.titulo, resumen: p.datos.resumen ?? '', tipo: p.datos.tipo })),
-  });
-  const propuesta = leerRespuesta(await modelo.completar(INSTRUCCION, entrada));
+  const publicas = piezas.filter((p) => !p.datos.borrador);
+
+  const extracciones = new Map<string, Extraccion>();
+  for (const pieza of publicas) extracciones.set(pieza.id, await extraer(modelo, pieza));
+  const grafo = Grafo.desde(extracciones);
+  grafo.guardar(dirCache);
+
+  const recuperadas = await recuperar(modelo, grafo, tema);
+  if (recuperadas.size === 0) throw new Error(`ninguna pieza del corpus es relevante para «${tema}»`);
+  const candidatas = new Map(publicas.filter((p) => recuperadas.has(p.id)).map((p) => [p.id, p]));
+  // Se ofrecen en el orden de relevancia del grafo.
+  const propuesta = await componer(modelo, tema, [...recuperadas.keys()].map((pid) => candidatas.get(pid)!));
 
   const elegidas = new Set<string>();
   const idsUnidad = new Set<string>();
-  const unidades = propuesta.unidades.flatMap((u) => {
+  const unidades = propuesta.flatMap((u) => {
     const ids = [...new Set(u.piezas)];
     const desconocidas = ids.filter((p) => !candidatas.has(p));
-    if (desconocidas.length) throw new Error(`el modelo cita piezas que no existen o son borradores: ${desconocidas.join(', ')}`);
+    if (desconocidas.length) throw new Error(`el modelo cita piezas que no se recuperaron del grafo, no existen o son borradores: ${desconocidas.join(', ')}`);
     if (ids.length === 0) return [];
     ids.forEach((p) => elegidas.add(p));
     const base = slug(u.titulo) || 'unidad';
@@ -83,7 +78,7 @@ export async function generarCurso({ tema, raizContenido, modelo }: OpcionesGene
   });
   if (unidades.length === 0) throw new Error(`ninguna pieza del corpus es relevante para «${tema}»`);
 
-  const origen = moduloDeOrigen(modulos, elegidas);
+  const origen = moduloDeOrigen(modulos, new Set(recuperadas.keys()));
   const modulo: CabeceraModulo = {
     nombre: tema,
     codigo: CODIGO_POR_DEFINIR,
@@ -96,5 +91,6 @@ export async function generarCurso({ tema, raizContenido, modelo }: OpcionesGene
 
   const generado: ModuloFuente = { id, archivo: `modulos/${id}.yml`, rutaAbs: `${raizContenido}/modulos/${id}.yml`, datos: modulo, privado: false };
   construirCatalogo(piezas, [...modulos, generado], 'desarrollo');
-  return { id, modulo };
+  const justificacion = Object.fromEntries([...elegidas].map((pid) => [pid, recuperadas.get(pid)!]));
+  return { id, modulo, justificacion };
 }
