@@ -4,7 +4,7 @@ import type { ModuloFuente } from '../tipos';
 import { componer } from './compositor';
 import { leerCorpus } from './corpus';
 import { extraer, type Extraccion } from './extractor';
-import { Grafo } from './grafo';
+import { Grafo, type Justificacion } from './grafo';
 import type { Modelo } from './modelo';
 import { recuperar } from './recuperador';
 
@@ -29,10 +29,10 @@ export function slug(texto: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-/** Módulo con más piezas entre las elegidas; en empate, el primero por id. */
-function moduloDeOrigen(modulos: ModuloFuente[], elegidas: Set<string>): ModuloFuente {
+/** Módulo con más piezas entre las recuperadas del grafo; en empate, el primero por id. */
+function moduloDeOrigen(modulos: ModuloFuente[], recuperadas: Set<string>): ModuloFuente {
   if (modulos.length === 0) throw new Error('no hay módulos de origen de los que deducir ciclo, curso e icono');
-  const cuenta = (m: ModuloFuente) => m.datos.unidades.flatMap((u) => u.piezas).filter((p) => elegidas.has(p)).length;
+  const cuenta = (m: ModuloFuente) => m.datos.unidades.flatMap((u) => u.piezas).filter((p) => recuperadas.has(p)).length;
   return [...modulos].sort((a, b) => cuenta(b) - cuenta(a) || a.id.localeCompare(b.id))[0];
 }
 
@@ -41,7 +41,7 @@ export async function generarCurso({ tema, raizContenido, modelo, dirCache }: Op
   id: string;
   modulo: CabeceraModulo;
   /** Por cada pieza propuesta, las entidades de la vecindad del tema que la justificaron. */
-  justificacion: Record<string, string[]>;
+  justificacion: Justificacion;
 }> {
   const id = slug(tema);
   if (!SLUG.test(id)) throw new Error(`el tema «${tema}» no da un identificador válido`);
@@ -78,7 +78,7 @@ export async function generarCurso({ tema, raizContenido, modelo, dirCache }: Op
   });
   if (unidades.length === 0) throw new Error(`ninguna pieza del corpus es relevante para «${tema}»`);
 
-  const origen = moduloDeOrigen(modulos, elegidas);
+  const origen = moduloDeOrigen(modulos, new Set(recuperadas.keys()));
   const modulo: CabeceraModulo = {
     nombre: tema,
     codigo: CODIGO_POR_DEFINIR,

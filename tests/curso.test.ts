@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { load } from 'js-yaml';
 import { afterEach, describe, expect, it } from 'vitest';
 import { generarCurso, type Modelo } from '../src/lib/curso/generar';
-import { ejecutarCurso } from '../src/lib/curso/cli';
+import { ejecutarCurso, formatearJustificacion } from '../src/lib/curso/cli';
 import { esquemaModulo } from '../src/lib/esquemas';
 
 const FIXTURES = resolve('tests/fixtures/curso/contenido');
@@ -159,10 +159,32 @@ describe('generarCurso', () => {
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo })).rejects.toThrow(/respuesta/i);
   });
 
-  it('hereda ciclo, curso e icono del módulo con más piezas elegidas', async () => {
-    const smr = await generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: falso({ unidades: [{ titulo: 'U', piezas: ['ssh', 'usuarios', 'vpn'] }] }).modelo });
+  it('entidades que solo difieren en símbolos (C, C++, C#) no se fusionan', async () => {
+    const guion: Guion = {
+      extraccion: { firewall: { entidades: ['C'] }, vpn: { entidades: ['C#'] }, ssh: { entidades: ['C++'] }, usuarios: { entidades: ['Otra'] } },
+      semillas: ['C#'],
+    };
+    const { modelo, compuestas } = falso({ unidades: [{ titulo: 'U', piezas: ['vpn'] }] }, guion);
+    const { justificacion } = await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: cache(), modelo });
+    expect(compuestas).toEqual(['vpn']);
+    expect(justificacion).toEqual({ vpn: ['C#'] });
+  });
+
+  it('deduce ciclo, curso e icono del módulo con más piezas recuperadas, no solo elegidas', async () => {
+    // Se recuperan las cuatro piezas (empate alfa/beta → alfa), aunque el compositor use solo las de beta.
+    const { modulo } = await generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: falso({ unidades: [{ titulo: 'U', piezas: ['ssh', 'usuarios'] }] }).modelo });
+    expect(modulo).toMatchObject({ ciclo: 'ASIR', curso: 2, icono: 'globo' });
+  });
+
+  it('hereda ciclo, curso e icono del módulo con más piezas recuperadas', async () => {
+    // Solo la pieza «fuera» queda sin la entidad semilla, así que no se recupera.
+    const sin = (fuera: string): Guion => ({
+      extraccion: Object.fromEntries(['firewall', 'vpn', 'ssh', 'usuarios'].map((id) => [id, { entidades: [id === fuera ? 'Otra' : 'Seguridad'] }])),
+    });
+    const todas = { unidades: [{ titulo: 'U', piezas: ['ssh'] }] };
+    const smr = await generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: falso(todas, sin('firewall')).modelo });
     expect(smr.modulo).toMatchObject({ ciclo: 'SMR', curso: 1, icono: 'terminal' });
-    const asir = await generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: falso({ unidades: [{ titulo: 'U', piezas: ['firewall', 'vpn', 'ssh'] }] }).modelo });
+    const asir = await generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: falso(todas, sin('usuarios')).modelo });
     expect(asir.modulo).toMatchObject({ ciclo: 'ASIR', curso: 2, icono: 'globo' });
   });
 
@@ -228,6 +250,12 @@ describe('ejecutarCurso (comando)', () => {
 
   it('sin proveedor de modelo configurado lo dice claramente', async () => {
     await expect(ejecutarCurso({ argumentos: ['Tema'], raizContenido: copia() })).rejects.toThrow(/proveedor/);
+  });
+});
+
+describe('formatearJustificacion', () => {
+  it('una línea por pieza con sus entidades', () => {
+    expect(formatearJustificacion({ firewall: ['Cortafuegos', 'Reglas'], vpn: ['VPN'] })).toEqual(['  firewall: Cortafuegos, Reglas', '  vpn: VPN']);
   });
 });
 

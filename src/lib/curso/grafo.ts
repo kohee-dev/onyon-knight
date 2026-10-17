@@ -2,6 +2,9 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Extraccion } from './extractor';
 
+/** Por cada pieza (id), las entidades que la justificaron. */
+export type Justificacion = Record<string, string[]>;
+
 interface Nodo {
   nombre: string;
   piezas: string[];
@@ -12,9 +15,17 @@ interface Nodo {
 export class Grafo {
   private nodos = new Map<string, Nodo>();
 
-  /** Clave con la que se identifica una entidad sin importar mayúsculas, tildes o espacios. */
+  /** Clave con la que se identifica una entidad sin importar mayúsculas, tildes o espacios, pero sin fundir símbolos con significado (C, C++, C#). */
   static clave(nombre: string): string {
-    return nombre.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    return nombre
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .replace(/\+/g, ' plus ')
+      .replace(/#/g, ' sharp ')
+      .replace(/\./g, ' dot ')
+      .replace(/[^\p{L}\p{N}]+/gu, ' ')
+      .trim();
   }
 
   static desde(extracciones: Map<string, Extraccion>): Grafo {
