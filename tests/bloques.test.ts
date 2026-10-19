@@ -133,6 +133,15 @@ describe('resolverBloques', () => {
       expect(m).toContain('z/y');
     });
 
+    it('una entrada que apunta a un fichero o a «..» no es una carpeta de bloque', () => {
+      const dir = raiz(['a/b']);
+      writeFileSync(join(dir, 'piezas', 'a', 'fichero'), '');
+      writeFileSync(join(dir, 'bloques.yml'), 'a:\n  fichero:\n    tema: redes\n  "..":\n    tema: redes\n');
+      const m = error(() => resolver(dir, p));
+      expect(m).toContain('a/fichero');
+      expect(m).toContain('a/..');
+    });
+
     it('excepción con una pieza inexistente', () => {
       const m = error(() => resolver(raiz(['a/b'], 'a:\n  b:\n    piezas:\n      fantasma: basico\n'), p));
       expect(m).toContain('contenido/bloques.yml');
@@ -156,10 +165,10 @@ describe('resolverBloques', () => {
 
 describe('cabecera de la pieza', () => {
   it('esquemaPieza rechaza «dificultad» y «tema»: viven en bloques.yml', () => {
-    for (const campo of ['dificultad: basico', 'tema: redes']) {
-      const r = esquemaPieza.safeParse({ titulo: 't', [campo.split(':')[0]]: campo.split(': ')[1] });
+    for (const [campo, valor] of [['dificultad', 'basico'], ['tema', 'redes']]) {
+      const r = esquemaPieza.safeParse({ titulo: 't', [campo]: valor });
       expect(r.success).toBe(false);
-      expect(JSON.stringify(r.error?.issues)).toContain(campo.split(':')[0]);
+      expect(JSON.stringify(r.error?.issues)).toContain(campo);
     }
     expect(esquemaPieza.safeParse({ titulo: 't' }).success).toBe(true);
   });

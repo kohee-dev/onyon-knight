@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { load, YAMLException } from 'js-yaml';
 import { problemasZod } from '../licencias';
@@ -43,21 +43,20 @@ export function resolverBloques(opts: { raiz: string; archivo: string; piezas: P
 
   const resultado = new Map<string, DatosBloque>();
   const problemas: Problema[] = [];
-  const idsPorBloque = new Map<string, Set<string>>();
-  for (const p of piezas) {
-    if (!idsPorBloque.has(p.bloque)) idsPorBloque.set(p.bloque, new Set());
-    idsPorBloque.get(p.bloque)!.add(p.id);
-  }
-  const ids = new Set(piezas.map((p) => p.id));
+  const bloqueDe = new Map(piezas.map((p) => [p.id, p.bloque]));
+  const esCarpeta = (...partes: string[]) => {
+    const ruta = join(raiz, 'piezas', ...partes);
+    return !partes.some((n) => n === '.' || n === '..') && existsSync(ruta) && statSync(ruta).isDirectory();
+  };
   for (const [modulo, bloques] of Object.entries(r.data)) {
     for (const [nombre, b] of Object.entries(bloques)) {
       const carpeta = `${modulo}/${nombre}`;
-      if (!existsSync(join(raiz, 'piezas', modulo, nombre))) {
+      if (!esCarpeta(modulo, nombre)) {
         problemas.push({ archivo, mensaje: `«${carpeta}» no es una carpeta de bloque (piezas/${carpeta}/)` });
       }
       for (const id of Object.keys(b.piezas ?? {})) {
-        if (!ids.has(id)) problemas.push({ archivo, mensaje: `«${carpeta}»: la pieza «${id}» no existe` });
-        else if (!idsPorBloque.get(carpeta)?.has(id)) problemas.push({ archivo, mensaje: `«${carpeta}»: la pieza «${id}» no está en ese bloque` });
+        if (!bloqueDe.has(id)) problemas.push({ archivo, mensaje: `«${carpeta}»: la pieza «${id}» no existe` });
+        else if (bloqueDe.get(id) !== carpeta) problemas.push({ archivo, mensaje: `«${carpeta}»: la pieza «${id}» no está en ese bloque` });
       }
     }
   }
