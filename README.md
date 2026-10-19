@@ -65,6 +65,7 @@ El contenido está en `contenido/`:
 | `contenido/piezas/<módulo>/<tema>/<id>.md` | Cada pieza, en Markdown. El nombre del archivo es su identificador y no puede repetirse en todo el proyecto. |
 | `contenido/modulos/<módulo>.yml` | Cada módulo: su nombre, código, ciclo, curso, icono y unidades. Cada unidad enumera sus piezas por identificador. |
 | `contenido/temas.yml` | La lista cerrada de temas para clasificar las piezas. |
+| `contenido/bloques.yml` | El tema y la dificultad de cada bloque (carpeta de piezas), y las excepciones de dificultad de piezas concretas. |
 | `contenido/creditos-sitio.yml` | Las herramientas y recursos con los que está hecha la web. |
 
 Una pieza empieza con una cabecera YAML:
@@ -75,8 +76,6 @@ titulo: "Contenedores con Docker"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso        # teoria (por defecto) o caso
 horas: 3          # obligatorio en los casos
-dificultad: intermedio  # basico, intermedio o avanzado (opcional)
-tema: virtualizacion    # id de contenido/temas.yml (opcional)
 resumen: Una frase sobre lo que se hace.
 fuentes:
   - "Autor. Título. https://…"
@@ -85,22 +84,32 @@ fuentes:
 
 Otros campos: `borrador: true` (la pieza se ve en `npm run dev`, pero no se publica) y, solo en los casos, `portada` y `cabecera` con la ruta de una imagen.
 
-**Dificultad.** Cada carpeta de piezas es un *bloque*. Un archivo `bloque.yml` en ella fija la dificultad de todas sus piezas:
+**Bloques: tema y dificultad.** Cada carpeta `contenido/piezas/<módulo>/<bloque>/` es un *bloque*. `contenido/bloques.yml` es el único sitio donde se fijan su tema y su dificultad, agrupados por módulo:
 
 ```yaml
-dificultad: intermedio
+sor:
+  active-directory:
+    tema: servicios-directorio
+    dificultad: intermedio      # basico, intermedio o avanzado
+    piezas:
+      aldea-goblins: avanzado   # excepción: esta pieza difiere de su bloque
+  introduccion:
+    tema: sistemas-operativos
+    dificultad: basico
 ```
 
-Una pieza que indique `dificultad` en su cabecera sustituye la del bloque. Si no hay ni una ni otra, no se muestra el indicador, y al generar la web aparece el aviso `bloque sin dificultad: <carpeta> (N piezas sin la suya)`.
+Todos los campos son opcionales. Una pieza hereda la dificultad y el tema de su bloque; una entrada de `piezas` solo cambia la dificultad de esa pieza, nunca el tema. Escribir `dificultad` o `tema` en la cabecera de una pieza es un error. La dificultad es del bloque: no cambia según la unidad o el módulo donde se use la pieza.
 
-**Temas.** `contenido/temas.yml` es la lista cerrada de temas, en el orden en que se muestran:
+`contenido/temas.yml` es la lista cerrada de temas, en el orden en que se muestran:
 
 ```yaml
 - id: virtualizacion
   nombre: Virtualización
 ```
 
-El tema se indica igual que la dificultad: `tema: virtualizacion` en el `bloque.yml` de la carpeta, o en la cabecera de una pieza para sustituirlo. Un tema que no esté en `temas.yml` es un error; una pieza sin tema no aparece en ninguna página de tema y al generar la web sale el aviso `bloque sin tema: <carpeta> (N piezas sin el suyo)`. Cada tema con piezas tiene su página en `/temas/<id>/`, enlazada desde el desplegable «Temas» de la cabecera.
+Errores (la web no se genera y el mensaje cita `bloques.yml`): YAML mal formado, campo desconocido, dificultad no válida, un tema que no esté en `temas.yml`, una entrada cuya carpeta de bloque no existe y una excepción que nombra una pieza inexistente o de otro bloque. Un bloque nuevo puede crearse y llenarse de piezas sin tocar antes `bloques.yml`: solo salen los avisos `bloque sin dificultad: <carpeta> (N piezas sin la suya)` y `bloque sin tema: <carpeta> (N piezas sin el suyo)`, y sin tema la pieza no aparece en ninguna página de tema. Cada tema con piezas tiene su página en `/temas/<id>/`, enlazada desde el desplegable «Temas» de la cabecera.
+
+El contenido privado (`ONYON_PRIVADO`) lleva su propio `bloques.yml` en la raíz de su carpeta, con el mismo formato y las mismas comprobaciones (los errores citan `privado:bloques.yml`). Un bloque es siempre `piezas/<módulo>/<bloque>/`: una pieza a otra profundidad no puede tener entrada. Con `npm run dev`, guardar `bloques.yml` actualiza la web.
 
 Para que una pieza aparezca en la web, añade su identificador a las `piezas` de una unidad en el `.yml` del módulo. Una misma pieza puede estar en varios módulos.
 
