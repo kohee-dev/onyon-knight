@@ -1,6 +1,6 @@
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
 import { getCollection } from 'astro:content';
-import { dificultadFinal, lectorBloques, valorFinal } from './bloques';
+import { resolverBloques } from './bloques';
 import { raizContenido, raizPrivada as privado } from './raices';
 import type { ModuloFuente, PiezaFuente } from './tipos';
 
@@ -24,20 +24,23 @@ async function coleccion(nombre: string): Promise<any[]> {
 export async function cargarFuentes(): Promise<{ piezas: PiezaFuente[]; modulos: ModuloFuente[] }> {
   const piezas: PiezaFuente[] = [];
   const modulos: ModuloFuente[] = [];
-  const leerBloque = lectorBloques();
   // Sin carpeta privada activa (siempre en build), las colecciones privadas ni se leen.
   const conPrivado = <T,>(lista: readonly (readonly [string, boolean])[]) => lista.filter(([, p]) => !p || privado);
   for (const [nombre, esPrivado] of conPrivado([['piezas', false], ['piezasPrivadas', true]])) {
-    const raizPiezas = resolve(esPrivado && privado ? privado : raizContenido, 'piezas');
-    for (const e of await coleccion(nombre)) {
+    const raizContenidoActual = esPrivado && privado ? privado : raizContenido;
+    const raizPiezas = resolve(raizContenidoActual, 'piezas');
+    const entradas = (await coleccion(nombre)).map((e) => {
       const r = rutas(e.filePath, esPrivado);
-      const dir = dirname(r.rutaAbs);
-      const bloque = (esPrivado ? 'privado:' : '') + relative(raizPiezas, dir).split(sep).join('/');
-      const dificultad = dificultadFinal(e.data.dificultad, dir, leerBloque);
-      const tema = valorFinal(e.data.tema, 'tema', dir, leerBloque);
-      const rutaBloque = join(dir, 'bloque.yml');
-      const archivoBloque = esPrivado && privado ? `privado:${relative(privado, rutaBloque)}` : relative(raiz, rutaBloque);
-      const origenTema = e.data.tema ? r.archivo : tema ? archivoBloque : undefined;
+      return { e, r, carpeta: relative(raizPiezas, dirname(r.rutaAbs)).split(sep).join('/') };
+    });
+    const datosBloque = resolverBloques({
+      raiz: raizContenidoActual,
+      archivo: esPrivado ? 'privado:bloques.yml' : relative(raiz, join(raizContenidoActual, 'bloques.yml')),
+      piezas: entradas.map(({ r, carpeta }) => ({ id: r.id, bloque: carpeta })),
+    });
+    for (const { e, r, carpeta } of entradas) {
+      const bloque = (esPrivado ? 'privado:' : '') + carpeta;
+      const { dificultad, tema, origenTema } = datosBloque.get(r.id)!;
       piezas.push({ ...r, datos: e.data, cuerpo: e.body ?? '', privado: esPrivado, bloque, dificultad, tema, origenTema });
     }
   }

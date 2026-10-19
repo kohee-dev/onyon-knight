@@ -1,0 +1,95 @@
+# Tema y dificultad de cada bloque (carpeta piezas/<módulo>/<bloque>/) y excepciones de dificultad por pieza.
+aso:
+  impresion:
+    tema: servicios-red
+    dificultad: intermedio
+  procesos:
+    tema: procesos
+    dificultad: intermedio
+    piezas:
+      procesos-espectro: avanzado
+  servicios-directorio:
+    tema: servicios-directorio
+    dificultad: intermedio
+    piezas:
+      openldap: avanzado
+iso:
+  almacenamiento:
+    tema: almacenamiento
+    dificultad: intermedio
+    piezas:
+      cifrado-datos: avanzado
+      minerva: avanzado
+      zfs-pools-datasets: avanzado
+  software-base:
+    tema: sistemas-operativos
+    dificultad: intermedio
+  virtualizacion:
+    tema: virtualizacion
+    dificultad: intermedio
+mm:
+  componentes:
+    tema: hardware
+    dificultad: basico
+  microinformatica:
+    tema: hardware
+    dificultad: basico
+psp:
+  multiproceso:
+    tema: procesos
+    dificultad: avanzado
+py:
+  fundamentos:
+    tema: programacion
+    dificultad: basico
+redes:
+  canalizaciones:
+    tema: redes
+    dificultad: basico
+  elementos:
+    tema: redes
+    dificultad: basico
+sge:
+  odoo:
+    tema: gestion-empresarial
+    dificultad: avanzado
+    piezas:
+      odoo-instalacion: intermedio
+som:
+  linux:
+    tema: sistemas-operativos
+    dificultad: intermedio
+  vim:
+    tema: linea-de-comandos
+    dificultad: basico
+sor:
+  active-directory:
+    tema: servicios-directorio
+    dificultad: intermedio
+    piezas:
+      aldea-goblins: avanzado
+  introduccion:
+    tema: sistemas-operativos
+    dificultad: basico
+  software-base:
+    tema: sistemas-operativos
+    dificultad: basico
+  usuarios-linux:
+    tema: usuarios-permisos
+    dificultad: intermedio
+    piezas:
+      opera-garnier: avanzado
+sri:
+  dhcp:
+    tema: servicios-red
+    dificultad: intermedio
+    piezas:
+      kea-dhcp: avanzado
+  dns:
+    tema: servicios-red
+    dificultad: intermedio
+    piezas:
+      dns-bind: avanzado
+  web:
+    tema: servicios-red
+    dificultad: intermedio

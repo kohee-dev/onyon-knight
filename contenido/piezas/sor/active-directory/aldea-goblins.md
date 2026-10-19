@@ -1,5 +1,4 @@
 ---
-dificultad: avanzado
 titulo: "Aldea de goblins"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso

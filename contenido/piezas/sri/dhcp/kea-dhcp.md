@@ -1,5 +1,4 @@
 ---
-dificultad: avanzado
 titulo: "Kea DHCP"
 licencia: CC-BY-NC-SA-4.0
 ---

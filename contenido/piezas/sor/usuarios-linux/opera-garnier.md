@@ -1,5 +1,4 @@
 ---
-dificultad: avanzado
 titulo: "La Ópera de Garnier"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso

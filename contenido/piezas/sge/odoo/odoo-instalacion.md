@@ -1,5 +1,4 @@
 ---
-dificultad: intermedio
 titulo: "La tienda de nº 163: instalación de Odoo"
 licencia: CC-BY-NC-SA-4.0
 tipo: "caso"

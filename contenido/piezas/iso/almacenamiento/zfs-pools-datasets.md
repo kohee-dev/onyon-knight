@@ -1,5 +1,4 @@
 ---
-dificultad: avanzado
 titulo: "ZFS, pools y datasets"
 licencia: CC-BY-NC-SA-4.0
 ---

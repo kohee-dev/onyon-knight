@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Loader } from 'astro/loaders';
 import { load } from 'js-yaml';
@@ -32,8 +32,11 @@ export function piezasMarkdown(base: string): Loader {
     name: 'onyon-piezas',
     async load({ store, parseData, config, watcher, logger }) {
       const raiz = fileURLToPath(config.root);
+      // bloques.yml vive en la raíz de contenido, junto a `piezas/`; entra en el digest para que editarlo refresque la web.
+      const bloques = join(dirname(base), 'bloques.yml');
       const cargar = async () => {
         store.clear();
+        const textoBloques = existsSync(bloques) ? readFileSync(bloques, 'utf8') : '';
         for (const ruta of listarArchivos(base, '.md')) {
           const filePath = relative(raiz, ruta);
           const texto = readFileSync(ruta, 'utf8');
@@ -44,15 +47,15 @@ export function piezasMarkdown(base: string): Loader {
             throw new Error(`${filePath}: cabecera YAML no válida: ${(e as Error).message.split('\n')[0]}`);
           }
           const data = await parseData({ id: filePath, data: separado.datos as Record<string, unknown>, filePath });
-          store.set({ id: filePath, data, body: separado.cuerpo, filePath, digest: texto });
+          store.set({ id: filePath, data, body: separado.cuerpo, filePath, digest: texto + textoBloques });
         }
       };
       await cargar();
       if (watcher) {
-        watcher.add(base);
+        watcher.add([base, bloques]);
         const recargar = async (ruta: string) => {
           // También imágenes y fichas: su URL publicada depende de su contenido (dev daría 404 si no).
-          if (!ruta.startsWith(base) || !/\.(md|ya?ml|png|jpe?g|gif|svg|webp)$/i.test(ruta)) return;
+          if (ruta !== bloques && (!ruta.startsWith(base) || !/\.(md|ya?ml|png|jpe?g|gif|svg|webp)$/i.test(ruta))) return;
           logger.info(`recargando piezas (${relative(raiz, ruta)})`);
           await cargar();
         };
