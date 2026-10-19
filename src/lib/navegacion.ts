@@ -36,6 +36,29 @@ export function modulosNavegacion(): Promise<ModuloNavegacion[]> {
   return (memo ??= calcular());
 }
 
+export interface TemaNavegacion {
+  id: string;
+  nombre: string;
+  url: string;
+}
+
+async function calcularTemas(): Promise<TemaNavegacion[]> {
+  const modo: Modo = import.meta.env.PROD ? 'publicacion' : 'desarrollo';
+  const { piezas, modulos } = await cargarFuentes();
+  // Solo el catálogo (sin renderizar): temas con alguna pieza en una unidad publicada.
+  const c = construirCatalogo(piezas, modulos, modo, temasDelSitio());
+  const usados = new Set([...c.apariciones.keys()].map((id) => c.piezas.get(id)?.tema).filter(Boolean));
+  return c.temas.filter((t) => usados.has(t.id)).map((t) => ({ id: t.id, nombre: t.nombre, url: `${base}temas/${t.id}/` }));
+}
+
+let memoTemas: Promise<TemaNavegacion[]> | null = null;
+
+/** Temas del desplegable de la cabecera y del menú. En build se calcula una vez. */
+export function temasNavegacion(): Promise<TemaNavegacion[]> {
+  if (!import.meta.env.PROD) return calcularTemas();
+  return (memoTemas ??= calcularTemas());
+}
+
 /** Id del módulo de la página actual (primer segmento tras la base), si lo hay. */
 export function moduloDeRuta(ruta: string): string | undefined {
   return ruta.startsWith(base) ? ruta.slice(base.length).split('/')[0] || undefined : undefined;

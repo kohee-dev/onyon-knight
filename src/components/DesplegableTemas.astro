@@ -1,9 +1,8 @@
 ---
-import { temasConPiezas } from '../lib/agrupar-temas';
-import { cargarSitio } from '../lib/sitio';
+import { temasNavegacion } from '../lib/navegacion';
 
-const sitio = await cargarSitio();
-const temas = temasConPiezas(sitio);
+const temas = await temasNavegacion();
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 ---
 {temas.length > 0 && (
   <div class="modulos-desplegable" data-desplegable>
@@ -12,8 +11,8 @@ const temas = temasConPiezas(sitio);
     </button>
     <div class="modulos-lista" id="lista-temas">
       <ul>
-        {temas.map(({ tema }) => <li><a href={`${sitio.base}temas/${tema.id}/`}>{tema.nombre}</a></li>)}
-        <li><a href={`${sitio.base}temas/`}>Todos los temas</a></li>
+        {temas.map((t) => <li><a href={t.url}>{t.nombre}</a></li>)}
+        <li><a href={`${base}temas/`}>Todos los temas</a></li>
       </ul>
     </div>
   </div>

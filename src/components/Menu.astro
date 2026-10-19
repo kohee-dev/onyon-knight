@@ -1,6 +1,5 @@
 ---
-import { temasConPiezas } from '../lib/agrupar-temas';
-import { cargarSitio } from '../lib/sitio';
+import { temasNavegacion } from '../lib/navegacion';
 import BotonTema from './BotonTema.astro';
 import ListaModulos from './ListaModulos.astro';
 
@@ -18,8 +17,8 @@ interface Props {
 }
 const { entradas = [] } = Astro.props;
 const conIndice = entradas.length > 0;
-const sitio = await cargarSitio();
-const temas = temasConPiezas(sitio);
+const temas = await temasNavegacion();
+const baseTemas = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 ---
 <nav class={`menu${conIndice ? '' : ' menu-vacio'}`} id="menu" aria-label={conIndice ? 'Índice' : 'Menú'}>
   <div class="menu-cabecera">
@@ -36,8 +35,8 @@ const temas = temasConPiezas(sitio);
       <p class="indice-titulo">Temas</p>
       <div class="menu-modulos-lista">
         <ul>
-          {temas.map(({ tema }) => <li><a href={`${sitio.base}temas/${tema.id}/`}>{tema.nombre}</a></li>)}
-          <li><a href={`${sitio.base}temas/`}>Todos los temas</a></li>
+          {temas.map((t) => <li><a href={t.url}>{t.nombre}</a></li>)}
+          <li><a href={`${baseTemas}temas/`}>Todos los temas</a></li>
         </ul>
       </div>
     </div>

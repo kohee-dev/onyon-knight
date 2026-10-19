@@ -52,3 +52,14 @@ describe('leerTemas', () => {
     expect(error(() => leerTemas(archivo('- id: redes\n  nombre: Redes\n  color: rojo\n')))).toContain('campo desconocido');
   });
 });
+
+describe('coste en astro dev', () => {
+  // En dev cargarSitio() no se memoiza: cada llamada renderiza todo el sitio y lanza git log.
+  // Los componentes que salen en todas las páginas (o una vez por pieza) no pueden usarlo.
+  it('la cabecera, el menú y la etiqueta de tema no reconstruyen el sitio', async () => {
+    const { readFileSync } = await import('node:fs');
+    for (const c of ['Tema', 'DesplegableTemas', 'Menu']) {
+      expect(readFileSync(`src/components/${c}.astro`, 'utf8'), c).not.toMatch(/import[^;]*cargarSitio|cargarSitio\(/);
+    }
+  });
+});
