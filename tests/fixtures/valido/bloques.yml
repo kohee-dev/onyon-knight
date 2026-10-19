@@ -1,0 +1,9 @@
+so:
+  procesos:
+    tema: procesos
+    dificultad: basico
+    piezas:
+      procesos-estados: avanzado
+  servicios:
+    tema: servicios
+    dificultad: intermedio

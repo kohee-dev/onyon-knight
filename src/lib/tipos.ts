@@ -48,11 +48,11 @@ export interface PiezaFuente {
   privado: boolean;
   /** Carpeta de la pieza relativa a la raíz de piezas (`privado:` delante si es privada). */
   bloque: string;
-  /** Dificultad final: la de la pieza o, si no tiene, la de su bloque.yml. */
+  /** Dificultad final: la excepción de la pieza o, si no tiene, la de su bloque en bloques.yml. */
   dificultad?: Dificultad;
-  /** Tema final (id de temas.yml): el de la pieza o el de su bloque.yml. */
+  /** Tema final (id de temas.yml): el de su bloque en bloques.yml. */
   tema?: string;
-  /** Archivo, para mensajes, del que sale el tema: la pieza o su bloque.yml. */
+  /** Archivo, para mensajes, del que sale el tema: bloques.yml. */
   origenTema?: string;
 }
 

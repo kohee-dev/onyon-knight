@@ -1,9 +1,9 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join } from 'node:path';
 import { load, YAMLException } from 'js-yaml';
 import { problemasZod } from '../licencias';
-import { esquemaBloque, type CabeceraBloque, type Dificultad } from './esquemas';
-import { ErrorContenido } from './tipos';
+import { esquemaBloques, type Dificultad } from './esquemas';
+import { ErrorContenido, type Problema } from './tipos';
 
 /** Lee un YAML; vacío o solo comentarios → undefined (js-yaml 5 lo rechaza). Errores de sintaxis → ErrorContenido. */
 export function cargarYaml(ruta: string, archivo: string): unknown {
@@ -17,37 +17,60 @@ export function cargarYaml(ruta: string, archivo: string): unknown {
   }
 }
 
-/** Lee y valida el bloque.yml de una carpeta de piezas; sin archivo (o vacío), {}. */
-export function leerBloque(dir: string): CabeceraBloque {
-  const ruta = join(dir, 'bloque.yml');
-  if (!existsSync(ruta)) return {};
-  const archivo = relative(process.cwd(), ruta);
-  const datos = cargarYaml(ruta, archivo);
-  const r = esquemaBloque.safeParse(datos ?? {});
+export interface PiezaDeBloque {
+  id: string;
+  /** Carpeta de la pieza relativa a `piezas/` (`módulo/bloque`), sin prefijo de raíz privada. */
+  bloque: string;
+}
+
+export interface DatosBloque {
+  tema?: string;
+  dificultad?: Dificultad;
+  /** Fichero, para mensajes, del que sale el tema. */
+  origenTema?: string;
+}
+
+/**
+ * Resuelve el tema y la dificultad de cada pieza de una raíz de contenido con su `bloques.yml`.
+ * `piezas` debe incluir todas las de la raíz (también los borradores); `archivo` es el nombre con que se cita el fichero.
+ */
+export function resolverBloques(opts: { raiz: string; archivo: string; piezas: PiezaDeBloque[] }): Map<string, DatosBloque> {
+  const { raiz, archivo, piezas } = opts;
+  const ruta = join(raiz, 'bloques.yml');
+  const datos = existsSync(ruta) ? cargarYaml(ruta, archivo) : undefined;
+  const r = esquemaBloques.safeParse(datos ?? {});
   if (!r.success) throw new ErrorContenido(problemasZod(r.error, archivo));
-  return r.data;
-}
 
-/** leerBloque con caché propia: cada carpeta se lee una vez por lector (uno por carga, nunca global). */
-export function lectorBloques(): (dir: string) => CabeceraBloque {
-  const cache = new Map<string, CabeceraBloque>();
-  return (dir) => {
-    if (!cache.has(dir)) cache.set(dir, leerBloque(dir));
-    return cache.get(dir)!;
-  };
-}
+  const resultado = new Map<string, DatosBloque>();
+  const problemas: Problema[] = [];
+  const idsPorBloque = new Map<string, Set<string>>();
+  for (const p of piezas) {
+    if (!idsPorBloque.has(p.bloque)) idsPorBloque.set(p.bloque, new Set());
+    idsPorBloque.get(p.bloque)!.add(p.id);
+  }
+  const ids = new Set(piezas.map((p) => p.id));
+  for (const [modulo, bloques] of Object.entries(r.data)) {
+    for (const [nombre, b] of Object.entries(bloques)) {
+      const carpeta = `${modulo}/${nombre}`;
+      if (!existsSync(join(raiz, 'piezas', modulo, nombre))) {
+        problemas.push({ archivo, mensaje: `«${carpeta}» no es una carpeta de bloque (piezas/${carpeta}/)` });
+      }
+      for (const id of Object.keys(b.piezas ?? {})) {
+        if (!ids.has(id)) problemas.push({ archivo, mensaje: `«${carpeta}»: la pieza «${id}» no existe` });
+        else if (!idsPorBloque.get(carpeta)?.has(id)) problemas.push({ archivo, mensaje: `«${carpeta}»: la pieza «${id}» no está en ese bloque` });
+      }
+    }
+  }
+  if (problemas.length) throw new ErrorContenido(problemas);
 
-/** Valor final de un campo: el de la pieza o el de su bloque. El bloque.yml se valida siempre, aunque no se use. */
-export function valorFinal<K extends keyof CabeceraBloque>(
-  propio: CabeceraBloque[K],
-  campo: K,
-  dir: string,
-  leer: (dir: string) => CabeceraBloque,
-): CabeceraBloque[K] {
-  const delBloque = leer(dir)[campo];
-  return propio ?? delBloque;
-}
-
-export function dificultadFinal(propia: Dificultad | undefined, dir: string, leer: (dir: string) => CabeceraBloque): Dificultad | undefined {
-  return valorFinal(propia, 'dificultad', dir, leer);
+  for (const p of piezas) {
+    const partes = p.bloque.split('/');
+    const b = partes.length === 2 ? r.data[partes[0]]?.[partes[1]] : undefined;
+    resultado.set(p.id, {
+      tema: b?.tema,
+      dificultad: b?.piezas?.[p.id] ?? b?.dificultad,
+      origenTema: b?.tema ? archivo : undefined,
+    });
+  }
+  return resultado;
 }

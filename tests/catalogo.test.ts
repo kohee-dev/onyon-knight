@@ -91,9 +91,9 @@ describe('temas en el catálogo', () => {
     expect(msg).toContain('tema desconocido «nada»');
   });
 
-  it('tema heredado desconocido cita bloque.yml', () => {
-    const msg = problemas(() => construirCatalogo([pieza('a', { tema: 'nada', origenTema: 'contenido/piezas/iso/b/bloque.yml' }), pieza('b')], m(), 'publicacion', T));
-    expect(msg).toContain('contenido/piezas/iso/b/bloque.yml');
+  it('tema desconocido cita bloques.yml', () => {
+    const msg = problemas(() => construirCatalogo([pieza('a', { tema: 'nada', origenTema: 'contenido/bloques.yml' }), pieza('b')], m(), 'publicacion', T));
+    expect(msg).toContain('contenido/bloques.yml');
   });
 
   it('tema desconocido falla aunque sea borrador', () => {

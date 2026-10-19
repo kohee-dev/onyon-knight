@@ -17,10 +17,6 @@ export const esquemaPieza = z
     borrador: z.boolean().default(false),
     fuentes: z.array(z.string().min(1)).default([]),
     licencia: z.string().default(LICENCIA_PROPIA),
-    /** Sustituye la dificultad del bloque (bloque.yml de su carpeta). */
-    dificultad,
-    /** Sustituye el tema del bloque; debe existir en temas.yml. */
-    tema,
     /** Solo en casos: duración estimada, imagen de la tarjeta y banner de la página. */
     horas: z.number().positive().optional(),
     portada: z.string().min(1).optional(),
@@ -56,8 +52,15 @@ export const esquemaModulo = z.strictObject({
   unidades: z.array(esquemaUnidad),
 });
 
-/** bloque.yml: datos comunes a las piezas de una carpeta. */
-export const esquemaBloque = z.strictObject({ dificultad, tema });
+/** Valor de un bloque en bloques.yml: tema, dificultad y excepciones de dificultad por pieza (id → dificultad). */
+export const esquemaBloque = z.strictObject({
+  dificultad,
+  tema,
+  piezas: z.record(z.string(), z.enum(DIFICULTADES, { error: 'debe ser «basico», «intermedio» o «avanzado»' })).optional(),
+});
+
+/** bloques.yml: módulo → bloque → datos del bloque. */
+export const esquemaBloques = z.record(z.string(), z.record(z.string(), esquemaBloque));
 
 /** Entrada de contenido/temas.yml (lista cerrada). */
 export const esquemaTema = z.strictObject({ id: z.string().regex(SLUG), nombre: z.string().min(1) });

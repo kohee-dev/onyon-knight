@@ -1,16 +1,24 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { dificultadFinal, leerBloque, lectorBloques, valorFinal } from '../src/lib/bloques';
-import { DIFICULTADES, esquemaBloque, esquemaPieza } from '../src/lib/esquemas';
+import { resolverBloques } from '../src/lib/bloques';
+import { esquemaPieza } from '../src/lib/esquemas';
 import { ErrorContenido } from '../src/lib/tipos';
 
-const carpeta = (contenido?: string) => {
-  const dir = mkdtempSync(join(tmpdir(), 'onyon-bloque-'));
-  if (contenido !== undefined) writeFileSync(join(dir, 'bloque.yml'), contenido);
+/** Raíz temporal con las carpetas de bloque dadas (módulo/bloque) y, si se da, su bloques.yml. */
+const raiz = (carpetas: string[], bloques?: string) => {
+  const dir = mkdtempSync(join(tmpdir(), 'onyon-bloques-'));
+  for (const c of carpetas) mkdirSync(join(dir, 'piezas', c), { recursive: true });
+  if (bloques !== undefined) writeFileSync(join(dir, 'bloques.yml'), bloques);
   return dir;
 };
+
+const pieza = (id: string, bloque: string) => ({ id, bloque });
+const GOBLINS = pieza('aldea-goblins', 'sor/active-directory');
+
+const resolver = (dir: string, piezas: { id: string; bloque: string }[], archivo = 'contenido/bloques.yml') =>
+  resolverBloques({ raiz: dir, archivo, piezas });
 
 function error(fn: () => unknown): string {
   try {
@@ -22,85 +30,137 @@ function error(fn: () => unknown): string {
   throw new Error('no lanzó error');
 }
 
-describe('dificultad en la pieza', () => {
-  it('esquemaPieza acepta los tres valores y su ausencia', () => {
-    for (const v of DIFICULTADES) expect(esquemaPieza.parse({ titulo: 't', dificultad: v }).dificultad).toBe(v);
-    expect(esquemaPieza.parse({ titulo: 't' }).dificultad).toBeUndefined();
+const CENTRAL = `
+sor:
+  active-directory:
+    tema: servicios-directorio
+    dificultad: intermedio
+    piezas:
+      aldea-goblins: avanzado
+  introduccion:
+    tema: sistemas-operativos
+    dificultad: basico
+`;
+const CARPETAS = ['sor/active-directory', 'sor/introduccion'];
+
+describe('resolverBloques', () => {
+  it('una pieza hereda tema y dificultad de su bloque y cita bloques.yml como origen del tema', () => {
+    const r = resolver(raiz(CARPETAS, CENTRAL), [pieza('ad-intro', 'sor/active-directory'), GOBLINS]);
+    expect(r.get('ad-intro')).toEqual({ tema: 'servicios-directorio', dificultad: 'intermedio', origenTema: 'contenido/bloques.yml' });
   });
 
-  it('esquemaPieza rechaza otro valor', () => {
-    const r = esquemaPieza.safeParse({ titulo: 't', dificultad: 'facil' });
-    expect(r.success).toBe(false);
-    expect(JSON.stringify(r.error?.issues)).toContain('debe ser «basico», «intermedio» o «avanzado»');
+  it('la excepción de una pieza gana en dificultad y no cambia el tema', () => {
+    const r = resolver(raiz(CARPETAS, CENTRAL), [GOBLINS, pieza('otra', 'sor/active-directory')]);
+    expect(r.get('aldea-goblins')).toMatchObject({ tema: 'servicios-directorio', dificultad: 'avanzado' });
+    expect(r.get('otra')?.dificultad).toBe('intermedio');
+  });
+
+  it('la excepción puede bajar de nivel y valer en un bloque sin dificultad propia', () => {
+    const dir = raiz(['a/b'], 'a:\n  b:\n    dificultad: avanzado\n    piezas:\n      p: intermedio\n');
+    expect(resolver(dir, [pieza('p', 'a/b')]).get('p')?.dificultad).toBe('intermedio');
+    const solo = raiz(['a/b'], 'a:\n  b:\n    piezas:\n      p: basico\n');
+    expect(resolver(solo, [pieza('p', 'a/b')]).get('p')).toMatchObject({ dificultad: 'basico', tema: undefined });
+  });
+
+  it('sin fichero, vacío o solo comentarios: ninguna pieza tiene datos', () => {
+    for (const contenido of [undefined, '', '# solo comentario\n']) {
+      const r = resolver(raiz(['a/b'], contenido), [pieza('p', 'a/b')]);
+      expect(r.get('p')).toEqual({ tema: undefined, dificultad: undefined, origenTema: undefined });
+    }
+  });
+
+  it('un bloque sin entrada deja a sus piezas sin datos, sin error', () => {
+    const r = resolver(raiz([...CARPETAS, 'sor/nuevo'], CENTRAL), [pieza('n', 'sor/nuevo'), GOBLINS]);
+    expect(r.get('n')?.dificultad).toBeUndefined();
+    expect(r.get('n')?.tema).toBeUndefined();
+  });
+
+  it('una pieza fuera de piezas/<módulo>/<bloque>/ no recibe datos', () => {
+    const dir = raiz(CARPETAS, CENTRAL);
+    const r = resolver(dir, [pieza('suelta', 'sor'), pieza('honda', 'sor/active-directory/sub'), GOBLINS]);
+    expect(r.get('suelta')?.dificultad).toBeUndefined();
+    expect(r.get('honda')?.tema).toBeUndefined();
+  });
+
+  it('las piezas de la lista cuentan como existentes aunque sean borradores (la lista las incluye todas)', () => {
+    const dir = raiz(['a/b'], 'a:\n  b:\n    piezas:\n      borrador: basico\n');
+    expect(resolver(dir, [pieza('borrador', 'a/b')]).get('borrador')?.dificultad).toBe('basico');
+  });
+
+  it('cita el nombre de fichero recibido (contenido privado)', () => {
+    const dir = raiz(['a/b'], 'a:\n  b:\n    dificultad: facil\n');
+    const m = error(() => resolver(dir, [pieza('p', 'a/b')], 'privado:bloques.yml'));
+    expect(m).toContain('privado:bloques.yml');
+    const r = resolver(raiz(['a/b'], 'a:\n  b:\n    tema: redes\n'), [pieza('p', 'a/b')], 'privado:bloques.yml');
+    expect(r.get('p')?.origenTema).toBe('privado:bloques.yml');
+  });
+
+  describe('errores (todos citan bloques.yml)', () => {
+    const p = [pieza('p', 'a/b')];
+
+    it('dificultad no válida en un bloque', () => {
+      const m = error(() => resolver(raiz(['a/b'], 'a:\n  b:\n    dificultad: facil\n'), p));
+      expect(m).toContain('contenido/bloques.yml');
+      expect(m).toContain('debe ser «basico»');
+    });
+
+    it('dificultad no válida en una excepción', () => {
+      const m = error(() => resolver(raiz(['a/b'], 'a:\n  b:\n    piezas:\n      p: facil\n'), p));
+      expect(m).toContain('contenido/bloques.yml');
+      expect(m).toContain('debe ser «basico»');
+    });
+
+    it('tema que no es un identificador', () => {
+      expect(error(() => resolver(raiz(['a/b'], 'a:\n  b:\n    tema: Redes X\n'), p))).toContain('debe ser un identificador de tema');
+    });
+
+    it('campo desconocido en un bloque, también «titulo»', () => {
+      const m = error(() => resolver(raiz(['a/b'], 'a:\n  b:\n    titulo: X\n'), p));
+      expect(m).toContain('contenido/bloques.yml');
+      expect(m).toContain('campo desconocido «titulo»');
+    });
+
+    it('YAML no válido', () => {
+      const m = error(() => resolver(raiz(['a/b'], 'a: [\n'), p));
+      expect(m).toContain('contenido/bloques.yml');
+      expect(m).toContain('YAML no válido');
+    });
+
+    it('entrada cuya carpeta de bloque no existe', () => {
+      const m = error(() => resolver(raiz(['a/b'], 'a:\n  b:\n    dificultad: basico\n  c:\n    dificultad: basico\nz:\n  y:\n    tema: redes\n'), p));
+      expect(m).toContain('contenido/bloques.yml');
+      expect(m).toContain('a/c');
+      expect(m).toContain('z/y');
+    });
+
+    it('excepción con una pieza inexistente', () => {
+      const m = error(() => resolver(raiz(['a/b'], 'a:\n  b:\n    piezas:\n      fantasma: basico\n'), p));
+      expect(m).toContain('contenido/bloques.yml');
+      expect(m).toContain('fantasma');
+    });
+
+    it('excepción con una pieza de otro bloque', () => {
+      const dir = raiz(['a/b', 'a/c'], 'a:\n  b:\n    piezas:\n      q: basico\n');
+      const m = error(() => resolver(dir, [pieza('p', 'a/b'), pieza('q', 'a/c')]));
+      expect(m).toContain('contenido/bloques.yml');
+      expect(m).toContain('q');
+    });
+
+    it('reúne todos los problemas en un solo error', () => {
+      const m = error(() => resolver(raiz([], 'x:\n  y:\n    dificultad: basico\n    piezas:\n      p: basico\n'), p));
+      expect(m).toContain('x/y');
+      expect(m).toContain('«p»');
+    });
   });
 });
 
-describe('leerBloque', () => {
-  it('devuelve {} si no hay bloque.yml', () => {
-    expect(leerBloque(carpeta())).toEqual({});
-  });
-
-  it('acepta un bloque.yml vacío', () => {
-    expect(leerBloque(carpeta(''))).toEqual({});
-    expect(leerBloque(carpeta('# solo comentario\n'))).toEqual({});
-  });
-
-  it('lee la dificultad', () => {
-    expect(leerBloque(carpeta('dificultad: avanzado\n'))).toEqual({ dificultad: 'avanzado' });
-  });
-
-  it('rechaza valor no válido citando el archivo', () => {
-    const m = error(() => leerBloque(carpeta('dificultad: facil\n')));
-    expect(m).toContain('bloque.yml');
-    expect(m).toContain('debe ser «basico»');
-  });
-
-  it('rechaza un campo desconocido', () => {
-    expect(error(() => leerBloque(carpeta('titulo: X\n')))).toContain('bloque.yml');
-  });
-
-  it('rechaza YAML no válido citando el archivo', () => {
-    const m = error(() => leerBloque(carpeta('dificultad: [\n')));
-    expect(m).toContain('bloque.yml');
-    expect(m).toContain('YAML no válido');
-  });
-
-  it('lectorBloques lee cada carpeta una vez', () => {
-    const dir = carpeta('dificultad: basico\n');
-    const leer = lectorBloques();
-    expect(leer(dir)).toEqual({ dificultad: 'basico' });
-    rmSync(join(dir, 'bloque.yml'));
-    expect(leer(dir)).toEqual({ dificultad: 'basico' });
-    expect(lectorBloques()(dir)).toEqual({});
-  });
-});
-
-describe('dificultadFinal', () => {
-  it('la de la pieza tiene prioridad sobre la del bloque', () => {
-    expect(dificultadFinal('avanzado', carpeta('dificultad: basico\n'), lectorBloques())).toBe('avanzado');
-  });
-
-  it('sin la de la pieza, hereda la del bloque', () => {
-    expect(dificultadFinal(undefined, carpeta('dificultad: basico\n'), lectorBloques())).toBe('basico');
-  });
-
-  it('valida el bloque.yml aunque la pieza tenga la suya', () => {
-    expect(error(() => dificultadFinal('avanzado', carpeta('titulo: X\n'), lectorBloques()))).toContain('bloque.yml');
-  });
-});
-
-describe('tema heredado', () => {
-  it('valorFinal hereda el tema del bloque', () => {
-    expect(valorFinal(undefined, 'tema', carpeta('tema: redes\n'), lectorBloques())).toBe('redes');
-  });
-
-  it('valorFinal: la pieza sustituye', () => {
-    expect(valorFinal('sistemas', 'tema', carpeta('tema: redes\n'), lectorBloques())).toBe('sistemas');
-  });
-
-  it('esquemaBloque acepta tema y rechaza tema no slug', () => {
-    expect(esquemaBloque.parse({ tema: 'redes' })).toEqual({ tema: 'redes' });
-    const r = esquemaBloque.safeParse({ tema: 'Redes X' });
-    expect(JSON.stringify(r.error?.issues)).toContain('debe ser un identificador de tema');
+describe('cabecera de la pieza', () => {
+  it('esquemaPieza rechaza «dificultad» y «tema»: viven en bloques.yml', () => {
+    for (const campo of ['dificultad: basico', 'tema: redes']) {
+      const r = esquemaPieza.safeParse({ titulo: 't', [campo.split(':')[0]]: campo.split(': ')[1] });
+      expect(r.success).toBe(false);
+      expect(JSON.stringify(r.error?.issues)).toContain(campo.split(':')[0]);
+    }
+    expect(esquemaPieza.safeParse({ titulo: 't' }).success).toBe(true);
   });
 });
