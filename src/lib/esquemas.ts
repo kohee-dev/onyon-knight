@@ -1,9 +1,12 @@
 import { z } from 'astro/zod';
 import { LICENCIA_PROPIA } from '../licencias';
 
+export const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
 export const DIFICULTADES = ['basico', 'intermedio', 'avanzado'] as const;
 export type Dificultad = (typeof DIFICULTADES)[number];
 const dificultad = z.enum(DIFICULTADES, { error: 'debe ser «basico», «intermedio» o «avanzado»' }).optional();
+const tema = z.string().regex(SLUG, 'debe ser un identificador de tema (minúsculas, números y guiones)').optional();
 
 export const esquemaPieza = z
   .strictObject({
@@ -16,6 +19,8 @@ export const esquemaPieza = z
     licencia: z.string().default(LICENCIA_PROPIA),
     /** Sustituye la dificultad del bloque (bloque.yml de su carpeta). */
     dificultad,
+    /** Sustituye el tema del bloque; debe existir en temas.yml. */
+    tema,
     /** Solo en casos: duración estimada, imagen de la tarjeta y banner de la página. */
     horas: z.number().positive().optional(),
     portada: z.string().min(1).optional(),
@@ -52,9 +57,13 @@ export const esquemaModulo = z.strictObject({
 });
 
 /** bloque.yml: datos comunes a las piezas de una carpeta. */
-export const esquemaBloque = z.strictObject({ dificultad });
+export const esquemaBloque = z.strictObject({ dificultad, tema });
+
+/** Entrada de contenido/temas.yml (lista cerrada). */
+export const esquemaTema = z.strictObject({ id: z.string().regex(SLUG), nombre: z.string().min(1) });
 
 export type CabeceraPieza = z.output<typeof esquemaPieza>;
 export type CabeceraBloque = z.output<typeof esquemaBloque>;
+export type Tema = z.output<typeof esquemaTema>;
 export type CabeceraModulo = z.output<typeof esquemaModulo>;
 export type CabeceraUnidad = z.output<typeof esquemaUnidad>;

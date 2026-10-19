@@ -2,8 +2,8 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { dificultadFinal, leerBloque, lectorBloques } from '../src/lib/bloques';
-import { DIFICULTADES, esquemaPieza } from '../src/lib/esquemas';
+import { dificultadFinal, leerBloque, lectorBloques, valorFinal } from '../src/lib/bloques';
+import { DIFICULTADES, esquemaBloque, esquemaPieza } from '../src/lib/esquemas';
 import { ErrorContenido } from '../src/lib/tipos';
 
 const carpeta = (contenido?: string) => {
@@ -86,5 +86,21 @@ describe('dificultadFinal', () => {
 
   it('valida el bloque.yml aunque la pieza tenga la suya', () => {
     expect(error(() => dificultadFinal('avanzado', carpeta('titulo: X\n'), lectorBloques()))).toContain('bloque.yml');
+  });
+});
+
+describe('tema heredado', () => {
+  it('valorFinal hereda el tema del bloque', () => {
+    expect(valorFinal(undefined, 'tema', carpeta('tema: redes\n'), lectorBloques())).toBe('redes');
+  });
+
+  it('valorFinal: la pieza sustituye', () => {
+    expect(valorFinal('sistemas', 'tema', carpeta('tema: redes\n'), lectorBloques())).toBe('sistemas');
+  });
+
+  it('esquemaBloque acepta tema y rechaza tema no slug', () => {
+    expect(esquemaBloque.parse({ tema: 'redes' })).toEqual({ tema: 'redes' });
+    const r = esquemaBloque.safeParse({ tema: 'Redes X' });
+    expect(JSON.stringify(r.error?.issues)).toContain('debe ser un identificador de tema');
   });
 });

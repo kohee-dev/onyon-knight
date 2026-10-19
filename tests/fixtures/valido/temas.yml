@@ -1,0 +1,6 @@
+- id: procesos
+  nombre: Procesos
+- id: servicios
+  nombre: Servicios de red
+- id: sin-piezas
+  nombre: Sin piezas

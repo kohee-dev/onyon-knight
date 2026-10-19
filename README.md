@@ -64,6 +64,7 @@ El contenido está en `contenido/`:
 | --- | --- |
 | `contenido/piezas/<módulo>/<tema>/<id>.md` | Cada pieza, en Markdown. El nombre del archivo es su identificador y no puede repetirse en todo el proyecto. |
 | `contenido/modulos/<módulo>.yml` | Cada módulo: su nombre, código, ciclo, curso, icono y unidades. Cada unidad enumera sus piezas por identificador. |
+| `contenido/temas.yml` | La lista cerrada de temas para clasificar las piezas. |
 | `contenido/creditos-sitio.yml` | Las herramientas y recursos con los que está hecha la web. |
 
 Una pieza empieza con una cabecera YAML:
@@ -75,6 +76,7 @@ licencia: CC-BY-NC-SA-4.0
 tipo: caso        # teoria (por defecto) o caso
 horas: 3          # obligatorio en los casos
 dificultad: intermedio  # basico, intermedio o avanzado (opcional)
+tema: virtualizacion    # id de contenido/temas.yml (opcional)
 resumen: Una frase sobre lo que se hace.
 fuentes:
   - "Autor. Título. https://…"
@@ -90,6 +92,15 @@ dificultad: intermedio
 ```
 
 Una pieza que indique `dificultad` en su cabecera sustituye la del bloque. Si no hay ni una ni otra, no se muestra el indicador, y al generar la web aparece el aviso `bloque sin dificultad: <carpeta> (N piezas sin la suya)`.
+
+**Temas.** `contenido/temas.yml` es la lista cerrada de temas, en el orden en que se muestran:
+
+```yaml
+- id: virtualizacion
+  nombre: Virtualización
+```
+
+El tema se indica igual que la dificultad: `tema: virtualizacion` en el `bloque.yml` de la carpeta, o en la cabecera de una pieza para sustituirlo. Un tema que no esté en `temas.yml` es un error; una pieza sin tema no aparece en ninguna página de tema y al generar la web sale el aviso `bloque sin tema: <carpeta> (N piezas sin el suyo)`. Cada tema con piezas tiene su página en `/temas/<id>/`, enlazada desde el desplegable «Temas» de la cabecera.
 
 Para que una pieza aparezca en la web, añade su identificador a las `piezas` de una unidad en el `.yml` del módulo. Una misma pieza puede estar en varios módulos.
 

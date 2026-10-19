@@ -1,0 +1,43 @@
+---
+import Dificultad from '../../components/Dificultad.astro';
+import Menu from '../../components/Menu.astro';
+import TarjetaCaso from '../../components/TarjetaCaso.astro';
+import Base from '../../layouts/Base.astro';
+import { gruposDeTema, temasConPiezas } from '../../lib/agrupar-temas';
+import { cargarSitio } from '../../lib/sitio';
+import type { Tema } from '../../lib/tipos';
+
+export async function getStaticPaths() {
+  const sitio = await cargarSitio();
+  return temasConPiezas(sitio).map(({ tema }) => ({ params: { tema: tema.id }, props: { tema } }));
+}
+
+const { tema } = Astro.props as { tema: Tema };
+const sitio = await cargarSitio();
+const grupos = gruposDeTema(sitio, tema.id);
+---
+<Base titulo={`${tema.nombre} · Temas`} descripcion={`Apuntes del tema ${tema.nombre}`}>
+  <p class="migas"><a href={sitio.base}>Inicio</a> › <a href={`${sitio.base}temas/`}>Temas</a> › {tema.nombre}</p>
+  <h1>{tema.nombre}</h1>
+  {grupos.map((g) => (
+    <section class="tema-grupo">
+      <h2>{g.modulo.datos.nombre}</h2>
+      {g.teoria.length > 0 && (
+        <ul class="tema-teoria">
+          {g.teoria.map((t) => (
+            <li>
+              <a href={t.url}>{t.pieza.fuente.datos.titulo}</a> <Dificultad dificultad={t.pieza.fuente.dificultad} />
+              <span class="contexto">{t.unidad.id.toUpperCase()} · {t.unidad.titulo}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {g.casos.length > 0 && (
+        <ul class="tarjetas-casos">
+          {g.casos.map((c) => <TarjetaCaso caso={c} modulo={g.modulo} />)}
+        </ul>
+      )}
+    </section>
+  ))}
+  <Menu />
+</Base>

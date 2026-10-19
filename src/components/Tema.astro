@@ -1,0 +1,17 @@
+---
+import { temasDelSitio } from '../lib/temas';
+interface Props {
+  /** Id del tema final de la pieza. */
+  id?: string;
+  /** false dentro de un elemento que ya es un enlace (tarjetas). El enlace es absoluto: las páginas se imprimen a PDF. */
+  enlace?: boolean;
+}
+const { id, enlace = true } = Astro.props;
+// Lectura barata de temas.yml: cargar el sitio entero aquí lo reconstruiría en dev por cada etiqueta.
+const tema = id ? temasDelSitio().find((t) => t.id === id) : undefined;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const sitioUrl = import.meta.env.SITE ?? 'http://localhost:4321';
+---
+{tema && (enlace
+  ? <a class="etiqueta-tema" href={new URL(`${base}temas/${tema.id}/`, sitioUrl).href}>{tema.nombre}</a>
+  : <span class="etiqueta-tema">{tema.nombre}</span>)}

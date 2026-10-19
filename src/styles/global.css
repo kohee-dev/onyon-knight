@@ -1154,3 +1154,20 @@ blockquote {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* Etiqueta de tema: enlace a /temas/<id>/ (texto dentro de las tarjetas, que ya son enlace). */
+.etiqueta-tema {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+  color: var(--acento);
+  background: var(--acento-suave);
+  text-decoration: none;
+}
+a.etiqueta-tema:hover { text-decoration: underline; }
+@media print {
+  .etiqueta-tema { color: inherit; background: none; border: 1px solid currentColor; text-decoration: none; }
+}

@@ -1,0 +1,23 @@
+---
+import { temasNavegacion } from '../lib/navegacion';
+
+const temas = await temasNavegacion();
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+{temas.length > 0 && (
+  <div class="modulos-desplegable" data-desplegable>
+    <button class="modulos-boton" type="button" aria-expanded="false" aria-controls="lista-temas" hidden>
+      Temas <span aria-hidden="true">▾</span>
+    </button>
+    <div class="modulos-lista" id="lista-temas">
+      <ul>
+        {temas.map((t) => <li><a href={t.url}>{t.nombre}</a></li>)}
+        <li><a href={`${base}temas/`}>Todos los temas</a></li>
+      </ul>
+    </div>
+  </div>
+)}
+
+<script>
+  import '../scripts/desplegables';
+</script>
