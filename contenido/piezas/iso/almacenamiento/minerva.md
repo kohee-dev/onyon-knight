@@ -1,4 +1,5 @@
 ---
+dificultad: avanzado
 titulo: "Minerva, la ciudad del conocimiento"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso

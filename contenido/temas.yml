@@ -1,0 +1,25 @@
+# Lista cerrada de temas para clasificar las piezas (ver README, «Escribir apuntes»).
+- id: sistemas-operativos
+  nombre: Sistemas operativos
+- id: linea-de-comandos
+  nombre: Línea de comandos
+- id: usuarios-permisos
+  nombre: Usuarios y permisos
+- id: procesos
+  nombre: Procesos y concurrencia
+- id: virtualizacion
+  nombre: Virtualización
+- id: almacenamiento
+  nombre: Almacenamiento
+- id: servicios-directorio
+  nombre: Servicios de directorio
+- id: servicios-red
+  nombre: Servicios de red
+- id: hardware
+  nombre: Hardware y componentes
+- id: redes
+  nombre: Redes y cableado
+- id: programacion
+  nombre: Programación
+- id: gestion-empresarial
+  nombre: Gestión empresarial (ERP)

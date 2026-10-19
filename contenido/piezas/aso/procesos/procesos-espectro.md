@@ -1,4 +1,5 @@
 ---
+dificultad: avanzado
 titulo: "El Espectro de la Máquina"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso
