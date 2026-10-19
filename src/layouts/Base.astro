@@ -1,4 +1,5 @@
 ---
+import DesplegableTemas from '../components/DesplegableTemas.astro';
 import '@fontsource-variable/nunito';
 import '@fontsource/jetbrains-mono';
 import '../styles/global.css';
@@ -56,6 +57,7 @@ const cssCategorias = Object.values(CATEGORIAS)
       <div class="cabecera-inicio">
         <a class="marca" href={base}><img class="marca-imagen" src={`${base}img/caballero-96.webp`} srcset={`${base}img/caballero-192.webp 2x`} alt="" width="122" height="96" /><span>Onyon Knight</span></a>
         <DesplegableModulos />
+        <DesplegableTemas />
       </div>
       <div class="cabecera-acciones">
         <BotonTema />

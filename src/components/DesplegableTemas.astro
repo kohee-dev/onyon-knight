@@ -1,0 +1,24 @@
+---
+import { temasConPiezas } from '../lib/agrupar-temas';
+import { cargarSitio } from '../lib/sitio';
+
+const sitio = await cargarSitio();
+const temas = temasConPiezas(sitio);
+---
+{temas.length > 0 && (
+  <div class="modulos-desplegable" data-desplegable>
+    <button class="modulos-boton" type="button" aria-expanded="false" aria-controls="lista-temas" hidden>
+      Temas <span aria-hidden="true">▾</span>
+    </button>
+    <div class="modulos-lista" id="lista-temas">
+      <ul>
+        {temas.map(({ tema }) => <li><a href={`${sitio.base}temas/${tema.id}/`}>{tema.nombre}</a></li>)}
+        <li><a href={`${sitio.base}temas/`}>Todos los temas</a></li>
+      </ul>
+    </div>
+  </div>
+)}
+
+<script>
+  import '../scripts/desplegables';
+</script>

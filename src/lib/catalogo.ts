@@ -7,7 +7,7 @@ import { SLUG } from './esquemas';
 export { SLUG };
 
 /** Ids que usa la propia página; una pieza con uno de ellos duplicaría ids y rompería anclas y aria-controls. */
-export const IDS_RESERVADOS = ['menu', 'lista-modulos', 'casos-practicos', 'casos-de-esta-unidad', 'licencias-y-fuentes'];
+export const IDS_RESERVADOS = ['menu', 'lista-modulos', 'lista-temas', 'casos-practicos', 'casos-de-esta-unidad', 'licencias-y-fuentes'];
 
 export function construirCatalogo(piezas: PiezaFuente[], modulos: ModuloFuente[], modo: Modo, temas: Tema[] = []): Catalogo {
   const problemas: Problema[] = [];

@@ -378,3 +378,35 @@ describe('temas', () => {
     expect(h).toContain('caso-ldap');
   });
 });
+
+describe('etiqueta y desplegable de temas', () => {
+  const unidad = () => leer('aso/ut1/index.html');
+
+  it('etiqueta de tema en la teoría', () => {
+    const h = unidad();
+    const i = h.indexOf('id="procesos-concepto"');
+    expect(h.slice(i, h.indexOf('</h2>', i))).toContain('class="etiqueta-tema" href="https://ej.es/ok/temas/procesos/"');
+  });
+
+  it('etiqueta de tema en la tarjeta sin enlace anidado', () => {
+    const h = unidad();
+    const i = h.indexOf('/ok/aso/ut1/casos/caso-ldap/');
+    const t = h.slice(h.lastIndexOf('<li class="tarjeta-caso"', i), h.indexOf('</li>', i));
+    expect(t).toContain('<span class="etiqueta-tema">Servicios de red</span>');
+    expect(t.match(/<a /g)?.length).toBe(1);
+  });
+
+  it('el menú lateral también lista los temas (pantallas estrechas)', () => {
+    const h = leer('index.html');
+    const i = h.indexOf('id="menu"');
+    expect(i).toBeGreaterThan(-1);
+    expect(h.slice(i)).toContain('href="/ok/temas/procesos/"');
+  });
+
+  it('desplegable de temas', () => {
+    const h = leer('index.html');
+    expect(h).toContain('aria-controls="lista-temas"');
+    expect(h).toContain('href="/ok/temas/procesos/"');
+    expect(h).toContain('href="/ok/temas/"');
+  });
+});

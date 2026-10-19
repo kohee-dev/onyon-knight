@@ -1,4 +1,5 @@
 ---
+import Tema from './Tema.astro';
 import Dificultad from './Dificultad.astro';
 import { formatearHoras } from '../lib/formato';
 import type { CasoSitio } from '../lib/sitio';
@@ -18,7 +19,7 @@ const { fuente, render, fecha } = caso.pieza;
   <a href={caso.url}>
     <ImagenCaso imagen={render.portada} modulo={modulo} proporcion="portada" titulo={fuente.datos.titulo} decorativa />
     <span class="tarjeta-caso-cuerpo">
-      <span class="tarjeta-meta"><span class="chip-caso">Caso práctico</span><span>{formatearHoras(fuente.datos.horas!)}</span><Dificultad dificultad={fuente.dificultad} /></span>
+      <span class="tarjeta-meta"><span class="chip-caso">Caso práctico</span><span>{formatearHoras(fuente.datos.horas!)}</span><Dificultad dificultad={fuente.dificultad} /><Tema id={fuente.tema} enlace={false} /></span>
       <span class="tarjeta-nombre">{fuente.datos.titulo}<Distintivo pieza={fuente} /></span>
       {fuente.datos.resumen && <span class="tarjeta-resumen">{fuente.datos.resumen}</span>}
       <Fecha fecha={fecha} />
