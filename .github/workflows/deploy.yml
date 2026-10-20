@@ -52,6 +52,8 @@ jobs:
           key: pdf-${{ github.sha }}
           restore-keys: pdf-
 
+      - run: npm run check
+
       - run: npm test
 
       - run: npm run build

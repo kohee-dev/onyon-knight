@@ -16,6 +16,7 @@ export function piezaMd(
     datos: esquemaPieza.parse({ titulo: titulo ?? `Título de ${id.toUpperCase()}`, borrador, ...campos }),
     cuerpo,
     privado: false,
+    bloque: 'so/b',
     ...resto,
   };
 }

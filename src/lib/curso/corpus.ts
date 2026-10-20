@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { basename, extname, join, relative } from 'node:path';
+import { basename, dirname, extname, join, relative } from 'node:path';
 import { load } from 'js-yaml';
 import { listarArchivos, separarCabecera } from '../cargador-piezas';
 import { esquemaModulo, esquemaPieza } from '../esquemas';
@@ -15,7 +15,8 @@ export function leerCorpus(raiz: string): { piezas: PiezaFuente[]; modulos: Modu
   });
   const piezas = listarArchivos(join(raiz, 'piezas'), '.md').map((ruta): PiezaFuente => {
     const { datos, cuerpo } = separarCabecera(readFileSync(ruta, 'utf8'));
-    return { ...fuente(ruta), datos: esquemaPieza.parse(datos), cuerpo };
+    const bloque = dirname(relative(join(raiz, 'piezas'), ruta)).replaceAll('\\', '/');
+    return { ...fuente(ruta), datos: esquemaPieza.parse(datos), cuerpo, bloque };
   });
   const modulos = listarArchivos(join(raiz, 'modulos'), '.yml').map(
     (ruta): ModuloFuente => ({ ...fuente(ruta), datos: esquemaModulo.parse(load(readFileSync(ruta, 'utf8'))) }),
