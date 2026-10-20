@@ -7,3 +7,6 @@ unidades:
   - id: ut1
     titulo: Programación multiproceso
     piezas: [procesos-concurrencia, gestion-procesos-java]
+  - id: ut2
+    titulo: Programación multihilo
+    piezas: [problema-barbero]
