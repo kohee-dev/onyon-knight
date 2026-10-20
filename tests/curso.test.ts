@@ -260,6 +260,46 @@ describe('generarCurso', () => {
       expect(segunda.extraidas).toHaveLength(2);
     });
 
+    it('si una ejecución cae tras reextraer una pieza, las piezas sin cambios que aún no alcanzó siguen en el índice', async () => {
+      const raiz = copia();
+      const dirCache = cache();
+      await generar(raiz, dirCache, falso(propuestaFirewall, grafoRedes).modelo);
+      for (const ruta of ['piezas/redes/firewall.md', 'piezas/redes/vpn.md']) {
+        writeFileSync(join(raiz, ruta), readFileSync(join(raiz, ruta), 'utf8') + '\nCambio.\n');
+      }
+      const buena = falso(propuestaFirewall, grafoRedes).modelo;
+      let n = 0;
+      const cae: Modelo = { completar: (i, e) => (++n === 2 ? Promise.reject(new Error('sin red')) : buena.completar(i, e)) };
+      await expect(generar(raiz, dirCache, cae)).rejects.toThrow(/sin red/);
+      const tercera = falso(propuestaFirewall, grafoRedes);
+      await generar(raiz, dirCache, tercera.modelo);
+      expect(tercera.extraidas).toEqual(['vpn']);
+    });
+
+    it('un índice con JSON válido pero de otra forma se ignora y se reconstruye', async () => {
+      const dirCache = cache();
+      await generar(FIXTURES, dirCache, falso(propuestaFirewall, grafoRedes).modelo);
+      const ruta = join(dirCache, 'indice.json');
+      const indice = JSON.parse(readFileSync(ruta, 'utf8'));
+      delete indice.piezas.firewall.entidades;
+      writeFileSync(ruta, JSON.stringify(indice));
+      const segunda = falso(propuestaFirewall, grafoRedes);
+      const { justificacion } = await generar(FIXTURES, dirCache, segunda.modelo);
+      expect(segunda.extraidas.sort()).toEqual(['firewall', 'ssh', 'usuarios', 'vpn']);
+      expect(justificacion.firewall).toEqual(['Cortafuegos', 'Reglas']);
+    });
+
+    it('cambiar solo el título o el resumen de una pieza la reextrae', async () => {
+      const raiz = copia();
+      const dirCache = cache();
+      await generar(raiz, dirCache, falso(propuestaFirewall, grafoRedes).modelo);
+      const ruta = join(raiz, 'piezas/redes/firewall.md');
+      writeFileSync(ruta, readFileSync(ruta, 'utf8').replace('Filtrado de tráfico con reglas', 'Otro resumen'));
+      const segunda = falso(propuestaFirewall, grafoRedes);
+      await generar(raiz, dirCache, segunda.modelo);
+      expect(segunda.extraidas).toEqual(['firewall']);
+    });
+
     it('un índice guardado ilegible se ignora y se reconstruye', async () => {
       const dirCache = cache();
       writeFileSync(join(dirCache, 'indice.json'), '{ no es json');
