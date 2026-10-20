@@ -3,7 +3,7 @@ import type { CabeceraModulo } from '../esquemas';
 import type { ModuloFuente } from '../tipos';
 import { componer } from './compositor';
 import { leerCorpus } from './corpus';
-import { extraer, type Extraccion } from './extractor';
+import { extraerIncremental } from './indice';
 import { Grafo, type Justificacion } from './grafo';
 import { conErroresClaros, type Modelo } from './modelo';
 import { recuperar } from './recuperador';
@@ -52,8 +52,7 @@ export async function generarCurso({ tema, raizContenido, modelo: modeloCrudo, d
   construirCatalogo(piezas, modulos, 'desarrollo');
   const publicas = piezas.filter((p) => !p.datos.borrador);
 
-  const extracciones = new Map<string, Extraccion>();
-  for (const pieza of publicas) extracciones.set(pieza.id, await extraer(modelo, pieza));
+  const extracciones = await extraerIncremental(modelo, publicas, dirCache);
   const grafo = Grafo.desde(extracciones);
   grafo.guardar(dirCache);
 
