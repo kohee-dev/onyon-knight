@@ -21,8 +21,9 @@ function entrada(id: string, datos: Record<string, unknown>, imagenes: ImagenUsa
     datos: esquemaPieza.parse({ titulo: `T ${id}`, ...datos }),
     cuerpo: '',
     privado: false,
+    bloque: 'so/b',
   };
-  const render: PiezaRenderizada = { id, html: '', imagenes, tieneMermaid: false };
+  const render: PiezaRenderizada = { id, html: '', imagenes, tieneMermaid: false, titulos: [] };
   return { fuente, render };
 }
 

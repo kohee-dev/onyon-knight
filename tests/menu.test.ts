@@ -16,7 +16,7 @@ beforeAll(async () => {
   servidor = createServer((req, res) => {
     if (!req.url!.startsWith('/ok/')) return void res.writeHead(404).end();
     req.url = req.url!.slice(3);
-    estatico(req, res, () => res.writeHead(404).end());
+    estatico(req, res, () => void res.writeHead(404).end());
   });
   await new Promise<void>((r) => servidor.listen(0, '127.0.0.1', () => r()));
   origen = `http://127.0.0.1:${(servidor.address() as any).port}`;
