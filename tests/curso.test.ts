@@ -205,6 +205,85 @@ describe('generarCurso', () => {
     expect(texto).not.toContain('ids-borrador');
   });
 
+  describe('indexado incremental', () => {
+    const propuestaFirewall = { unidades: [{ titulo: 'Perímetro', piezas: ['firewall', 'vpn'] }] };
+    const generar = (raizContenido: string, dirCache: string, modelo: Modelo, tema = 'Cortafuegos') =>
+      generarCurso({ tema, raizContenido, dirCache, modelo });
+
+    it('una segunda ejecución sin cambios no llama al modelo de extracción', async () => {
+      const dirCache = cache();
+      await generar(FIXTURES, dirCache, falso(propuestaFirewall, grafoRedes).modelo);
+      const segunda = falso(propuestaFirewall, grafoRedes);
+      const { justificacion } = await generar(FIXTURES, dirCache, segunda.modelo);
+      expect(segunda.extraidas).toEqual([]);
+      expect(justificacion).toEqual({ firewall: ['Cortafuegos', 'Reglas'], vpn: ['Cortafuegos', 'VPN'] });
+    });
+
+    it('una pieza modificada se reextrae y las demás no', async () => {
+      const raiz = copia();
+      const dirCache = cache();
+      await generar(raiz, dirCache, falso(propuestaFirewall, grafoRedes).modelo);
+      const ruta = join(raiz, 'piezas/redes/vpn.md');
+      writeFileSync(ruta, readFileSync(ruta, 'utf8') + '\nUn párrafo nuevo.\n');
+      const segunda = falso(propuestaFirewall, grafoRedes);
+      await generar(raiz, dirCache, segunda.modelo);
+      expect(segunda.extraidas).toEqual(['vpn']);
+      const tercera = falso(propuestaFirewall, grafoRedes);
+      await generar(raiz, dirCache, tercera.modelo);
+      expect(tercera.extraidas).toEqual([]);
+    });
+
+    it('una pieza borrada y luego restaurada se vuelve a extraer: el índice la olvidó', async () => {
+      const raiz = copia();
+      const dirCache = cache();
+      const ruta = join(raiz, 'piezas/sistemas/ssh.md');
+      const texto = readFileSync(ruta, 'utf8');
+      await generar(raiz, dirCache, falso(propuestaFirewall, grafoRedes).modelo);
+      const beta = join(raiz, 'modulos/beta.yml');
+      rmSync(ruta);
+      writeFileSync(beta, readFileSync(beta, 'utf8').replace('[ssh, usuarios]', '[usuarios]'));
+      await generar(raiz, dirCache, falso(propuestaFirewall, grafoRedes).modelo);
+      writeFileSync(ruta, texto);
+      const tercera = falso(propuestaFirewall, grafoRedes);
+      await generar(raiz, dirCache, tercera.modelo);
+      expect(tercera.extraidas).toEqual(['ssh']);
+    });
+
+    it('si la extracción falla a medias, la siguiente ejecución no repite las piezas ya extraídas', async () => {
+      const dirCache = cache();
+      const buena = falso(propuestaFirewall, grafoRedes).modelo;
+      let n = 0;
+      const cae: Modelo = { completar: (i, e) => (++n === 3 ? Promise.reject(new Error('sin red')) : buena.completar(i, e)) };
+      await expect(generar(FIXTURES, dirCache, cae)).rejects.toThrow(/sin red/);
+      const segunda = falso(propuestaFirewall, grafoRedes);
+      await generar(FIXTURES, dirCache, segunda.modelo);
+      expect(segunda.extraidas).toHaveLength(2);
+    });
+
+    it('un índice guardado ilegible se ignora y se reconstruye', async () => {
+      const dirCache = cache();
+      writeFileSync(join(dirCache, 'indice.json'), '{ no es json');
+      const { modelo, extraidas } = falso(propuestaFirewall, grafoRedes);
+      await generar(FIXTURES, dirCache, modelo);
+      expect(extraidas.sort()).toEqual(['firewall', 'ssh', 'usuarios', 'vpn']);
+    });
+
+    it('una pieza borrada deja de aparecer en el grafo y en las propuestas', async () => {
+      const raiz = copia();
+      const dirCache = cache();
+      await generar(raiz, dirCache, falso(propuestaFirewall, grafoRedes).modelo);
+      rmSync(join(raiz, 'piezas/redes/firewall.md'));
+      const alfa = join(raiz, 'modulos/alfa.yml');
+      writeFileSync(alfa, readFileSync(alfa, 'utf8').replace('[firewall, vpn]', '[vpn]'));
+      const segunda = falso({ unidades: [{ titulo: 'Perímetro', piezas: ['vpn'] }] }, grafoRedes);
+      const { justificacion } = await generar(raiz, dirCache, segunda.modelo);
+      expect(segunda.extraidas).toEqual([]);
+      expect(segunda.compuestas).toEqual(['vpn']);
+      expect(Object.keys(justificacion)).toEqual(['vpn']);
+      expect(readFileSync(join(dirCache, 'grafo.json'), 'utf8')).not.toContain('Reglas');
+    });
+  });
+
   it('semillas que no están en el grafo no recuperan nada: error explícito', async () => {
     const { modelo } = falso(propuestaBuena, { ...grafoRedes, semillas: ['astronomía'] });
     await expect(generarCurso({ tema: 'Astronomía', raizContenido: FIXTURES, dirCache: cache(), modelo })).rejects.toThrow(/ninguna pieza/i);
