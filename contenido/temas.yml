@@ -7,6 +7,8 @@
   nombre: Usuarios y permisos
 - id: procesos
   nombre: Procesos y concurrencia
+- id: hilos
+  nombre: Hilos
 - id: virtualizacion
   nombre: Virtualización
 - id: almacenamiento

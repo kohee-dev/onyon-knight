@@ -35,6 +35,9 @@ mm:
     tema: hardware
     dificultad: basico
 psp:
+  multihilo:
+    tema: hilos
+    dificultad: intermedio
   multiproceso:
     tema: procesos
     dificultad: avanzado
