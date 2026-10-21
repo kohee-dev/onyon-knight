@@ -11,7 +11,12 @@ const PLAZO_POR_DEFECTO_MS = 10 * 60 * 1000;
 
 /** Acepta `maquina:11434` o `[::1]:11434` sin esquema; las credenciales del host pasan a autenticación básica. */
 function normalizarHost(host: string): { base: string; autorizacion?: string } {
-  const url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(host) ? host : `http://${host}`);
+  let url: URL;
+  try {
+    url = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(host) ? host : `http://${host}`);
+  } catch {
+    throw new Error(`OLLAMA_HOST no es una dirección válida: «${host.replace(/\/\/[^@/]*@/, '//***@')}»`);
+  }
   const autorizacion = url.username
     ? `Basic ${Buffer.from(`${decodeURIComponent(url.username)}:${decodeURIComponent(url.password)}`).toString('base64')}`
     : undefined;
@@ -41,7 +46,8 @@ export function crearModeloOllama({ host, modelo, plazoMs, fetch: llamar = globa
         }),
       }).catch((e: unknown) => {
         if (e instanceof Error && e.name === 'TimeoutError') throw new Error(`Ollama no respondió dentro del plazo de ${plazoMs} ms (OLLAMA_TIMEOUT_MS)`);
-        throw e;
+        const causa = e instanceof Error && e.cause instanceof Error ? e.cause.message : e instanceof Error ? e.message : String(e);
+        throw new Error(`no se pudo conectar con Ollama en ${base} (${causa}); ¿está en marcha y es correcto OLLAMA_HOST?`, { cause: e });
       });
       const cuerpo = (await respuesta.json().catch(() => ({}))) as { message?: { content?: unknown }; error?: unknown };
       if (!respuesta.ok) throw new Error(`Ollama respondió ${respuesta.status}${typeof cuerpo.error === 'string' ? `: ${cuerpo.error}` : ''}`);

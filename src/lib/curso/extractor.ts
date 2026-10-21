@@ -18,6 +18,12 @@ export const esquemaExtraccion = z.object({
   relaciones: z.array(z.tuple([z.string(), z.string()])).default([]),
 });
 
+// Los modelos pequeños devuelven relaciones rotas: se leen sin exigir forma y se filtran después.
+const esquemaRespuesta = esquemaExtraccion.extend({ relaciones: z.array(z.unknown()).default([]) });
+
+/** Tope de entidades por pieza: pasado esto un modelo pequeño solo repite o divaga. */
+const MAX_ENTIDADES = 15;
+
 function entradaDe(pieza: PiezaFuente): string {
   return JSON.stringify({
     tarea: 'extraer',
@@ -32,5 +38,9 @@ export function huella(pieza: PiezaFuente): string {
 
 /** Pide al modelo las entidades y relaciones de una pieza, de forma independiente al resto. */
 export async function extraer(modelo: Modelo, pieza: PiezaFuente): Promise<Extraccion> {
-  return leerJson(await modelo.completar(INSTRUCCION, entradaDe(pieza)), esquemaExtraccion, '«entidades» y «relaciones»');
+  const { entidades, relaciones } = leerJson(await modelo.completar(INSTRUCCION, entradaDe(pieza)), esquemaRespuesta, '«entidades» y «relaciones»');
+  return {
+    entidades: entidades.slice(0, MAX_ENTIDADES),
+    relaciones: relaciones.filter((r): r is [string, string] => Array.isArray(r) && r.length === 2 && r.every((x) => typeof x === 'string')),
+  };
 }

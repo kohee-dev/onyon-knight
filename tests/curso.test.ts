@@ -477,4 +477,28 @@ describe('scripts/curso.mjs', () => {
     expect(r.status).toBe(1);
     expect(r.stderr).toContain('uso: node scripts/curso.mjs');
   });
+
+  it('una pieza con respuesta inválida se salta con aviso y no aborta el comando', async () => {
+    const avisos: string[] = [];
+    const original = console.warn;
+    console.warn = (m: string) => { avisos.push(String(m)); };
+    try {
+      const { modelo } = falso(propuestaBuena);
+      // Se rompe la extracción de una pieza que la propuesta no cita.
+      const intermitente: Modelo = { completar: (i, e) => (JSON.parse(e).pieza?.id === 'usuarios' ? Promise.resolve('no es json') : modelo.completar(i, e)) };
+      await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: cache(), modelo: intermitente });
+    } finally {
+      console.warn = original;
+    }
+    expect(avisos.some((a) => /respuesta del modelo no válida/.test(a))).toBe(true);
+  });
+
+  it('la extracción limita a 15 entidades y descarta relaciones rotas', async () => {
+    const entidades = Array.from({ length: 20 }, (_, i) => `E${i}`);
+    const modelo: Modelo = { completar: async () => JSON.stringify({ entidades, relaciones: [['E0', 'E1'], ['E0'], 'x', ['E2', 3]] }) };
+    const { extraer } = await import('../src/lib/curso/extractor');
+    const r = await extraer(modelo, { id: 'p', datos: { titulo: 'T' }, cuerpo: '' } as never);
+    expect(r.entidades).toHaveLength(15);
+    expect(r.relaciones).toEqual([['E0', 'E1']]);
+  });
 });

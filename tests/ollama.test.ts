@@ -51,6 +51,19 @@ describe('adaptador de Ollama', () => {
     expect((llamadas[1].init.headers as Record<string, string>).Authorization).toBe(`Basic ${Buffer.from('usuario:secreto').toString('base64')}`);
   });
 
+  it('acepta IPv6 sin esquema y envía las opciones que evitan el recorte y los bucles', async () => {
+    const { fetch, llamadas } = fetchFalso({ message: { content: 'a' } });
+    await crearModeloOllama({ host: '[::1]:11434', modelo: 'x', plazoMs: 1000, fetch }).completar('i', 'e');
+    expect(llamadas[0].url).toBe('http://[::1]:11434/api/chat');
+    expect(JSON.parse(llamadas[0].init.body as string).options).toEqual({ num_ctx: 16384, num_predict: 4096, temperature: 0.3, repeat_penalty: 1.2 });
+  });
+
+  it('un host inválido nombra OLLAMA_HOST y un fallo de conexión nombra el host y la causa', async () => {
+    expect(() => crearModeloOllama({ host: 'http://', modelo: 'x', plazoMs: 1, fetch: fetchFalso({}).fetch })).toThrow(/OLLAMA_HOST/);
+    const caido = (async () => { throw new TypeError('fetch failed', { cause: new Error('ECONNREFUSED') }); }) as unknown as typeof globalThis.fetch;
+    await expect(crearModeloOllama({ host: 'h:1', modelo: 'x', plazoMs: 1000, fetch: caido }).completar('i', 'e')).rejects.toThrow(/http:\/\/h:1.*ECONNREFUSED/);
+  });
+
   it('lee host, modelo y plazo del entorno con valores por defecto', () => {
     expect(modeloDesdeEntorno({}, fetchFalso({}).fetch)).toBeDefined();
     expect(() => modeloDesdeEntorno({ OLLAMA_TIMEOUT_MS: 'abc' })).toThrow(/OLLAMA_TIMEOUT_MS/);

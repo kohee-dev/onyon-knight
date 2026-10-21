@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { z } from 'astro/zod';
 import type { PiezaFuente } from '../tipos';
 import { esquemaExtraccion, extraer, huella, type Extraccion } from './extractor';
-import type { Modelo } from './modelo';
+import { RespuestaNoValida, type Modelo } from './modelo';
 
 const esquemaIndice = z.object({ piezas: z.record(z.string(), esquemaExtraccion.extend({ huella: z.string() })) });
 type Entradas = z.output<typeof esquemaIndice>['piezas'];
@@ -38,7 +38,15 @@ export async function extraerIncremental(modelo: Modelo, piezas: PiezaFuente[], 
     const actual = huella(pieza);
     const guardada = previo[pieza.id];
     const vigente = guardada?.huella === actual;
-    const extraccion = vigente ? { entidades: guardada.entidades, relaciones: guardada.relaciones } : await extraer(modelo, pieza);
+    let extraccion;
+    try {
+      extraccion = vigente ? { entidades: guardada.entidades, relaciones: guardada.relaciones } : await extraer(modelo, pieza);
+    } catch (e) {
+      if (!(e instanceof RespuestaNoValida)) throw e;
+      // Sin entrada guardada, la pieza se reintenta en la siguiente ejecución.
+      console.warn(`aviso: se salta la pieza ${pieza.id}: ${e.message}`);
+      continue;
+    }
     entradas[pieza.id] = { huella: actual, ...extraccion };
     extracciones.set(pieza.id, extraccion);
     if (!vigente) guardar();
