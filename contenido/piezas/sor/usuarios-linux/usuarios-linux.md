@@ -742,22 +742,3 @@ Documentación para ampliar el bloque:
 | 8. Reglas de sudo | [Manual de sudoers](https://manpages.debian.org/bookworm/sudo/sudoers.5.en.html) |
 | 9. Servidor OpenSSH en Ubuntu | [OpenSSH server (Ubuntu Server)](https://ubuntu.com/server/docs/how-to/security/openssh-server/) |
 | 9. Opciones de `sshd_config` | [Manual de sshd_config](https://manpages.ubuntu.com/manpages/noble/man5/sshd_config.5.html) |
-
-# Soluciones
-
-1. Por el mínimo privilegio: si el servicio es comprometido, el atacante solo tiene los permisos de ese usuario y no los de root.
-2. Nombre de usuario, una `x` (la contraseña está en shadow), UID, GID del grupo primario, comentario (nombre completo), directorio personal e intérprete de comandos.
-3. Porque ese archivo debe ser legible por todos, y así cualquiera podría copiar los hashes y atacarlos. Están en `/etc/shadow`, que solo puede leer root.
-4. Sin la opción `-a`, `usermod -G` sustituye todos los grupos secundarios de Andrea por `proyecto`. Hay que usar `usermod -aG proyecto andrea` para añadir sin quitar.
-5. `useradd` es el comando de bajo nivel, hace solo lo que se le indica (no crea el directorio personal sin `-m`). `adduser` es un asistente de Debian y Ubuntu que crea el directorio, copia `/etc/skel` y pide la contraseña.
-6. `passwd -l` solo bloquea la contraseña, y el usuario puede tener una clave pública autorizada. Para cortar el acceso del todo se usa `chage -E 0` (o se pone `nologin` como intérprete) y se cierran sus sesiones.
-7. Con `pam_faillock` (bloqueo tras un número de fallos) o con fail2ban, y mejor aún desactivando las contraseñas y usando solo claves públicas.
-8. El propietario puede leer y escribir (6), el grupo solo leer (4) y los demás no pueden hacer nada (0).
-9. `x` para poder atravesarlo y `r` para listar lo que contiene. Además hace falta `x` en todos los directorios del camino.
-10. Poniendo la carpeta a un grupo común y activando el bit SGID (`chmod 2775`) para que los archivos nuevos hereden el grupo de la carpeta, y asegurando que los usuarios tienen una umask que da permiso de escritura al grupo.
-11. Para que en un directorio donde todos pueden escribir cada uno solo pueda borrar o renombrar sus propios archivos. Se usa en `/tmp`.
-12. Porque cualquier usuario debe poder cambiar su contraseña, que está en `/etc/shadow`, solo modificable por root. Con SUID el programa se ejecuta con los permisos de root, solo mientras dura esa tarea.
-13. Porque `visudo` comprueba la sintaxis antes de guardar. Un error en `sudoers` puede dejar `sudo` inutilizable para todos los administradores.
-14. Con una regla en `sudoers` (por ejemplo, `%soporte ALL=(root) /usr/bin/systemctl restart ssh`), creada con `visudo`.
-15. La contraseña no viaja por la red ni se puede adivinar por fuerza bruta, y se puede revocar quitando la clave pública del servidor. Eso sí, la clave privada hay que protegerla.
-16. Con `last` para el historial de sesiones (contando usuarios distintos con `awk`, `sort` y `uniq`), con `lastb` para los intentos fallidos y con `grep "Failed password" /var/log/auth.log` para el detalle.

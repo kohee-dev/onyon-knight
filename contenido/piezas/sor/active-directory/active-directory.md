@@ -641,19 +641,3 @@ Documentación oficial de Microsoft para ampliar cada apartado del bloque:
 | 12. Roles FSMO | [Find servers that hold FSMO roles](https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/find-servers-holding-fsmo-role) |
 | 12. Transferir o apoderar roles | [Transfer or seize FSMO roles](https://learn.microsoft.com/en-GB/troubleshoot/windows-server/identity/transfer-or-seize-fsmo-roles-in-ad-ds) |
 | General | [Deploy and Manage AD DS (ruta de formación)](https://learn.microsoft.com/en-us/training/paths/deploy-manage-active-directory-domain-services/) |
-
-# Soluciones
-
-1. El dominio es la unidad básica con su base de datos de cuentas. Un árbol es un conjunto de dominios con nombres encadenados (`empresa.com` y `madrid.empresa.com`). Un bosque agrupa uno o más árboles que comparten esquema y configuración, y es el límite de seguridad más alto.
-2. Es una carpeta compartida que se replica entre los controladores de dominio. Guarda los archivos de las directivas de grupo y los scripts de inicio de sesión, que los clientes descargan al iniciar sesión.
-3. Porque para encontrar el controlador de dominio necesita consultar los registros SRV que éste publica en su DNS, y un servidor público no los conoce. El cliente debe usar como DNS el controlador de dominio.
-4. Instalar el rol solo copia los archivos necesarios en el servidor. La promoción es lo que lo convierte en controlador de dominio: crea la base de datos, el dominio, los registros DNS y SYSVOL.
-5. La hora. Kerberos rechaza los tickets si el reloj del cliente se desvía más de cinco minutos respecto al servidor.
-6. Porque son contenedores y no unidades organizativas, así que no se les pueden vincular GPO. Se crean OU propias y se mueven los objetos allí.
-7. Los usuarios de Contabilidad se meten en el grupo global `GG_Contabilidad`. Ese grupo se mete en el grupo local de dominio `DL_Facturas_Modificar`, y a este último se le dan los permisos de modificación sobre la carpeta Facturas. Si un usuario cambia de departamento, solo se cambia su grupo global.
-8. No hay que copiar el perfil entero al iniciar y cerrar sesión: las carpetas apuntan directamente al servidor. Es más rápida y evita perfiles enormes viajando por la red.
-9. Que el equipo esté realmente dentro de esa OU (y no en `Computers`), que la herencia no esté bloqueada ni el filtrado de seguridad la excluya, y lo que realmente se ha aplicado, con `gpresult /r` o `gpresult /h`.
-10. La de la OU, porque se aplica la última según el orden local, sitio, dominio, OU. Solo ganaría la del dominio si estuviera marcada como exigida.
-11. Las políticas de contraseña de dominio solo se aplican cuando están en la GPO vinculada a la raíz del dominio. Para tener una política distinta en un grupo concreto se usa una PSO (directiva de contraseña específica).
-12. Es dar permisos concretos sobre una OU concreta (por ejemplo, restablecer contraseñas) a un grupo. Respeta el mínimo privilegio, mientras que un administrador del dominio puede hacer cualquier cosa sobre todo el dominio.
-13. Que cualquier controlador puede aceptar cambios, que luego se replican al resto. Los FSMO existen porque hay cinco tareas que no pueden hacerse a la vez desde dos sitios sin provocar conflictos, y se reservan a un único controlador.
