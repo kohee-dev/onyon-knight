@@ -507,14 +507,6 @@ Para terminar:
 3. Clasifica los componentes como **alimentación, conexión, control o protección**.
 4. Señala qué daños visibles justificarían dejar de utilizar un componente y avisar al docente.
 
-:::pregunta[¿Qué componente proporciona energía?]
-La pila o batería, que proporciona energía eléctrica mediante procesos químicos. En el montaje de Tinkercad, esa función la cumple la fuente de alimentación.
-:::
-
-:::pregunta[¿Qué cambia al abrir el interruptor?]
-Se interrumpe el recorrido conductor, por lo que el circuito queda abierto y deja de circular corriente: el LED se apaga. Al cerrarlo se completa el recorrido y el LED vuelve a encenderse.
-:::
-
 ## 3. Componentes electrónicos
 
 Los **componentes electrónicos** permiten controlar y utilizar la corriente eléctrica para realizar funciones como emitir luz, almacenar energía, amplificar señales o procesar información.
@@ -749,12 +741,20 @@ En Tinkercad construiremos un circuito guiado con:
 **La simulación ayuda a comprender el circuito, pero no sustituye las instrucciones de seguridad para trabajar con material real.** Los montajes físicos se realizarán únicamente con los materiales, valores y procedimientos indicados por el docente.
 :::
 
+:::pregunta[¿Qué componente proporciona energía?]
+La pila o batería, que proporciona energía eléctrica mediante procesos químicos. En el montaje de Tinkercad, esa función la cumple la fuente de alimentación.
+:::
+
 :::pregunta[¿Qué función cumple la resistencia?]
 Presenta oposición al paso de corriente y, en este montaje, se coloca en serie con el LED para limitar la corriente.
 :::
 
 :::pregunta[¿Por qué importa la orientación del LED?]
 Porque tiene ánodo y cátodo, y hay que respetar su polaridad para que funcione. La patilla larga suele ser el ánodo y el borde plano del encapsulado ayuda a identificar el cátodo, pero debe comprobarse.
+:::
+
+:::pregunta[¿Qué cambia al abrir el interruptor?]
+Se interrumpe el recorrido conductor, por lo que el circuito queda abierto y deja de circular corriente: el LED se apaga. Al cerrarlo se completa el recorrido y el LED vuelve a encenderse.
 :::
 
 :::pregunta[¿Qué puntos de la protoboard están conectados entre sí?]

@@ -708,8 +708,8 @@ Solo `wordpress` debe ser accesible desde fuera; la base de datos solo se alcanz
 `docker compose down` elimina los contenedores y la red, pero los volúmenes siguen existiendo y los datos se conservan. Con `-v` se eliminan también los volúmenes, y con ellos la base de datos y los archivos de WordPress; no se puede deshacer.
 :::
 
-:::pregunta[El blog funciona dentro de una máquina virtual. ¿Qué inconvenientes de la virtualización, descritos en el aviso «No es gratis» del apartado 2 de fundamentos-virtualizacion, siguen afectándole? ¿Qué copias harías y dónde las guardarías?]
-Sigue consumiendo los recursos de la capa de virtualización y depende del equipo físico: si el anfitrión cae, cae el blog. Haría una copia lógica de la base de datos con `mariadb-dump` y otra del volumen de WordPress (`blog_wp_data`) con `tar`, y las guardaría fuera de la máquina virtual (por ejemplo con `scp`), porque un volumen no es una copia de seguridad.
+:::pregunta[El blog funciona dentro de una máquina virtual. ¿Qué inconvenientes de la virtualización, descritos en el aviso «No es gratis» del apartado 2 de «Virtualización», siguen afectándole? ¿Qué copias harías y dónde las guardarías?]
+Sigue consumiendo los recursos de la capa de virtualización y depende del equipo físico: si el anfitrión cae, cae el blog. Haría una copia lógica de la base de datos con `mariadb-dump` y otra del volumen de WordPress (`blog_wp_data`) con `tar`, y las guardaría fuera de la máquina virtual (por ejemplo con `scp`), porque un volumen no es una copia de seguridad. El aviso está en [[fundamentos-virtualizacion]].
 :::
 
 ## 8. Qué entregar
