@@ -59,6 +59,22 @@ export function remarkRecuadros() {
             : `recuadro «${nodo.name}» sin cerrar (falta una línea «:::»)`,
         );
       }
+      if (nodo.name === 'pregunta') {
+        if (!nodo.children[0]?.data?.directiveLabel) {
+          problema(file, nodo, 'pregunta sin texto (falta el texto entre corchetes: «:::pregunta[¿…?]»)');
+          return;
+        }
+        const pregunta = nodo.children.shift().children;
+        if (!nodo.children.length) {
+          // Sin respuesta todavía: se muestra como pregunta normal, no como desplegable vacío.
+          nodo.data = { hName: 'aside', hProperties: { className: ['recuadro', 'recuadro-ejercicio'] } };
+          nodo.children = [{ type: 'paragraph', children: pregunta }];
+          return;
+        }
+        nodo.data = { hName: 'details', hProperties: { className: ['recuadro', 'recuadro-ejercicio', 'pregunta'] } };
+        nodo.children.unshift({ type: 'paragraph', data: { hName: 'summary' }, children: pregunta });
+        return;
+      }
       const rotulo = RECUADROS[nodo.name];
       if (!rotulo) {
         problema(file, nodo, `recuadro desconocido «${nodo.name}» (permitidos: ${Object.keys(RECUADROS).join(', ')})`);
