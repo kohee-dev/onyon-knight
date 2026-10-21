@@ -812,15 +812,17 @@ blockquote {
 .pregunta > summary::-webkit-details-marker {
   display: none;
 }
+/* La flecha cuelga a la izquierda: con flex, cada fragmento de texto y cada `código` serían una columna. */
 .pregunta-texto {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+  position: relative;
+  display: block;
+  padding-left: 1.25rem;
   font-weight: 700;
 }
 .pregunta-texto::before {
   content: '▸';
-  flex: none;
+  position: absolute;
+  left: 0;
   color: var(--c-etiqueta);
   transition: transform 0.15s;
 }
