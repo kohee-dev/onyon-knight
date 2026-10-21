@@ -66,6 +66,10 @@ Con el comando `id` puedes ver tu UID, tu GID y todos los grupos a los que perte
 Linux es multiusuario por diseño. Cada usuario y grupo se identifica internamente con un número (UID y GID). Root es el administrador absoluto, las personas empiezan en el UID 1000, y los servicios corren con sus propias cuentas para limitar el daño si algo falla.
 :::
 
+:::pregunta[¿Por qué las cuentas de servicio tienen su propio usuario en vez de ejecutarse como root?]
+Por el mínimo privilegio. Si un atacante compromete el servicio, solo tendrá los permisos de ese usuario y no los de root.
+:::
+
 # 2. Dónde guarda Linux las cuentas
 
 En Windows las cuentas viven en una base de datos que no se edita a mano. En Linux, tres archivos de texto plano guardan lo esencial. Puedes abrirlos con cualquier editor, y por eso conviene que entiendas qué contiene cada campo.
@@ -128,6 +132,14 @@ Para consultar usuarios y grupos, mejor `getent passwd andrea` o `getent group o
 `/etc/passwd` guarda los usuarios, `/etc/group` los grupos y `/etc/shadow` los hashes de contraseña y su caducidad. Las contraseñas están separadas porque `passwd` debe ser legible por todos, y `shadow` solo por root.
 :::
 
+:::pregunta[¿Qué guarda cada campo de una línea de `/etc/passwd`?]
+Siete campos separados por dos puntos: nombre de usuario, una `x` (la contraseña está en `/etc/shadow`), UID, GID del grupo primario, comentario (normalmente el nombre completo), directorio personal e intérprete de comandos.
+:::
+
+:::pregunta[¿Por qué las contraseñas no están en `/etc/passwd`?]
+Porque ese archivo debe ser legible por todos, y así cualquiera podría copiar los hashes y atacarlos tranquilamente. Por eso están en `/etc/shadow`, que solo puede leer root.
+:::
+
 # 3. Crear y gestionar usuarios y grupos
 
 ## Crear un usuario
@@ -188,6 +200,14 @@ getent passwd andrea # su línea de passwd
 
 :::nota[En resumen]
 `adduser` es el asistente amable y `useradd` la herramienta precisa. Con `usermod -aG` se añade a grupos secundarios (sin olvidar la `-a`). Cada usuario tiene un grupo primario, que marca el grupo de lo que crea, y los secundarios, que le dan acceso a recursos.
+:::
+
+:::pregunta[Ejecutas `usermod -G proyecto andrea` y Andrea pierde el acceso a `sudo`. ¿Qué ha pasado y cómo se evita?]
+Sin la opción `-a`, `usermod -G` sustituye todos los grupos secundarios de Andrea por `proyecto`, y se le quita también el grupo `sudo`. Se evita con `usermod -aG proyecto andrea`, que añade sin quitar.
+:::
+
+:::pregunta[¿Qué diferencia hay entre `useradd` y `adduser`?]
+`useradd` es la herramienta de bajo nivel y hace solo lo que se le indica (no crea el directorio personal sin `-m`). `adduser` es un asistente de Debian y Ubuntu que crea el directorio, copia `/etc/skel` y pide la contraseña.
 :::
 
 # 4. El entorno del usuario
@@ -310,6 +330,14 @@ Cuando sospeches que una cuenta está comprometida, el orden es: 1) desactívala
 `chage` controla la caducidad de contraseñas y cuentas. `passwd -l` bloquea solo la contraseña; para cortar del todo hay que usar `chage -E 0`. `pwquality` exige contraseñas decentes y `pam_faillock` bloquea las cuentas tras varios intentos fallidos.
 :::
 
+:::pregunta[Has bloqueado a un usuario con `passwd -l`, pero sigue entrando por SSH. ¿Por qué y qué harías?]
+`passwd -l` bloquea solo la contraseña, y el usuario puede tener una clave pública autorizada con la que seguir entrando. Para cortar el acceso del todo se usa `chage -E 0` y se cierran sus sesiones abiertas.
+:::
+
+:::pregunta[¿Cómo evitarías que una cuenta sufra un ataque de adivinación de contraseñas por SSH?]
+Con `pam_faillock`, que bloquea la cuenta tras un número de fallos seguidos, o con fail2ban, que bloquea la IP de quien falla demasiado. Mejor aún, desactivando las contraseñas en `sshd_config` y usando solo claves públicas.
+:::
+
 # 6. Permisos de archivos
 
 Este es probablemente el tema más importante del bloque, porque cada vez que algo en Linux "no funciona", la causa suele ser un permiso.
@@ -398,6 +426,14 @@ Cuando un permiso falla, comprueba tres cosas por este orden: 1) los permisos de
 Cada archivo tiene propietario, grupo y tres bloques de permisos (`rwx` para propietario, grupo y otros). En directorios, `x` significa poder entrar y `w` poder crear y borrar. Se cambian con `chmod` (simbólico u octal), `chown` y `chgrp`, y la `umask` decide los permisos por defecto de lo nuevo.
 :::
 
+:::pregunta[¿Qué permisos tiene un archivo con `chmod 640` y quién puede hacer qué?]
+El propietario puede leer y escribir (6), el grupo solo leer (4) y los demás no pueden hacer nada (0).
+:::
+
+:::pregunta[Para entrar en un directorio y listar su contenido, ¿qué permisos hacen falta?]
+`x` para poder atravesarlo y `r` para listar lo que contiene. Además hace falta `x` en todos los directorios del camino.
+:::
+
 # 7. Permisos especiales
 
 Además de `rwx`, hay tres permisos que modifican el comportamiento de un archivo o directorio. Aparecen como un cuarto dígito delante de los tres habituales en el modo octal.
@@ -456,6 +492,18 @@ find / -perm -4000 -type f 2>/dev/null     # buscar archivos con SUID
 SGID en un directorio hace que lo nuevo herede su grupo: es la base de las carpetas de grupo. El sticky bit impide borrar archivos ajenos, como en `/tmp`. SUID hace que un programa se ejecute con los permisos de su dueño, y hay que usarlo con mucho cuidado.
 :::
 
+:::pregunta[Un equipo comparte una carpeta, pero los archivos que crea cada miembro no los pueden editar los demás. ¿Cómo lo arreglas?]
+Se asigna la carpeta a un grupo común y se activa el bit SGID (`chmod 2775`) para que lo nuevo herede el grupo de la carpeta. Además, la umask de los usuarios debe dar permiso de escritura al grupo (por ejemplo `002`).
+:::
+
+:::pregunta[¿Para qué sirve el sticky bit y dónde lo has visto?]
+Para que, en un directorio donde todos pueden escribir, cada uno solo pueda borrar o renombrar sus propios archivos. Se ve en `/tmp`.
+:::
+
+:::pregunta[¿Por qué `passwd` tiene el bit SUID?]
+Porque cualquier usuario debe poder cambiar su contraseña, que está en `/etc/shadow`, un archivo que solo puede modificar root. Con SUID el programa se ejecuta con los permisos de root, pero solo para esa tarea concreta.
+:::
+
 # 8. Elevar privilegios: `su` y `sudo`
 
 Trabajar siempre como root es una mala idea: un error de teclado (`rm -rf` en el sitio equivocado) o un programa malicioso lo pueden destrozar todo. Lo sensato es usar tu usuario normal y **subir de privilegios solo cuando hace falta**.
@@ -500,6 +548,18 @@ Un detalle: la opción `NOPASSWD` permite ejecutar comandos sin pedir contraseñ
 
 :::nota[En resumen]
 `su` cambia de usuario con la contraseña de ese usuario; `sudo` ejecuta un comando con tu propia contraseña y deja constancia en el registro. Las reglas están en `sudoers`, que siempre se edita con `visudo`, y permiten delegar comandos concretos a grupos concretos.
+:::
+
+:::pregunta[¿Por qué se edita `sudoers` con `visudo`?]
+Porque `visudo` comprueba la sintaxis antes de guardar. Un error en `sudoers` puede dejar `sudo` inutilizable para todos y sin forma de ser administrador.
+:::
+
+:::pregunta[¿Cómo permitirías a un grupo reiniciar el servicio SSH sin darle acceso de administrador?]
+Con una regla en `sudoers` que le permita solo ese comando, creada con `visudo`:
+
+```
+%soporte ALL=(root) /usr/bin/systemctl restart ssh
+```
 :::
 
 # 9. Acceso remoto por SSH
@@ -573,6 +633,10 @@ scp informe.txt andrea@192.168.50.30:/home/andrea/
 SSH da una terminal remota cifrada por el puerto 22. Lo más seguro es autenticarse con un par de claves: la privada se queda contigo y la pública va al `authorized_keys` del servidor. En `sshd_config` se prohíbe entrar como root, se limita quién puede entrar y se puede desactivar la contraseña.
 :::
 
+:::pregunta[¿Qué ventajas tiene la autenticación por clave pública frente a la contraseña?]
+La contraseña nunca viaja por la red y no se puede adivinar por fuerza bruta, porque solo resuelve el reto quien tiene la clave privada. Eso sí, la clave privada hay que protegerla (por ejemplo con una frase de contraseña).
+:::
+
 # 10. Buenas prácticas y auditoría
 
 Montar el sistema es la mitad del trabajo. La otra mitad es cuidarlo: seguir ciertas normas y mirar de vez en cuando qué ha pasado.
@@ -627,6 +691,10 @@ Los registros son tu memoria del servidor. Un atacante que consigue entrar suele
 Seguridad es mantener el mínimo privilegio, no usar root y tener una cuenta por persona. Con `last`, `lastb`, `lastlog` y el registro de autenticación se puede saber quién entró, quién lo intentó y qué hizo.
 :::
 
+:::pregunta[¿Cómo averiguarías cuántas personas distintas han accedido a un servidor y si ha habido intentos fallidos?]
+Con `last` para el historial de sesiones (contando usuarios distintos con `awk`, `sort` y `uniq`), con `lastb` para los intentos fallidos y con `grep "Failed password" /var/log/auth.log` para el detalle.
+:::
+
 # Glosario
 
 | Término | Significado |
@@ -661,29 +729,6 @@ Seguridad es mantener el mínimo privilegio, no usar root y tener una cuenta por
 | `authorized_keys` | Archivo del servidor con las claves públicas autorizadas |
 | `last` / `lastb` / `lastlog` | Historial de accesos, de intentos fallidos y de último acceso |
 
-# Comprueba lo que sabes
-
-Contesta por tu cuenta y después comprueba tus respuestas en las soluciones, al final del tema.
-
-:::ejercicio[Preguntas]
-1. ¿Por qué las cuentas de servicio tienen su propio usuario en vez de ejecutarse como root?
-2. ¿Qué guarda cada campo de una línea de `/etc/passwd`?
-3. ¿Por qué las contraseñas no están en `/etc/passwd`?
-4. Ejecutas `usermod -G proyecto andrea` y Andrea pierde el acceso a `sudo`. ¿Qué ha pasado y cómo se evita?
-5. ¿Qué diferencia hay entre `useradd` y `adduser`?
-6. Has bloqueado a un usuario con `passwd -l`, pero sigue entrando por SSH. ¿Por qué y qué harías?
-7. ¿Cómo evitarías que una cuenta sufra un ataque de adivinación de contraseñas por SSH?
-8. ¿Qué permisos tiene un archivo con `chmod 640` y quién puede hacer qué?
-9. Para entrar en un directorio y listar su contenido, ¿qué permisos hacen falta?
-10. Un equipo comparte una carpeta, pero los archivos que crea cada miembro no los pueden editar los demás. ¿Cómo lo arreglas?
-11. ¿Para qué sirve el sticky bit y dónde lo has visto?
-12. ¿Por qué `passwd` tiene el bit SUID?
-13. ¿Por qué se edita `sudoers` con `visudo`?
-14. ¿Cómo permitirías a un grupo reiniciar el servicio SSH sin darle acceso de administrador?
-15. ¿Qué ventajas tiene la autenticación por clave pública frente a la contraseña?
-16. ¿Cómo averiguarías cuántas personas distintas han accedido a un servidor y si ha habido intentos fallidos?
-:::
-
 # Fuentes y para saber más
 
 Documentación para ampliar el bloque:
@@ -697,22 +742,3 @@ Documentación para ampliar el bloque:
 | 8. Reglas de sudo | [Manual de sudoers](https://manpages.debian.org/bookworm/sudo/sudoers.5.en.html) |
 | 9. Servidor OpenSSH en Ubuntu | [OpenSSH server (Ubuntu Server)](https://ubuntu.com/server/docs/how-to/security/openssh-server/) |
 | 9. Opciones de `sshd_config` | [Manual de sshd_config](https://manpages.ubuntu.com/manpages/noble/man5/sshd_config.5.html) |
-
-# Soluciones
-
-1. Por el mínimo privilegio: si el servicio es comprometido, el atacante solo tiene los permisos de ese usuario y no los de root.
-2. Nombre de usuario, una `x` (la contraseña está en shadow), UID, GID del grupo primario, comentario (nombre completo), directorio personal e intérprete de comandos.
-3. Porque ese archivo debe ser legible por todos, y así cualquiera podría copiar los hashes y atacarlos. Están en `/etc/shadow`, que solo puede leer root.
-4. Sin la opción `-a`, `usermod -G` sustituye todos los grupos secundarios de Andrea por `proyecto`. Hay que usar `usermod -aG proyecto andrea` para añadir sin quitar.
-5. `useradd` es el comando de bajo nivel, hace solo lo que se le indica (no crea el directorio personal sin `-m`). `adduser` es un asistente de Debian y Ubuntu que crea el directorio, copia `/etc/skel` y pide la contraseña.
-6. `passwd -l` solo bloquea la contraseña, y el usuario puede tener una clave pública autorizada. Para cortar el acceso del todo se usa `chage -E 0` (o se pone `nologin` como intérprete) y se cierran sus sesiones.
-7. Con `pam_faillock` (bloqueo tras un número de fallos) o con fail2ban, y mejor aún desactivando las contraseñas y usando solo claves públicas.
-8. El propietario puede leer y escribir (6), el grupo solo leer (4) y los demás no pueden hacer nada (0).
-9. `x` para poder atravesarlo y `r` para listar lo que contiene. Además hace falta `x` en todos los directorios del camino.
-10. Poniendo la carpeta a un grupo común y activando el bit SGID (`chmod 2775`) para que los archivos nuevos hereden el grupo de la carpeta, y asegurando que los usuarios tienen una umask que da permiso de escritura al grupo.
-11. Para que en un directorio donde todos pueden escribir cada uno solo pueda borrar o renombrar sus propios archivos. Se usa en `/tmp`.
-12. Porque cualquier usuario debe poder cambiar su contraseña, que está en `/etc/shadow`, solo modificable por root. Con SUID el programa se ejecuta con los permisos de root, solo mientras dura esa tarea.
-13. Porque `visudo` comprueba la sintaxis antes de guardar. Un error en `sudoers` puede dejar `sudo` inutilizable para todos los administradores.
-14. Con una regla en `sudoers` (por ejemplo, `%soporte ALL=(root) /usr/bin/systemctl restart ssh`), creada con `visudo`.
-15. La contraseña no viaja por la red ni se puede adivinar por fuerza bruta, y se puede revocar quitando la clave pública del servidor. Eso sí, la clave privada hay que protegerla.
-16. Con `last` para el historial de sesiones (contando usuarios distintos con `awk`, `sort` y `uniq`), con `lastb` para los intentos fallidos y con `grep "Failed password" /var/log/auth.log` para el detalle.

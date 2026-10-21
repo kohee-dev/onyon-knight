@@ -145,6 +145,13 @@
   tr {
     break-inside: avoid;
   }
+  /* En papel se practica: salen las preguntas, no las respuestas. */
+  .pregunta > :not(summary) {
+    display: none;
+  }
+  .pregunta > summary::before {
+    content: none;
+  }
   h2,
   h3,
   h4 {

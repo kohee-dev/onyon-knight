@@ -58,6 +58,10 @@ Las herramientas habituales son estas:
 - En Linux, `lsblk` para ver los discos, `fdisk` o `parted` para particionar (`parted` maneja GPT con comodidad) y `mkfs.ext4` para formatear.
 - En Windows, la **Administración de discos** (`diskmgmt.msc`) o `diskpart`.
 
+:::pregunta[¿Para qué sirve una tabla de particiones y qué diferencia hay entre MBR y GPT?]
+Es un mapa al principio del disco que indica dónde empieza y acaba cada partición. MBR es antiguo: máximo de 2 TiB, 4 particiones primarias y una sola copia de la tabla. GPT, parte de UEFI, admite discos prácticamente ilimitados, 128 particiones por defecto en Windows y guarda una copia de la tabla al final con suma de comprobación. Hoy se usa GPT salvo que haya un motivo para no hacerlo.
+:::
+
 ## 3. Sistemas de ficheros
 
 El sistema de ficheros decide cómo se guardan los archivos en el disco. Estos son los que más te vas a encontrar:
@@ -71,6 +75,10 @@ El sistema de ficheros decide cómo se guardan los archivos en el disco. Estos s
 | [ZFS](https://es.wikipedia.org/wiki/ZFS) | Servidores de almacenamiento | Se ocupa a la vez de los discos, los volúmenes y los ficheros ([[zfs-pools-datasets]]) |
 
 Lo del diario merece una explicación. Un sistema con diario no escribe los cambios directamente: primero los apunta en un cuaderno. Si se va la luz a mitad de una operación, al volver a arrancar lee ese cuaderno y deshace o termina lo que había quedado a medias, en lugar de revisar el disco entero.
+
+:::pregunta[¿Qué es un sistema de ficheros con diario y qué ventaja tiene?]
+Uno que primero apunta los cambios en un diario (*journal*) y después los aplica. Si se va la luz a mitad de una operación, al arrancar lee el diario y deshace o termina lo pendiente, sin revisar el disco entero.
+:::
 
 ## 4. Montar un sistema de ficheros en Linux
 
@@ -96,6 +104,14 @@ Con `blkid` ves el UUID de cada partición. Es un identificador que se guarda de
 Si una línea está mal escrita o el disco ya no existe, el sistema puede quedarse en modo de emergencia. Cada vez que edites `fstab`, ejecuta `sudo mount -a` antes de reiniciar: si hay un error, lo verás ahí. Para discos que pueden faltar (un USB o un recurso de red) se usa la opción `nofail`.
 :::
 
+:::pregunta[¿Por qué es mejor usar el UUID que `/dev/sdb1` en `fstab`?]
+Porque el UUID se guarda dentro del sistema de ficheros y no cambia aunque el disco pase a llamarse `sdc`, mientras que `/dev/sdb1` depende del orden de detección y podría acabar montando el disco equivocado.
+:::
+
+:::pregunta[Has editado `/etc/fstab`. ¿Qué haces antes de reiniciar?]
+Ejecutar `sudo mount -a`: si hay un error en alguna línea, aparece ahí, y se evita que el equipo se quede en modo de emergencia al arrancar.
+:::
+
 ## 5. LVM
 
 Con particiones normales, el tamaño que eliges al principio es el que te toca. Si `/datos` se llena y el disco ya está repartido, ampliar es incómodo. **LVM** (*Logical Volume Manager*) mete una capa intermedia que lo soluciona, y funciona con tres piezas:
@@ -110,6 +126,10 @@ Las órdenes principales son `pvcreate`, `vgcreate`, `lvcreate`, `lvextend` y, p
 
 :::nota[¿Y ZFS?]
 ZFS hace él solo lo que aquí hacen por separado las particiones, LVM, RAID y el sistema de ficheros. Lo vemos en [[zfs-pools-datasets]]. Pero conviene entender primero cada capa por su lado, porque en la mayoría de los equipos que te vas a encontrar seguirán estando separadas.
+:::
+
+:::pregunta[¿Qué ventaja da LVM frente a las particiones normales?]
+Permite ampliar los volúmenes lógicos en caliente: se añade otro disco al grupo de volúmenes, se estira el LV y, con ext4 o XFS, se hace crecer el sistema de ficheros, sin repartir el disco de antemano.
 :::
 
 ## 6. Sistemas RAID
@@ -152,6 +172,26 @@ El RAID por hardware lo hace una tarjeta controladora. Quita trabajo al procesad
 Un RAID te protege de que un disco se estropee, y de nada más. No te salva si borras un archivo por error, si un virus cifra tus datos, si falla el software, o si hay un incendio o un robo. En todos esos casos, el RAID replica el desastre en todos los discos al instante. Para eso están las copias de seguridad, que vemos en [[instantaneas-copias]].
 :::
 
+:::pregunta[Tienes 5 discos de 2 TB. ¿Qué capacidad útil tendrías en RAID 5, en RAID 6 y en RAID 0?]
+RAID 5: *N* − 1 = 4 discos, 8 TB. RAID 6: *N* − 2 = 3 discos, 6 TB. RAID 0: *N* = 5 discos, 10 TB, sin ninguna protección.
+:::
+
+:::pregunta[¿Cuántos discos pueden fallar en un RAID 6 y en un RAID 10 de 4 discos?]
+En RAID 6, dos discos cualesquiera. En RAID 10, uno por pareja de espejo: dos discos si no son de la misma pareja, pero si fallan los dos de una misma pareja se pierde el RAID.
+:::
+
+:::pregunta[¿Por qué se prefiere RAID 6 a RAID 5 con discos muy grandes?]
+Porque reconstruir un RAID 5 de varios TB lleva horas o días, y durante todo ese tiempo un segundo fallo se llevaría los datos. RAID 6 aguanta ese segundo fallo.
+:::
+
+:::pregunta[Un compañero dice: "Ya tengo RAID 1, no necesito copia de seguridad". ¿Qué le respondes?]
+Que RAID solo protege de que un disco se estropee. No salva de un borrado por error, un virus, un fallo de software, un incendio o un robo: el RAID replica el desastre en todos los discos al instante.
+:::
+
+:::pregunta[¿Qué ventaja y qué riesgo tiene el RAID por hardware frente al de software?]
+Ventaja: la tarjeta controladora quita trabajo al procesador. Riesgo: si la tarjeta se estropea, puede hacer falta otra igual para recuperar los datos; el RAID por software es flexible, barato y no depende de una tarjeta concreta.
+:::
+
 ---
 
 ## Glosario
@@ -167,21 +207,6 @@ Un RAID te protege de que un disco se estropee, y de nada más. No te salva si b
 | Striping | Repartir los datos en trozos entre varios discos |
 | Paridad | Dato calculado que permite reconstruir un trozo perdido |
 | RAID | Conjunto de discos que funciona como uno solo para ganar velocidad o tolerancia a fallos |
-
-## Comprueba lo que sabes
-
-:::ejercicio[Repaso]
-1. ¿Para qué sirve una tabla de particiones y qué diferencia hay entre MBR y GPT?
-2. ¿Qué es un sistema de ficheros con diario y qué ventaja tiene?
-3. ¿Por qué es mejor usar el UUID que `/dev/sdb1` en `fstab`?
-4. Has editado `/etc/fstab`. ¿Qué haces antes de reiniciar?
-5. ¿Qué ventaja da LVM frente a las particiones normales?
-6. Tienes 5 discos de 2 TB. ¿Qué capacidad útil tendrías en RAID 5, en RAID 6 y en RAID 0?
-7. ¿Cuántos discos pueden fallar en un RAID 6 y en un RAID 10 de 4 discos?
-8. ¿Por qué se prefiere RAID 6 a RAID 5 con discos muy grandes?
-9. Un compañero dice: "Ya tengo RAID 1, no necesito copia de seguridad". ¿Qué le respondes?
-10. ¿Qué ventaja y qué riesgo tiene el RAID por hardware frente al de software?
-:::
 
 ## Fuentes y para saber más
 

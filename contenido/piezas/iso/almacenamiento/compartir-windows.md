@@ -43,6 +43,10 @@ Dos cosas sobre los nombres:
 - Si el nombre termina en **`$`**, el recurso está **oculto**: no aparece al explorar la red, pero se abre si conoces la ruta (`\\servidor\Escuela$`). Es discreción, no seguridad.
 - Windows crea por su cuenta unos **recursos administrativos** ocultos: `C$` (la raíz de cada disco), `ADMIN$` (la carpeta del sistema) e `IPC$` (para la comunicación entre procesos). Solo los administradores pueden usarlos.
 
+:::pregunta[¿Qué significa que un recurso compartido termine en `$`?]
+Que está oculto: no aparece al explorar la red, pero se abre si se conoce la ruta. Es discreción, no seguridad.
+:::
+
 ## 2. Dos capas de permisos
 
 Esta es la clave del tema. Cuando alguien accede por la red, Windows aplica dos juegos de permisos y se queda con el más restrictivo de cada caso:
@@ -66,6 +70,18 @@ Para no volverse loco, la mayoría de administradores da Cambiar o Control total
 
 Para diagnosticar, en las propiedades avanzadas de seguridad tienes la pestaña **Acceso efectivo**, que calcula lo que puede hacer un usuario concreto sobre esa carpeta. Ojo: solo tiene en cuenta NTFS, y la compartición hay que mirarla aparte.
 
+:::pregunta[El permiso de compartición es "Lectura" y el NTFS es "Control total". ¿Qué puede hacer el usuario por la red y qué desde la consola del servidor?]
+Por la red solo puede leer, porque el permiso efectivo es el menor de los dos. Iniciando sesión en el servidor puede hacer todo, ya que la compartición no se aplica en local.
+:::
+
+:::pregunta[¿Por qué muchos administradores dan "Cambiar" a "Todos" en la compartición?]
+Para gestionar el control fino solo con NTFS y tener así un único sitio donde mirar. Los permisos NTFS siguen protegiendo, además, el acceso en local o con otro nombre de compartición.
+:::
+
+:::pregunta[¿Para qué sirve la pestaña "Acceso efectivo"?]
+Para calcular qué puede hacer un usuario concreto sobre una carpeta, y así diagnosticar permisos. Solo tiene en cuenta NTFS: la compartición hay que mirarla aparte.
+:::
+
 ## 3. Enumeración basada en el acceso
 
 Aunque un usuario no pueda abrir una carpeta, por defecto la ve en la lista. No es un fallo grave de seguridad, pero es incómodo y cuenta más de lo que debería: el nombre `Despidos-2026` ya cuenta una historia. La **enumeración basada en el acceso** (*Access-Based Enumeration*, ABE) hace que cada usuario vea solo lo que tiene permiso para abrir.
@@ -73,6 +89,10 @@ Aunque un usuario no pueda abrir una carpeta, por defecto la ve en la lista. No 
 ```powershell
 Set-SmbShare -Name 'Escuela' -FolderEnumerationMode AccessBased
 ```
+
+:::pregunta[¿Qué hace la enumeración basada en el acceso?]
+Hace que cada usuario vea solo las carpetas que tiene permiso para abrir, en lugar de ver también las que no puede abrir.
+:::
 
 ## 4. FSRM: cuotas y filtros de archivos
 
@@ -115,11 +135,31 @@ Si alguien renombra `cancion.mp3` a `cancion.txt`, el filtro no lo detecta. Es u
 
 FSRM también genera **informes** de almacenamiento: los archivos más grandes, los duplicados, los que nadie abre...
 
+:::pregunta[¿Qué diferencia hay entre una cuota dura y una blanda?]
+La dura impide guardar más al llegar al límite; la blanda deja seguir, pero avisa (por correo, en el registro de eventos...).
+:::
+
+:::pregunta[¿Qué es un filtro de archivos activo y qué limitación tiene?]
+Es un filtro que bloquea el guardado de ciertos tipos de archivo (el pasivo lo permite pero lo anota). Mira la extensión, no el contenido, así que si se renombra `cancion.mp3` a `cancion.txt` no lo detecta.
+:::
+
+:::pregunta[¿Qué rol hay que instalar en Windows Server para usar cuotas y filtros?]
+El Administrador de recursos del servidor de archivos (FSRM), que se instala como característica con `Install-WindowsFeature FS-FileServer, FS-Resource-Manager`.
+:::
+
 ## 5. Versiones anteriores
 
 Los servidores Windows pueden hacer **instantáneas de volumen** con el servicio VSS (*Volume Shadow Copy Service*), que se programan en las propiedades del disco, en la pestaña *Instantáneas*. Con ellas activadas, un usuario puede hacer clic derecho sobre un archivo o carpeta de la red, elegir *Propiedades* → **Versiones anteriores** y recuperar lo que borró sin pedir ayuda a nadie.
 
 Es el mismo concepto que las instantáneas de ZFS de [[instantaneas-copias]]: una foto del volumen en un momento dado, que sirve para deshacer errores rápidos pero no sustituye a una copia de seguridad, porque si el disco se pierde se pierde todo.
+
+:::pregunta[Un usuario ha borrado un archivo del servidor. ¿Cómo puede recuperarlo sin ayuda?]
+Si hay instantáneas de volumen (VSS) activadas, con clic derecho sobre el archivo o carpeta de la red, *Propiedades* → *Versiones anteriores*.
+:::
+
+:::pregunta[¿Por qué las versiones anteriores no sustituyen a una copia de seguridad?]
+Porque son instantáneas del mismo volumen: sirven para deshacer errores rápidos, pero si el disco se pierde se pierde todo, también las versiones.
+:::
 
 ## 6. Otras opciones
 
@@ -146,21 +186,6 @@ En la práctica los usuarios y grupos serán locales del servidor. En un dominio
 | FSRM | Rol de Windows Server para cuotas, filtros e informes |
 | Cuota dura / blanda | Impide / solo avisa al llegar al límite |
 | VSS | Servicio de instantáneas de volumen de Windows |
-
-## Comprueba lo que sabes
-
-:::ejercicio[Repaso]
-1. ¿Qué significa que un recurso compartido termine en `$`?
-2. El permiso de compartición es "Lectura" y el NTFS es "Control total". ¿Qué puede hacer el usuario por la red y qué desde la consola del servidor?
-3. ¿Por qué muchos administradores dan "Cambiar" a "Todos" en la compartición?
-4. ¿Qué hace la enumeración basada en el acceso?
-5. ¿Qué diferencia hay entre una cuota dura y una blanda?
-6. ¿Qué es un filtro de archivos activo y qué limitación tiene?
-7. ¿Qué rol hay que instalar en Windows Server para usar cuotas y filtros?
-8. ¿Para qué sirve la pestaña "Acceso efectivo"?
-9. Un usuario ha borrado un archivo del servidor. ¿Cómo puede recuperarlo sin ayuda?
-10. ¿Por qué las versiones anteriores no sustituyen a una copia de seguridad?
-:::
 
 ## Fuentes y para saber más
 

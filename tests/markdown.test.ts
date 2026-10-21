@@ -51,6 +51,66 @@ describe('recuadros', () => {
     expect(m).toContain('::::nota');
   });
 
+  it('convierte :::pregunta en un desplegable cerrado con la pregunta y la respuesta', async () => {
+    const h = await html(':::pregunta[¿Qué es un **vdev**?]\nUn grupo de discos.\n:::');
+    expect(h).toContain('<details class="recuadro recuadro-ejercicio pregunta">');
+    expect(h).toContain('<summary>¿Qué es un <strong>vdev</strong>?</summary>');
+    expect(h).toContain('<p>Un grupo de discos.</p>');
+    expect(h).not.toContain('open');
+    expect(h).not.toContain('recuadro-titulo');
+  });
+
+  it('una :::pregunta sin respuesta se muestra como recuadro normal, sin desplegable', async () => {
+    const h = await html(':::pregunta[¿Qué es un vdev?]\n:::');
+    expect(h).toContain('<aside class="recuadro recuadro-ejercicio">');
+    expect(h).toContain('¿Qué es un vdev?');
+    expect(h).not.toContain('<details');
+    expect(h).not.toContain('Ejercicio');
+  });
+
+  it('la respuesta de una :::pregunta admite código y listas', async () => {
+    const h = await html(':::pregunta[¿Cómo?]\n- uno\n- dos\n\n```bash\nzpool list\n```\n:::');
+    expect(h).toContain('<li>uno</li>');
+    expect(h).toContain('<pre');
+    expect(h).toContain('zpool');
+    expect(h).toContain('<details');
+  });
+
+  it('una :::pregunta sin texto de pregunta da error con la línea', async () => {
+    const m = await error('Hola\n\n:::pregunta\nRespuesta\n:::');
+    expect(m).toContain('a.md:3');
+    expect(m).toContain('pregunta');
+    expect(m).toContain('texto');
+  });
+
+  it('una :::pregunta con los corchetes vacíos da el mismo error que sin texto', async () => {
+    const m = await error('Hola\n\n:::pregunta[]\nRespuesta\n:::');
+    expect(m).toContain('a.md:3');
+    expect(m).toContain('texto');
+  });
+
+  it('una :::pregunta cuyo texto son solo espacios da el mismo error que sin texto', async () => {
+    const m = await error('Hola\n\n:::pregunta[ ]\nRespuesta\n:::');
+    expect(m).toContain('a.md:3');
+    expect(m).toContain('texto');
+  });
+
+  it('el error de recuadro desconocido también lista pregunta entre los permitidos', async () => {
+    const m = await error(':::peligro\nX\n:::');
+    expect(m).toContain('pregunta');
+  });
+
+  it('una :::pregunta sin cerrar da error con la línea', async () => {
+    const m = await error('Hola\n\n:::pregunta[¿Qué?]\nRespuesta');
+    expect(m).toContain('a.md:3');
+    expect(m).toContain('sin cerrar');
+  });
+
+  it('no transforma :::pregunta dentro de un bloque de código', async () => {
+    const h = await html('```text\n:::pregunta[¿Qué?]\nX\n:::\n```');
+    expect(h).not.toContain('<details');
+  });
+
   it('no reescribe «::: nota» dentro de un bloque de código', async () => {
     const h = await html('```text\n::: nota\n:::\n```\n\n~~~\n::: aviso\n~~~');
     expect(h).toContain('::: nota');

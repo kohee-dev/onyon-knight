@@ -51,6 +51,10 @@ Esto es lo que suele hacer un sistema operativo de red:
 Un SO de red ofrece servicios a otros equipos. Lo que lo distingue del de escritorio es su papel (atender a muchos), su necesidad de estar siempre disponible y que se administra a distancia.
 :::
 
+:::pregunta[¿Qué diferencia a un SO de red de uno de escritorio?]
+Su papel: da servicio a muchos equipos y usuarios a la vez, debe estar disponible casi siempre y se administra a distancia, e incluye servicios como directorio, archivos o nombres.
+:::
+
 # 2. Modelos de red
 
 ## Cliente-servidor y punto a punto
@@ -88,6 +92,14 @@ Un error muy común es pensar que "servidor" y "cliente" son máquinas distintas
 Cliente-servidor centraliza, escala bien y se controla mejor, pero cuesta más. Punto a punto es sencillo y barato, pero solo sirve para redes muy pequeñas. En Windows, lo primero equivale a un dominio y lo segundo a un grupo de trabajo.
 :::
 
+:::pregunta[Una oficina de 4 personas comparte una impresora y unos documentos. ¿Qué modelo elegirías y por qué?]
+Punto a punto: son pocos equipos y un servidor sería exagerado y más caro. Si la oficina creciera, convendría pasar a cliente-servidor.
+:::
+
+:::pregunta[¿En qué se parecen y en qué se diferencian un grupo de trabajo y un dominio?]
+Los dos agrupan equipos Windows. En un grupo de trabajo cada equipo guarda sus propias cuentas; en un dominio las cuentas viven en un servidor central y los equipos confían en él, con una sola cuenta válida en todos.
+:::
+
 # 3. Roles y servicios típicos de un servidor
 
 Un servidor rara vez hace una sola cosa. Normalmente reúne varios **roles**, y cada rol es un servicio que ofrece a los demás: guardar archivos, gestionar las cuentas, resolver nombres, publicar una web...
@@ -114,6 +126,10 @@ Los puertos de la tabla son los habituales, pero se pueden cambiar. Lo important
 
 :::nota[En resumen]
 Un servidor puede ofrecer muchos servicios a la vez. Cada servicio escucha en un puerto, y en este módulo te centrarás en el directorio, los archivos compartidos y el acceso remoto.
+:::
+
+:::pregunta[¿Qué servicio corresponde a los puertos 445, 3389 y 22?]
+El 445 es SMB (archivos compartidos, Samba en Linux), el 3389 es el escritorio remoto de Windows (RDP) y el 22 es SSH.
 :::
 
 # 4. Familias de sistemas operativos de red
@@ -165,6 +181,10 @@ No existe un sistema "mejor" que otro, sino el que encaja con cada necesidad. De
 Windows Server es propietario, se licencia por núcleos y CAL, y su punto fuerte es Active Directory. Ubuntu Server es libre, se administra por consola y SSH, y es muy flexible. Se elige según el coste, los conocimientos del equipo y el software que haga falta.
 :::
 
+:::pregunta[Una empresa usa SQL Server y aplicaciones .NET. ¿Qué sistema operativo de servidor le encaja mejor y por qué?]
+Windows Server, porque ese software es de su ecosistema y se integra de forma nativa. Hay que tener en cuenta el coste de las licencias (núcleos y CAL).
+:::
+
 # 5. Gestión centralizada de usuarios
 
 Esta es la idea más importante del bloque, y la que da sentido a buena parte del módulo.
@@ -194,6 +214,14 @@ Durante el módulo vas a trabajar con dos tecnologías de directorio:
 
 :::nota[En resumen]
 Un directorio centraliza cuentas, grupos y políticas en un único servidor. Autenticar es comprobar quién eres y autorizar es decidir qué puedes hacer. Todo funciona mejor con un directorio, pero el servidor se convierte en un punto crítico.
+:::
+
+:::pregunta[¿Qué problema resuelve un directorio?]
+Evita crear y mantener una cuenta en cada equipo: cuentas, grupos y políticas se definen en un único servidor, al que los equipos delegan la comprobación de quién es cada usuario.
+:::
+
+:::pregunta[¿Qué diferencia hay entre autenticar y autorizar?]
+Autenticar es comprobar quién eres; autorizar es decidir qué puedes hacer una vez identificado.
 :::
 
 # 6. Virtualización como entorno de trabajo
@@ -239,6 +267,14 @@ No clones una VM de Windows sin prepararla antes con `sysprep`. Un clon comparte
 Una VM es un equipo completo dentro de otro. Las instantáneas permiten volver atrás, y el modo de red decide quién ve a quién. Para el laboratorio, usa Red NAT.
 :::
 
+:::pregunta[Necesitas una red de laboratorio en la que tus VM se vean entre sí y tengan Internet. ¿Qué modo de red eliges?]
+Red NAT. El NAT simple aísla cada máquina de las demás y la red interna no tiene salida a Internet.
+:::
+
+:::pregunta[¿Por qué no se debe clonar una VM de Windows sin `sysprep`?]
+Porque el clon comparte el identificador de seguridad del original, y dos equipos con el mismo identificador dan problemas al unirse a un dominio.
+:::
+
 # 7. Conceptos de red mínimos
 
 Para montar el laboratorio necesitas unos pocos conceptos de red. No vamos a profundizar, porque el funcionamiento de la red y de sus servicios lo verás en otros módulos, pero sí tienes que manejar estas ideas:
@@ -271,6 +307,10 @@ Cuando algo no conecta, no empieces por lo más complicado. Comprueba **de dentr
 Para que un equipo funcione en red necesita IP, máscara, puerta de enlace y servidor DNS. Y cuando algo falla, se diagnostica de dentro hacia fuera.
 :::
 
+:::pregunta[Un cliente no puede abrir `ejemplo.com` pero sí hace ping a `8.8.8.8`. ¿Dónde está el problema?]
+En la resolución de nombres: la conectividad funciona, así que lo más probable es un fallo del servidor DNS configurado en ese equipo.
+:::
+
 # Glosario
 
 | Término | Significado |
@@ -290,23 +330,6 @@ Para que un equipo funcione en red necesita IP, máscara, puerta de enlace y ser
 | LTS | Versión de soporte largo de Ubuntu |
 | Puerta de enlace | Equipo que da salida al tráfico fuera de la red local |
 
-# Comprueba lo que sabes
-
-Contesta por tu cuenta y después comprueba tus respuestas en las soluciones, al final del tema.
-
-:::ejercicio[Preguntas]
-1. ¿Qué diferencia a un SO de red de uno de escritorio?
-2. Una oficina de 4 personas comparte una impresora y unos documentos. ¿Qué modelo elegirías y por qué?
-3. ¿En qué se parecen y en qué se diferencian un grupo de trabajo y un dominio?
-4. ¿Qué servicio corresponde a los puertos 445, 3389 y 22?
-5. Una empresa usa SQL Server y aplicaciones .NET. ¿Qué sistema operativo de servidor le encaja mejor y por qué?
-6. ¿Qué problema resuelve un directorio?
-7. ¿Qué diferencia hay entre autenticar y autorizar?
-8. Necesitas una red de laboratorio en la que tus VM se vean entre sí y tengan Internet. ¿Qué modo de red eliges?
-9. Un cliente no puede abrir `ejemplo.com` pero sí hace ping a `8.8.8.8`. ¿Dónde está el problema?
-10. ¿Por qué no se debe clonar una VM de Windows sin `sysprep`?
-:::
-
 # Temas para la presentación
 
 Las presentaciones del alumnado duran unos 8 a 10 minutos. Algunas ideas de tema:
@@ -315,16 +338,3 @@ Las presentaciones del alumnado duran unos 8 a 10 minutos. Algunas ideas de tema
 - Un servicio de los vistos en la tabla de la sección 3, salvo los que se estudian en SER (DNS, DHCP, servidor web y correo).
 - Hipervisores: Hyper-V, KVM, VMware ESXi, VirtualBox y Proxmox.
 - Licencias y ciclo de vida: cómo se licencia y se da soporte a Windows Server y a las distribuciones Linux.
-
-# Soluciones
-
-1. No es una diferencia técnica tajante, sino de papel: el SO de red atiende a muchos equipos y usuarios, debe estar disponible casi siempre, se administra a distancia e incluye servicios como directorio, archivos o nombres.
-2. Punto a punto: son pocos equipos y no justifican el coste de un servidor. Si la oficina creciera, convendría pasar a cliente-servidor.
-3. Los dos agrupan equipos Windows. En un grupo de trabajo cada equipo guarda sus cuentas; en un dominio las cuentas están en un servidor central y los equipos confían en él.
-4. 445 es SMB (archivos compartidos con Windows, o Samba en Linux), 3389 es el escritorio remoto de Windows (RDP) y 22 es SSH.
-5. Windows Server, porque el software que debe ejecutar es de su ecosistema y se integra de forma nativa. Aun así, hay que tener en cuenta el coste de las licencias (núcleos y CAL).
-6. Evita crear y mantener una cuenta en cada equipo: las cuentas, los grupos y las políticas se definen en un único sitio y todos los equipos le delegan la autenticación.
-7. Autenticar es comprobar quién eres; autorizar es decidir qué puedes hacer una vez identificado.
-8. Red NAT. El modo NAT simple no permite que las VM se vean entre sí y la red interna no tiene salida a Internet.
-9. En la resolución de nombres: la red funciona, así que lo más probable es un fallo del servidor DNS configurado en ese equipo.
-10. Porque el clon comparte el identificador de seguridad del equipo original, y eso provoca fallos al unirlo a un dominio.

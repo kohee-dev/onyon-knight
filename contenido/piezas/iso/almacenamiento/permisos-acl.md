@@ -42,9 +42,21 @@ En una carpeta, sin `x` no puedes acceder a lo que hay dentro aunque tengas `r`.
 
 Cuando una carpeta tiene el bit **SGID** (el `2` de `2770`), todo lo que se crea dentro hereda el grupo de la carpeta y no el grupo principal de quien lo crea. En una carpeta compartida por un departamento es imprescindible. Sin él, un archivo creado por Irene pertenecería al grupo `irene`, y su compañero Tomás no podría editarlo.
 
+:::pregunta[¿Qué significa el `2` en `chmod 2770` aplicado a una carpeta?]
+Es el bit SGID: todo lo que se cree dentro hereda el grupo de la carpeta y no el grupo principal de quien lo crea. Es imprescindible en carpetas compartidas por un departamento.
+:::
+
+:::pregunta[Un usuario ve una carpeta pero al intentar entrar le sale "permiso denegado". ¿Qué permiso suele faltar?]
+El permiso `x` de la carpeta: sin él no se puede acceder a lo que hay dentro aunque se tenga `r`.
+:::
+
 ## 2. Límites de los permisos clásicos
 
 Los permisos clásicos solo permiten **un dueño y un grupo** por archivo. Si necesitas que `archivo` escriba, que `investigacion` solo lea y que `direccion` también solo lea, no hay forma: el archivo tiene un único grupo, y "otros" vale lo mismo para todos los demás. Podrías inventar un grupo `lectores` que junte a Investigación y Dirección, pero cada combinación nueva exigiría otro grupo, y enseguida sería inmanejable.
+
+:::pregunta[¿Por qué los permisos clásicos no pueden expresar "archivo escribe, investigación lee y docencia no entra"?]
+Porque solo admiten un dueño y un grupo por archivo, y "otros" vale lo mismo para todos los demás. Con un único grupo no se pueden dar permisos distintos a varios grupos; hacerlo con grupos auxiliares exigiría uno nuevo por cada combinación.
+:::
 
 ## 3. ACL en Linux
 
@@ -112,6 +124,26 @@ Cuando cambias los permisos de grupo con `chmod`, en realidad estás cambiando l
 Linux comprueba, por este orden, si eres el dueño, si hay una entrada con tu nombre de usuario, si perteneces a algún grupo con entrada (si hay varios, se suman sus permisos) y, por último, "otros". Se queda con la primera coincidencia.
 :::
 
+:::pregunta[¿Qué hace `setfacl -m g:investigacion:rX /datos`?]
+Añade (o modifica) una entrada de ACL para el grupo `investigacion` en `/datos` con lectura y, con la `X` mayúscula, ejecución solo si es una carpeta o si alguien ya la tenía.
+:::
+
+:::pregunta[¿Para qué sirve la opción `-d` de `setfacl`?]
+Para definir la ACL por defecto de una carpeta, que heredarán los elementos que se creen después dentro de ella.
+:::
+
+:::pregunta[Has puesto una ACL por defecto, pero los archivos antiguos siguen sin los permisos nuevos. ¿Por qué?]
+Porque la ACL por defecto solo afecta a lo que se cree después. Para lo que ya existe hay que aplicar también la ACL con `-R`.
+:::
+
+:::pregunta[`getfacl` muestra `group:docencia:rwx  #effective:r--`. ¿Qué ocurre?]
+La máscara es `r--` y recorta los permisos: el grupo tiene la entrada `rwx`, pero en la práctica solo puede leer. Suele deberse a un `chmod` sobre el archivo, que cambia la máscara.
+:::
+
+:::pregunta[¿Qué indica el `+` al final de los permisos en `ls -l`?]
+Que el archivo o la carpeta tiene una ACL.
+:::
+
 ## 4. Permisos NTFS en Windows
 
 Windows trabaja con ACL desde siempre. Cada archivo y cada carpeta NTFS tiene una **DACL**, una lista de entradas (ACE) donde cada una dice a quién (usuario o grupo) se aplica y qué permite o deniega.
@@ -137,6 +169,10 @@ Hay algunos detalles que conviene saber:
 
 La diferencia de filosofía con Linux es esta: en Windows, la ACL es la manera normal de dar permisos, y el administrador piensa en "grupos con permisos sobre carpetas". En Linux, lo normal son los permisos clásicos, y la ACL es el recurso para los casos que no caben.
 
+:::pregunta[En Windows, un usuario pertenece a dos grupos: uno con "Lectura" y otro con "Denegar escritura". ¿Qué puede hacer?]
+Solo leer. Los permisos de los grupos se suman, pero un `Denegar` explícito gana a cualquier `Permitir`, así que la escritura queda anulada.
+:::
+
 ## 5. Un modelo práctico para un servidor de ficheros
 
 Para organizar una empresa o un centro con carpetas por departamento, la receta se repite en Linux y en Windows:
@@ -146,6 +182,10 @@ Para organizar una empresa o un centro con carpetas por departamento, la receta 
 3. Da **lo mínimo imprescindible**: lectura a quien solo necesita leer.
 4. Haz que lo nuevo herede los permisos: SGID más ACL por defecto en Linux, herencia en Windows.
 5. Comprueba con usuarios reales (en Linux, `sudo -u irene touch fichero`; en Windows, el acceso efectivo), y no solo leyendo los permisos.
+
+:::pregunta[¿Por qué se dan los permisos a grupos y no a personas?]
+Porque las personas entran y salen de los grupos, mientras que los permisos casi no se tocan. Si alguien cambia de departamento, basta con cambiar su grupo.
+:::
 
 ---
 
@@ -161,21 +201,6 @@ Para organizar una empresa o un centro con carpetas por departamento, la receta 
 | DACL | Lista de ACE de un objeto NTFS |
 | Herencia | Los elementos nuevos adoptan los permisos de su carpeta |
 | Acceso efectivo | Lo que un usuario puede hacer realmente, sumando sus grupos |
-
-## Comprueba lo que sabes
-
-:::ejercicio[Repaso]
-1. ¿Qué significa el `2` en `chmod 2770` aplicado a una carpeta?
-2. Un usuario ve una carpeta pero al intentar entrar le sale "permiso denegado". ¿Qué permiso suele faltar?
-3. ¿Por qué los permisos clásicos no pueden expresar "archivo escribe, investigación lee y docencia no entra"?
-4. ¿Qué hace `setfacl -m g:investigacion:rX /datos`?
-5. ¿Para qué sirve la opción `-d` de `setfacl`?
-6. Has puesto una ACL por defecto, pero los archivos antiguos siguen sin los permisos nuevos. ¿Por qué?
-7. `getfacl` muestra `group:docencia:rwx  #effective:r--`. ¿Qué ocurre?
-8. ¿Qué indica el `+` al final de los permisos en `ls -l`?
-9. En Windows, un usuario pertenece a dos grupos: uno con "Lectura" y otro con "Denegar escritura". ¿Qué puede hacer?
-10. ¿Por qué se dan los permisos a grupos y no a personas?
-:::
 
 ## Fuentes y para saber más
 

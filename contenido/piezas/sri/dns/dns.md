@@ -48,6 +48,14 @@ Son conceptos distintos y se confunden con frecuencia.
 
 Si `ejemplo.org` delega `aula.ejemplo.org` a otro servidor, ambos son dominios, pero son **dos zonas** distintas. La delegación se hace con registros `NS` en la zona padre. Cuando el servidor de nombres del subdominio está dentro del propio subdominio (`ns1.aula.ejemplo.org`), el padre necesita publicar también su dirección: es el **registro glue** (pegamento). Sin él habría una dependencia circular, porque para encontrar el servidor habría que resolver un nombre que solo ese servidor sabe resolver.
 
+:::pregunta[¿Qué diferencia hay entre un dominio y una zona?]
+Un dominio es una rama del árbol con todo lo que cuelga de ella; la zona es la parte que un servidor administra directamente. Si `ejemplo.org` delega `aula.ejemplo.org`, ambos son dominios pero son dos zonas distintas.
+:::
+
+:::pregunta[¿Para qué sirve un registro glue y cuándo es imprescindible?]
+Es la dirección del servidor de nombres que publica la zona padre. Es imprescindible cuando el servidor del subdominio está dentro del propio subdominio (`ns1.aula.ejemplo.org`), para evitar la dependencia circular de tener que resolver un nombre que solo ese servidor sabe resolver.
+:::
+
 # 4. Tipos de servidores
 
 | Tipo | Función |
@@ -86,6 +94,14 @@ Cada registro lleva un **[TTL](https://es.wikipedia.org/wiki/Tiempo_de_vida)** (
 - Un TTL bajo permite cambios rápidos, a costa de más consultas.
 - La «propagación de DNS» no es un proceso activo: es simplemente la caducidad de las cachés.
 - También se cachean las respuestas negativas (el nombre no existe), con un tiempo que marca el campo mínimo del SOA.
+
+:::pregunta[¿Qué diferencia hay entre una consulta recursiva y una iterativa? ¿Quién hace cada una?]
+En la recursiva el cliente pide la respuesta definitiva y el servidor se encarga de conseguirla; la hace el stub resolver a su recursivo. En la iterativa el servidor responde con lo que sabe o con una referencia y quien consulta sigue el camino; la hace el recursivo con raíz, TLD y autoritativos.
+:::
+
+:::pregunta[¿Por qué un cambio de IP puede tardar horas en ser visible para todos los usuarios?]
+Porque las cachés conservan el registro antiguo hasta que caduca su TTL. La «propagación» no es un proceso activo, sino la caducidad de las cachés, y con un TTL alto los cambios tardan más en verse.
+:::
 
 # 6. Registros de recursos
 
@@ -128,6 +144,10 @@ Contiene los parámetros que gobiernan la zona:
 
 El formato clásico de [fichero de zona](https://en.wikipedia.org/wiki/Zone_file) es texto plano con una línea por registro. Directivas habituales: `$ORIGIN` (dominio por defecto para los nombres relativos) y `$TTL` (TTL por defecto). Un punto final marca un nombre absoluto; sin él, se le añade el `$ORIGIN`. Olvidar el punto final es uno de los errores más frecuentes.
 
+:::pregunta[¿Por qué no se puede poner un `CNAME` en el vértice de una zona?]
+Porque un `CNAME` no puede convivir con otros registros en el mismo nombre, y en el vértice de la zona ya están el `SOA` y los `NS`.
+:::
+
 # 7. Resolución inversa
 
 Permite obtener el nombre a partir de una IP mediante registros `PTR`. Se organiza en dominios especiales:
@@ -136,6 +156,10 @@ Permite obtener el nombre a partir de una IP mediante registros `PTR`. Se organi
 - IPv6: `ip6.arpa`, con cada nibble (medio byte) invertido.
 
 La zona inversa la delega quien posee el bloque de direcciones (normalmente el proveedor), no el dueño del dominio directo. Se usa en registros de logs, en diagnóstico y, sobre todo, en servidores de correo, que suelen comprobar que la IP emisora tenga un `PTR` coherente.
+
+:::pregunta[¿Cómo se escribe la consulta inversa de `198.51.100.25`?]
+Se invierten los octetos y se añade `in-addr.arpa`: `25.100.51.198.in-addr.arpa`, donde se busca un registro `PTR`.
+:::
 
 # 8. Redundancia: servidores primario y secundario
 
@@ -147,6 +171,10 @@ Toda zona debería tener al menos dos servidores autoritativos, idealmente en re
 - Un secundario solo se actualiza si el **serial** es mayor que el que tiene. Si se olvida incrementarlo, los cambios no se replican.
 
 Una transferencia de zona entrega el contenido completo de la zona, por lo que debe restringirse a los secundarios autorizados.
+
+:::pregunta[¿Qué pasa si modificas una zona y no incrementas el serial?]
+Los secundarios no se actualizan, porque solo copian la zona si el serial del primario es mayor que el suyo. Los cambios no se replican.
+:::
 
 # 9. El protocolo
 
@@ -167,6 +195,10 @@ Elementos de una respuesta que hay que saber leer:
 | `SERVFAIL` | El servidor no pudo completar la resolución |
 | `REFUSED` | El servidor se niega a responder (política o ACL) |
 
+:::pregunta[¿Qué significa `NXDOMAIN` frente a `SERVFAIL`?]
+`NXDOMAIN` indica que el nombre no existe. `SERVFAIL` indica que el servidor no pudo completar la resolución.
+:::
+
 # 10. Seguridad
 
 DNS se diseñó sin autenticación ni cifrado, y de ahí vienen sus riesgos:
@@ -183,6 +215,14 @@ Mecanismos más avanzados:
 - **[DNS over TLS](https://en.wikipedia.org/wiki/DNS_over_TLS) y [DNS over HTTPS](https://en.wikipedia.org/wiki/DNS_over_HTTPS)**: cifran la comunicación entre cliente y recursivo para ganar **privacidad**.
 - **[Split-horizon DNS](https://en.wikipedia.org/wiki/Split-horizon_DNS)** (vistas): un mismo servidor responde distinto según quién pregunta, por ejemplo con direcciones internas para la red local y públicas para el exterior.
 
+:::pregunta[¿Qué protege DNSSEC y qué no protege?]
+Protege la autenticidad y la integridad de los registros mediante firma criptográfica. No cifra ni oculta nada, así que no aporta privacidad (para eso están DNS over TLS y DNS over HTTPS).
+:::
+
+:::pregunta[¿Por qué no conviene que un servidor autoritativo de Internet ofrezca recursión abierta?]
+Porque un servidor abierto y mal configurado puede usarse para ataques de amplificación y reflexión contra terceros, y mezclar los roles autoritativo y recursivo expuestos a Internet se considera mala práctica de seguridad. La recursión debe limitarse a las redes propias con ACL.
+:::
+
 # 11. Herramientas de diagnóstico
 
 Para consultar a mano y ver la respuesta completa (secciones, banderas, TTL restante) existen [`dig`](https://en.wikipedia.org/wiki/Dig_(command)), `host` y `nslookup`. `dig` es la referencia para diagnosticar porque muestra todos los campos de la respuesta y permite elegir el servidor y el tipo de registro.
@@ -197,18 +237,3 @@ Para consultar a mano y ver la respuesta completa (secciones, banderas, TTL rest
 | [Knot DNS](https://en.wikipedia.org/wiki/Knot_DNS) | Autoritativo de alto rendimiento |
 | [PowerDNS](https://en.wikipedia.org/wiki/PowerDNS) | Autoritativo y recursivo, con almacenamiento en base de datos |
 | [CoreDNS](https://en.wikipedia.org/wiki/CoreDNS) | DNS por plugins, habitual en Kubernetes |
-
-# 13. Preguntas de repaso
-
-:::ejercicio[Preguntas]
-1. ¿Qué diferencia hay entre un dominio y una zona?
-2. ¿Para qué sirve un registro glue y cuándo es imprescindible?
-3. ¿Qué pasa si modificas una zona y no incrementas el serial?
-4. ¿Qué diferencia hay entre una consulta recursiva y una iterativa? ¿Quién hace cada una?
-5. ¿Por qué un cambio de IP puede tardar horas en ser visible para todos los usuarios?
-6. ¿Por qué no se puede poner un `CNAME` en el vértice de una zona?
-7. ¿Cómo se escribe la consulta inversa de `198.51.100.25`?
-8. ¿Qué protege DNSSEC y qué no protege?
-9. ¿Qué significa `NXDOMAIN` frente a `SERVFAIL`?
-10. ¿Por qué no conviene que un servidor autoritativo de Internet ofrezca recursión abierta?
-:::
