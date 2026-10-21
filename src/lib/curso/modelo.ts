@@ -16,13 +16,6 @@ export function leerJson<T extends z.ZodType>(texto: string, esquema: T, esperad
   }
 }
 
-/** La clave de API del proveedor no está en la variable de entorno esperada. */
-export class ClaveAusente extends Error {
-  constructor(readonly variable: string) {
-    super(`falta la clave de API: define la variable de entorno ${variable} y vuelve a ejecutar el comando`);
-  }
-}
-
 /** Texto de un rechazo cualquiera. Un objeto que no es un Error no se vuelca entero: podría llevar cabeceras o la clave. */
 function detalle(e: unknown): string {
   try {
@@ -48,8 +41,7 @@ export function conErroresClaros(modelo: Modelo): Modelo {
       try {
         return await modelo.completar(instruccion, entrada);
       } catch (e) {
-        if (e instanceof ClaveAusente) throw e;
-        throw new Error(`el proveedor del modelo ha fallado (${detalle(e)}); comprueba la conexión, la cuota y la clave, y vuelve a intentarlo`, { cause: e });
+        throw new Error(`el proveedor del modelo ha fallado (${detalle(e)}); comprueba que Ollama está en marcha y el modelo descargado, y vuelve a intentarlo`, { cause: e });
       }
     },
   };
