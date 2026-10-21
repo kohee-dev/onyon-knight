@@ -30,6 +30,27 @@ export function normalizarRecuadros(cuerpo: string): string {
     .join('\n');
 }
 
+/** Saca de la directiva el texto entre corchetes (`:::nombre[texto]`); null si no lo lleva. */
+function tomarEtiqueta(nodo: any): any[] | null {
+  return nodo.children[0]?.data?.directiveLabel ? nodo.children.shift().children : null;
+}
+
+/** `:::pregunta[texto]` + respuesta = desplegable; sin respuesta todavía se queda como pregunta normal. */
+function convertirPregunta(nodo: any, file: VFile) {
+  const etiqueta = tomarEtiqueta(nodo);
+  if (!etiqueta?.length) {
+    problema(file, nodo, 'pregunta sin texto (falta el texto entre corchetes: «:::pregunta[¿…?]»)');
+    return;
+  }
+  if (!nodo.children.length) {
+    nodo.data = { hName: 'aside', hProperties: { className: ['recuadro', 'recuadro-ejercicio'] } };
+    nodo.children = [{ type: 'paragraph', children: etiqueta }];
+    return;
+  }
+  nodo.data = { hName: 'details', hProperties: { className: ['recuadro', 'recuadro-ejercicio', 'pregunta'] } };
+  nodo.children.unshift({ type: 'paragraph', data: { hName: 'summary' }, children: etiqueta });
+}
+
 export function remarkRecuadros() {
   return (arbol: Root, file: VFile) => {
     const fuente = String(file.value);
@@ -60,27 +81,15 @@ export function remarkRecuadros() {
         );
       }
       if (nodo.name === 'pregunta') {
-        if (!nodo.children[0]?.data?.directiveLabel) {
-          problema(file, nodo, 'pregunta sin texto (falta el texto entre corchetes: «:::pregunta[¿…?]»)');
-          return;
-        }
-        const pregunta = nodo.children.shift().children;
-        if (!nodo.children.length) {
-          // Sin respuesta todavía: se muestra como pregunta normal, no como desplegable vacío.
-          nodo.data = { hName: 'aside', hProperties: { className: ['recuadro', 'recuadro-ejercicio'] } };
-          nodo.children = [{ type: 'paragraph', children: pregunta }];
-          return;
-        }
-        nodo.data = { hName: 'details', hProperties: { className: ['recuadro', 'recuadro-ejercicio', 'pregunta'] } };
-        nodo.children.unshift({ type: 'paragraph', data: { hName: 'summary' }, children: pregunta });
+        convertirPregunta(nodo, file);
         return;
       }
       const rotulo = RECUADROS[nodo.name];
       if (!rotulo) {
-        problema(file, nodo, `recuadro desconocido «${nodo.name}» (permitidos: ${Object.keys(RECUADROS).join(', ')})`);
+        problema(file, nodo, `recuadro desconocido «${nodo.name}» (permitidos: ${[...Object.keys(RECUADROS), 'pregunta'].join(', ')})`);
         return;
       }
-      const etiqueta = nodo.children[0]?.data?.directiveLabel ? nodo.children.shift().children : [{ type: 'text', value: rotulo }];
+      const etiqueta = tomarEtiqueta(nodo) ?? [{ type: 'text', value: rotulo }];
       nodo.data = { hName: 'aside', hProperties: { className: ['recuadro', `recuadro-${nodo.name}`] } };
       nodo.children.unshift({ type: 'paragraph', data: { hProperties: { className: ['recuadro-titulo'] } }, children: etiqueta });
     });

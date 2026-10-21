@@ -83,6 +83,17 @@ describe('recuadros', () => {
     expect(m).toContain('texto');
   });
 
+  it('una :::pregunta con los corchetes vacíos da el mismo error que sin texto', async () => {
+    const m = await error('Hola\n\n:::pregunta[]\nRespuesta\n:::');
+    expect(m).toContain('a.md:3');
+    expect(m).toContain('texto');
+  });
+
+  it('el error de recuadro desconocido también lista pregunta entre los permitidos', async () => {
+    const m = await error(':::peligro\nX\n:::');
+    expect(m).toContain('pregunta');
+  });
+
   it('una :::pregunta sin cerrar da error con la línea', async () => {
     const m = await error('Hola\n\n:::pregunta[¿Qué?]\nRespuesta');
     expect(m).toContain('a.md:3');
