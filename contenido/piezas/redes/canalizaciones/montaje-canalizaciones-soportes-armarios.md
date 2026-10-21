@@ -63,6 +63,10 @@ Una pared de 4 metros debe medir 8 centímetros en nuestro plano a 1:50. Si mide
 
 **Actividad:** dibuja una habitación de 4 × 3 metros a escala 1:50. Añade una puerta, dos mesas, dos tomas y un armario. Incluye leyenda y cotas.
 
+:::pregunta[¿Qué información falta en un croquis que solo muestra líneas sin medidas ni leyenda?]
+Faltan las medidas o cotas y la leyenda que explica qué significa cada símbolo. Sin ellas no se puede saber qué se va a instalar ni dónde, y el dibujo resulta poco útil para el montaje.
+:::
+
 ## 2. Planificar el recorrido
 
 ### 2.1. Qué debemos observar
@@ -120,6 +124,10 @@ La longitud total, por sí sola, no dice cuántas uniones necesitamos. También 
 | Fijaciones | Según el soporte y las instrucciones de montaje. |
 
 **Actividad:** dibuja cómo repartirías los cortes de las dos barras. Indica dónde quedaría cada unión y qué sobrantes obtendrías. En el montaje real también se consideran las pérdidas del corte y el encaje de los accesorios.
+
+:::pregunta[¿Por qué no basta con elegir el recorrido más corto?]
+Porque el recorrido debe poder instalarse y mantenerse: hay que considerar obstáculos como puertas y muebles, el soporte, otras instalaciones, la accesibilidad y la protección. Una línea que atraviesa una puerta en el dibujo puede impedir usarla o ser imposible de montar.
+:::
 
 ## 3. Herramientas y preparación del puesto
 
@@ -193,6 +201,10 @@ Antes de abrir una entrada, comprobamos su posición y el tamaño necesario. Des
 
 **Actividad sin herramientas de montaje:** utiliza tiras de cartón para representar canaletas y pequeñas cajas de papel como registros. Comprueba el recorrido sobre el plano antes de pegar las piezas.
 
+:::pregunta[¿Qué es una rebaba y por qué debemos eliminarla?]
+Es un borde o fragmento de material que queda tras cortar o mecanizar. Debe eliminarse porque puede causar cortes en las manos o dañar la cubierta de los cables.
+:::
+
 ## 5. Fijación de canalizaciones, cajas y soportes
 
 ### 5.1. Elegir la fijación
@@ -224,6 +236,10 @@ No se debe apretar hasta deformar una canaleta o romper una caja. Las tapas debe
 :::
 
 **Actividad:** ordena las fases anteriores y explica qué problemas pueden aparecer si se perfora antes de presentar y comprobar las piezas.
+
+:::pregunta[¿Por qué una fijación puede servir para una pared y no para otra?]
+Porque la fijación depende del peso, de la pieza y del material y estado del soporte: un muro macizo y un tabique hueco no se comportan igual. Por eso se consulta lo que indica el fabricante para la fijación concreta.
+:::
 
 ## 6. Montaje de armarios y racks
 
@@ -276,6 +292,10 @@ Los equipos pesados se distribuyen teniendo en cuenta la estabilidad y las instr
 
 **Actividad:** dibuja un frontal de 6U y distribuye los tres elementos del ejemplo. Explica por dónde entrarían los cables y qué espacio dejarías para acceder al armario. Utiliza fotografías o diagramas; no hace falta disponer de uno físicamente.
 
+:::pregunta[¿Qué debemos revisar además de las unidades U de un armario?]
+Además de la altura en U, hay que revisar la profundidad, la anchura de montaje, el peso y la ventilación. También el espacio, la apertura de puertas, la entrada de cables y la capacidad del soporte al elegir la ubicación.
+:::
+
 ## 7. Revisar el montaje y trabajar con seguridad
 
 La comprobación final permite detectar errores antes de comenzar el tendido del cableado.
@@ -296,6 +316,10 @@ La prevención acompaña a todo el proceso: mantener libres las zonas de paso, s
 
 ::: tip
 Un trabajo no termina cuando se coloca el último tornillo. También hay que revisar el resultado, recoger el puesto y dejar constancia de las incidencias.
+:::
+
+:::pregunta[¿Por qué hay que comprobar una instalación antes de tender el cableado?]
+Porque la comprobación final permite detectar errores antes de empezar el tendido: correspondencia con el plano, fijaciones, acabado, uniones, accesibilidad y armario. Si el montaje difiere del plano, hay que explicar el motivo y actualizar la documentación.
 :::
 
 ## 8. Actividad integrada: preparar una pequeña oficina
@@ -327,15 +351,6 @@ Intercambia el trabajo con un compañero y comprueba:
 - ¿Se explica cómo verificar las fijaciones?
 
 **Entrega:** plano o croquis acotado, lista de materiales, orden de trabajo y revisión final. La representación prepara el montaje; cuando haya medios, las destrezas de montaje se practicarán y evaluarán con material real.
-
-## 9. Comprueba lo aprendido
-
-1. ¿Qué información falta en un croquis que solo muestra líneas sin medidas ni leyenda?
-2. ¿Por qué no basta con elegir el recorrido más corto?
-3. ¿Qué es una rebaba y por qué debemos eliminarla?
-4. ¿Por qué una fijación puede servir para una pared y no para otra?
-5. ¿Qué debemos revisar además de las unidades U de un armario?
-6. ¿Por qué hay que comprobar una instalación antes de tender el cableado?
 
 En el **RA3** continuaremos con el despliegue del cable: recorrido, tendido, identificación y conexión de los elementos correspondientes.
 

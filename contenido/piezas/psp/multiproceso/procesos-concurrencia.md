@@ -95,6 +95,10 @@ Una aplicación pide un dato por teclado. Mientras espera, puede estar bloqueada
 
 El modelo es una simplificación. Los sistemas reales presentan otros estados y matices. En Unix, un **zombi** es un proceso que ya ha terminado pero conserva información mínima, como su estado de salida, hasta que el padre u otro proceso responsable la recoge. No está ejecutando instrucciones.
 
+:::pregunta[Explica por qué un proceso bloqueado no debe ocupar CPU esperando activamente.]
+Un proceso bloqueado espera un evento, datos o un recurso y todavía no puede continuar, así que usar la CPU no le haría avanzar. Al estar bloqueado deja libre el procesador para otros trabajos, y vuelve a la cola de preparados cuando el evento se resuelve.
+:::
+
 # 3. Observar y controlar procesos
 
 ## 3.1. En GNU/Linux
@@ -163,6 +167,10 @@ tasklist /svc /fi "imagename eq svchost.exe"
 Para finalizar un proceso de prueba identificado previamente se puede utilizar `taskkill /PID PID_REAL`; `/F` solicita finalización forzada. Sustituye `PID_REAL` por el identificador de tu proceso de prueba.
 
 `taskkill` no es una interfaz general equivalente al envío de todas las señales de Unix. Los mecanismos disponibles dependen del sistema operativo.
+
+:::pregunta[Localiza el PID y PPID de un proceso propio y explica su relación.]
+Con `echo $$` y `echo $PPID` se obtienen el PID del shell y el de su padre; también se ven con `ps -eo pid,ppid,stat,ni,comm --forest`. El PID identifica al proceso y el PPID identifica a su padre, el proceso que lo creó.
+:::
 
 # 4. Planificación: quién utiliza el procesador
 
@@ -289,6 +297,10 @@ E/S:          2–5 P1
 
 En 5, P1 vuelve a estar listo, pero espera hasta que P2 termina en 6. **Finalizar la E/S no equivale a recuperar inmediatamente la CPU.**
 
+:::pregunta[Dibuja la planificación FCFS y Round Robin del ejemplo sin consultar la solución.]
+FCFS: P1 de 0 a 10, P2 de 10 a 16 y P3 de 16 a 19. Round Robin con quantum 2: P1 0–2, P2 2–4, P3 4–6, P1 6–8, P2 8–10, P3 10–11 (termina), P1 11–13, P2 13–15 (termina), P1 15–19 (termina).
+:::
+
 # 5. Concurrencia y paralelismo
 
 La **concurrencia** permite que varias tareas progresen durante periodos que se solapan. La **ejecución paralela** implica que se ejecutan instrucciones de distintas tareas al mismo tiempo en diferentes unidades de ejecución.
@@ -326,6 +338,10 @@ El modelo de gestión de hilos depende de la plataforma: existen hilos planifica
 En Java estudiaremos más adelante `Thread` y `Runnable`. Una aplicación concurrente también puede estar formada por **varios procesos monohilo**, sin que cada uno deba ser multihilo.
 
 Un **servicio** ofrece una funcionalidad a otros programas. Puede iniciarse durante el arranque o bajo demanda y suele trabajar sin interacción directa con el usuario. Puede utilizar varios procesos, varios hilos o un modelo basado en eventos; ser servicio no obliga a utilizar un diseño concreto.
+
+:::pregunta[Distingue un programa, dos procesos del mismo programa y dos hilos de un proceso.]
+Un programa son instrucciones almacenadas, una entidad pasiva. Dos procesos del mismo programa son dos instancias en ejecución, cada una con su identidad y contexto. Dos hilos de un proceso son flujos de ejecución dentro de un mismo proceso: cada uno tiene su pila, pero comparten la memoria y los archivos abiertos.
+:::
 
 # 7. Comunicación, coordinación y datos compartidos
 
@@ -398,6 +414,14 @@ S2 ──┘
 Aunque S1 y S4 no compartan variables directamente, **S4 depende indirectamente de S1 a través de S3**. Hay que estudiar el conjunto del programa, no solo una pareja aislada. Las condiciones tampoco sustituyen el análisis de archivos, red y otros efectos externos.
 :::
 
+:::pregunta[Explica por qué `contador++` puede necesitar protección cuando se comparte.]
+Incrementar implica leer, sumar y escribir. Si dos tareas leen el mismo valor antes de que la otra escriba, una actualización se pierde (el resultado es 1 en lugar de 2). Una sección crítica así necesita exclusión mutua.
+:::
+
+:::pregunta[Justifica el orden S1/S2 → S3 → S4 mediante sus lecturas y escrituras.]
+S1 (lee x, y; escribe a) y S2 (lee z; escribe b) no comparten lecturas ni escrituras, así que pueden ir concurrentemente. S3 lee a y b, que escriben S1 y S2, por lo que debe ir después; y S4 lee c, que escribe S3, por lo que va al final.
+:::
+
 # 8. Sistemas distribuidos
 
 En un **sistema distribuido**, los componentes se ejecutan en distintos equipos y se coordinan mediante comunicaciones. Por ejemplo, una aplicación puede separar la interfaz, el procesamiento de pedidos y el almacenamiento en diferentes servidores.
@@ -411,6 +435,10 @@ La distribución introduce retos propios: latencia, pérdida de conectividad, se
 :::
 
 La comunicación puede apoyarse en sockets, llamadas a procedimientos remotos (**RPC**) o invocación remota de objetos, como **RMI** en Java. Las simulaciones científicas y el procesamiento de grandes volúmenes de datos son ámbitos habituales. El material complementario presenta **PVM, Parallel Virtual Machine**, como referencia histórica de entornos de computación paralela y distribuida.
+
+:::pregunta[Indica una ventaja y un coste de distribuir una aplicación entre equipos.]
+Una ventaja es compartir recursos, repartir carga y crecer añadiendo equipos (escalado horizontal). Un coste son los retos propios de la distribución: latencia, pérdida de conectividad, seguridad y fallos parciales.
+:::
 
 # 9. Ampliación: procesos Unix desde C
 
@@ -434,13 +462,3 @@ Tras `fork()`, padre e hijo tienen espacios de memoria separados, aunque el sist
 ::: aviso
 `execl()` no concede privilegios de administrador por sí mismo. Además, una lectura de una tubería vacía puede esperar si siguen abiertos extremos de escritura, o devolver fin de archivo si ya no queda ningún escritor.
 :::
-
-# 10. Comprueba que lo has entendido
-
-1. Distingue un programa, dos procesos del mismo programa y dos hilos de un proceso.
-2. Explica por qué un proceso bloqueado no debe ocupar CPU esperando activamente.
-3. Localiza el PID y PPID de un proceso propio y explica su relación.
-4. Dibuja la planificación FCFS y Round Robin del ejemplo sin consultar la solución.
-5. Explica por qué `contador++` puede necesitar protección cuando se comparte.
-6. Justifica el orden S1/S2 → S3 → S4 mediante sus lecturas y escrituras.
-7. Indica una ventaja y un coste de distribuir una aplicación entre equipos.
