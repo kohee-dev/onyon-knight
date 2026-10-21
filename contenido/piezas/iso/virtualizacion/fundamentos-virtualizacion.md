@@ -23,6 +23,10 @@ El sistema operativo invitado cree que trabaja sobre hardware real. En realidad,
 
 Este cambio ha transformado la forma de trabajar con servidores. Hace unos años, cada servicio se alojaba en una máquina física, que a menudo albergaba varios servicios a la vez. Hoy lo normal es lo contrario: muchas máquinas virtuales sobre el mismo hardware, cada una con **un único servicio**, para limitar el alcance de un fallo.
 
+:::pregunta[¿Qué es un hipervisor y qué le presenta a una máquina virtual?]
+Es el software que crea las máquinas virtuales y reparte entre ellas los recursos del anfitrión. A cada una le presenta un hardware **virtual** (CPU, memoria, disco y red) y traduce lo que hace el sistema invitado a los recursos físicos, de modo que este cree que trabaja sobre hardware real.
+:::
+
 ## 2. Por qué se virtualiza
 
 - **Aprovechar mejor el hardware**: un servidor físico suele estar poco cargado. Varias máquinas virtuales comparten uno solo y reducen el número de equipos, el espacio y el consumo.
@@ -76,6 +80,14 @@ KVM está integrado en el núcleo de Linux, por lo que el propio Linux actúa co
 
 La asistencia por hardware se llama **[Intel VT-x](https://en.wikipedia.org/wiki/X86_virtualization)** en Intel y **AMD-V** en AMD. Suele venir desactivada de fábrica y hay que habilitarla en la BIOS o UEFI. Sin ella, la mayoría de los hipervisores no pueden ejecutar máquinas de 64 bits o van muy lentos.
 
+:::pregunta[¿Qué diferencia hay entre un hipervisor de tipo 1 y uno de tipo 2? ¿Por qué no siempre está clara?]
+El tipo 1 (*bare metal*) se ejecuta directamente sobre el hardware y es el habitual en servidores; el tipo 2 es un programa dentro de un sistema operativo anfitrión, con algo menos de rendimiento, y se usa en escritorio y pruebas. No siempre está clara porque KVM está integrado en el núcleo de Linux y Hyper-V, al activarse, coloca a Windows como una máquina más sobre el hipervisor, así que se discute a qué tipo pertenecen.
+:::
+
+:::pregunta[¿Para qué sirve la asistencia por hardware (VT-x / AMD-V) y por qué hay que comprobar que esté activada?]
+Son instrucciones de la propia CPU para virtualizar, y son la base de los hipervisores modernos. Suele venir desactivada de fábrica y hay que habilitarla en la BIOS o UEFI; sin ella, la mayoría de los hipervisores no pueden ejecutar máquinas de 64 bits o van muy lentos.
+:::
+
 ## 5. Recursos de una máquina virtual
 
 Al crear una VM se decide qué parte de los recursos del anfitrión le corresponde.
@@ -92,6 +104,10 @@ Un ejemplo: si tu portátil tiene 16 GB de RAM, no puedes encender a la vez tres
 
 :::nota[Sobreasignación]
 Algunos hipervisores permiten asignar entre todas las VM **más** recursos de los que existen realmente (por ejemplo, más vCPU que núcleos), confiando en que no todas los usen a la vez. Es práctico en servidores poco cargados, pero un error de cálculo degrada a todas las máquinas.
+:::
+
+:::pregunta[¿Qué pasa si se asigna a las máquinas virtuales más RAM de la que tiene el anfitrión?]
+Se empieza a usar el disco como memoria y todo se ralentiza. Por eso la suma de la RAM de las VM no debería superar la física, y hay que dejar memoria libre para el propio anfitrión.
 :::
 
 ## 6. Discos virtuales
@@ -125,6 +141,18 @@ El disco de una máquina virtual es un **fichero** en el anfitrión. El sistema 
 Una instantánea depende del disco original: si este se pierde o se corrompe, la instantánea no sirve. Además, mantener muchas hace que la máquina vaya más lenta y que los ficheros crezcan sin control.
 :::
 
+:::pregunta[¿Qué ventaja e inconveniente tiene un disco de tamaño dinámico frente a uno de tamaño fijo?]
+Ventaja: ahorra espacio, porque el fichero crece solo conforme el invitado escribe, hasta el máximo indicado. Inconveniente: es algo más lento que el fijo, y si el anfitrión se queda sin disco, las máquinas virtuales se paran.
+:::
+
+:::pregunta[¿Por qué una instantánea no es una copia de seguridad?]
+Porque depende del disco original: los cambios posteriores se guardan en un fichero diferencial, y si el disco se pierde o se corrompe, la instantánea no sirve. Además, acumular muchas ralentiza la máquina y hace crecer los ficheros sin control.
+:::
+
+:::pregunta[¿Qué diferencia hay entre un clon completo y uno enlazado?]
+El clon completo es una copia independiente. El enlazado comparte el disco base con la máquina original y solo guarda las diferencias: ocupa poco, pero depende de ella.
+:::
+
 ## 7. Redes virtuales
 
 Cada tarjeta de red virtual se conecta a una red virtual que el hipervisor gestiona. Los modos de conexión más habituales (con los nombres de VirtualBox) son:
@@ -139,6 +167,10 @@ Cada tarjeta de red virtual se conecta a una red virtual que el hipervisor gesti
 
 La elección depende de lo que se quiera probar. Un laboratorio de servicios (DHCP, DNS, web) suele combinar una **red interna** para el tráfico entre máquinas y una salida por NAT para actualizar paquetes. El modo puente puede interferir con la red real, por ejemplo, si una VM con un servidor DHCP responde a otros equipos.
 
+:::pregunta[¿Qué modo de red elegirías para un laboratorio con un servidor DHCP propio? ¿Por qué?]
+Una red interna (o solo anfitrión), para que el tráfico quede entre las máquinas del laboratorio, con una salida por NAT si se necesita Internet. El modo puente se evita porque la VM con DHCP respondería a otros equipos de la red real e interferiría con ella.
+:::
+
 ## 8. Herramientas del invitado
 
 Los fabricantes ofrecen controladores y servicios que se instalan **dentro** del sistema invitado y mejoran su integración con el anfitrión: *VirtualBox Guest Additions*, *VMware Tools*, *Hyper-V Integration Services* o *QEMU Guest Agent*. Aportan:
@@ -147,6 +179,10 @@ Los fabricantes ofrecen controladores y servicios que se instalan **dentro** del
 - Portapapeles y carpetas compartidas con el anfitrión.
 - Ajuste automático de la resolución.
 - Apagado ordenado y sincronización de la hora.
+
+:::pregunta[¿Qué aportan las herramientas del invitado?]
+Controladores optimizados de vídeo, red y disco, portapapeles y carpetas compartidas con el anfitrión, ajuste automático de la resolución, apagado ordenado y sincronización de la hora.
+:::
 
 ## 9. Máquinas virtuales y contenedores
 
@@ -178,6 +214,10 @@ Docker se ha impuesto como sistema de contenedores para aplicaciones:
 
 :::nota[No compiten, se complementan]
 Es muy frecuente ejecutar contenedores **dentro** de máquinas virtuales, combinando el aislamiento fuerte de las VM con la ligereza de los contenedores.
+:::
+
+:::pregunta[¿Qué comparten y qué no comparten los contenedores con el anfitrión? ¿Qué implica para la seguridad?]
+Comparten el núcleo del anfitrión, mientras que cada uno tiene aislados sus procesos, su red y su sistema de archivos mediante espacios de nombres, con los recursos limitados por cgroups. Al compartir núcleo, el aislamiento es menor que el de una VM, por eso se suelen ejecutar contenedores dentro de máquinas virtuales.
 :::
 
 ## 10. Funciones avanzadas
@@ -213,18 +253,3 @@ Consiste en usar máquinas virtuales alojadas en los centros de datos de un prov
 - Hacer **copia de seguridad** de los ficheros de las VM, no solo instantáneas.
 - Asignar recursos con medida y vigilar el espacio del anfitrión.
 - Tener en cuenta las **licencias**: el sistema operativo invitado también está sujeto a licencia, igual que si fuera físico.
-
-## 13. Preguntas de repaso
-
-:::ejercicio[Repaso]
-1. ¿Qué es un hipervisor y qué le presenta a una máquina virtual?
-2. ¿Qué diferencia hay entre un hipervisor de tipo 1 y uno de tipo 2? ¿Por qué no siempre está clara?
-3. ¿Para qué sirve la asistencia por hardware (VT-x / AMD-V) y por qué hay que comprobar que esté activada?
-4. ¿Qué ventaja e inconveniente tiene un disco de tamaño dinámico frente a uno de tamaño fijo?
-5. ¿Por qué una instantánea no es una copia de seguridad?
-6. ¿Qué diferencia hay entre un clon completo y uno enlazado?
-7. ¿Qué modo de red elegirías para un laboratorio con un servidor DHCP propio? ¿Por qué?
-8. ¿Qué aportan las herramientas del invitado?
-9. ¿Qué comparten y qué no comparten los contenedores con el anfitrión? ¿Qué implica para la seguridad?
-10. ¿Qué pasa si se asigna a las máquinas virtuales más RAM de la que tiene el anfitrión?
-:::

@@ -83,6 +83,14 @@ Son típicos de los servidores que trabajan detrás de un proxy o delante de una
 | HTTP/2 | Multiplexa varias peticiones en una misma conexión, comprime cabeceras. En la práctica va cifrado |
 | HTTP/3 | Funciona sobre [QUIC](https://es.wikipedia.org/wiki/QUIC) (UDP) en lugar de TCP, para reducir latencia y evitar bloqueos |
 
+:::pregunta[¿Qué significa que HTTP no tiene estado y cómo se consigue una sesión?]
+Que cada petición es independiente y el servidor no recuerda las anteriores. Las sesiones se construyen por encima del protocolo, con *cookies* o *tokens* que el cliente envía en cada petición.
+:::
+
+:::pregunta[¿Qué diferencia hay entre un `401` y un `403`? ¿Y entre un `502` y un `503`?]
+`401` significa que falta autenticación («no sé quién eres») y `403` que sé quién eres pero no tienes permiso. `502` indica que la respuesta del servidor de atrás es inválida o no llega, y `503` que el servicio no está disponible o está saturado.
+:::
+
 # 4. HTTPS: TLS y certificados
 
 [HTTPS](https://es.wikipedia.org/wiki/Protocolo_seguro_de_transferencia_de_hipertexto) es HTTP dentro de un canal cifrado con [TLS](https://es.wikipedia.org/wiki/Seguridad_de_la_capa_de_transporte). Aporta tres garantías:
@@ -120,6 +128,18 @@ Sin SNI, un servidor con una sola IP no sabría qué certificado presentar antes
 Nombre que no coincide con el del certificado, certificado caducado, cadena incompleta (falta el intermedio) y CA no reconocida por el cliente.
 :::
 
+:::pregunta[¿Qué garantías da HTTPS y cuál de ellas depende de la confianza en una CA?]
+Confidencialidad, integridad y autenticidad del servidor. La autenticidad depende de la CA: el certificado une el dominio con una clave pública y está firmado por una autoridad en la que el cliente confía.
+:::
+
+:::pregunta[¿Por qué hace falta SNI para varios sitios HTTPS en una misma IP?]
+Porque el servidor debe elegir qué certificado presentar antes de poder leer la cabecera `Host`, que ya va cifrada. Con SNI el cliente indica el nombre al que se conecta antes de recibir el certificado.
+:::
+
+:::pregunta[Un cliente ve un aviso de certificado no válido: enumera tres causas posibles.]
+El nombre no coincide con el del certificado, el certificado ha caducado, la cadena está incompleta (falta el intermedio) o la CA no es reconocida por el cliente.
+:::
+
 # 5. Varios sitios en un servidor: hosts virtuales
 
 Un servidor puede alojar muchos sitios. Para decidir cuál responde se usa uno de estos criterios:
@@ -133,6 +153,10 @@ Un servidor puede alojar muchos sitios. Para decidir cuál responde se usa uno d
 En el modelo basado en nombre, el DNS hace que varios nombres apunten a la misma IP y el servidor web elige el sitio por la cabecera. Siempre hay un **sitio por defecto** que responde cuando ningún nombre coincide.
 
 Cada sitio tiene su **raíz de documentos** (*document root*): el directorio del que se sirven los ficheros.
+
+:::pregunta[¿Cómo decide el servidor qué sitio responde en un host virtual basado en nombre?]
+Por la cabecera `Host` de la petición (y por SNI en HTTPS). Varios nombres apuntan a la misma IP y, si ninguno coincide, responde el sitio por defecto.
+:::
 
 # 6. Contenido estático y dinámico
 
@@ -152,6 +176,10 @@ Para el contenido dinámico, el servidor web puede:
 Con FastCGI o proxy, el servidor web se dedica a lo que hace mejor (conexiones, ficheros, TLS) y el motor de la aplicación se escala o se reinicia por separado.
 :::
 
+:::pregunta[¿Qué ventaja tiene FastCGI sobre CGI?]
+CGI lanza un programa por cada petición, lo que es sencillo pero lento. FastCGI mantiene procesos externos en marcha (como PHP-FPM) y les envía las peticiones, evitando ese coste.
+:::
+
 # 7. Arquitecturas de los servidores
 
 La diferencia de diseño más relevante es **cómo atiende varias conexiones a la vez**.
@@ -169,6 +197,10 @@ La diferencia de diseño más relevante es **cómo atiende varias conexiones a l
 
 [nginx](https://es.wikipedia.org/wiki/Nginx) fue diseñado desde el principio con arquitectura orientada a eventos.
 
+:::pregunta[¿Por qué un servidor orientado a eventos aguanta mejor miles de conexiones lentas?]
+Porque unos pocos procesos atienden muchas conexiones a la vez con E/S asíncrona, sin quedarse bloqueados esperando a cada cliente. Con un proceso o hilo por conexión, la memoria crece mucho al aumentar las conexiones.
+:::
+
 # 8. Comparativa de servidores
 
 | | Apache HTTP Server | nginx | [IIS](https://es.wikipedia.org/wiki/Internet_Information_Services) |
@@ -184,6 +216,10 @@ La diferencia de diseño más relevante es **cómo atiende varias conexiones a l
 Apache permite configurar un directorio con un fichero dentro de él, sin tocar la configuración principal. Es cómodo en alojamientos compartidos, pero se lee en cada petición y reduce el rendimiento. nginx no lo tiene.
 :::
 
+:::pregunta[¿Por qué `.htaccess` perjudica al rendimiento?]
+Porque Apache lee ese fichero en cada petición, en lugar de leer la configuración principal una sola vez.
+:::
+
 # 9. Proxy inverso, balanceo y caché
 
 Un [proxy inverso](https://en.wikipedia.org/wiki/Reverse_proxy) recibe las peticiones de los clientes y las reenvía a uno o varios servidores internos. Los clientes solo ven al proxy.
@@ -197,6 +233,10 @@ Para qué se usa:
 - Publicar en un único nombre varias aplicaciones que viven en servidores distintos.
 
 nginx se usa mucho para esta función, y Apache también puede hacerlo con sus módulos de proxy.
+
+:::pregunta[¿Qué ventajas tiene poner un proxy inverso delante de una aplicación?]
+Permite terminar TLS en un punto, repartir la carga entre varios servidores, ocultar la estructura interna, guardar en caché respuestas frecuentes y publicar varias aplicaciones bajo un único nombre.
+:::
 
 # 10. Registros (logs)
 
@@ -230,18 +270,3 @@ Todo lo que está dentro de la raíz de documentos es potencialmente público. L
 | Herramientas del navegador | Ver las peticiones, cabeceras, tiempos y errores |
 | `openssl s_client` | Comprobar el certificado y la cadena de un servidor |
 | Registros del servidor | Ver qué ha llegado y qué se ha respondido |
-
-# 13. Preguntas de repaso
-
-:::ejercicio[Preguntas]
-1. ¿Qué significa que HTTP no tiene estado y cómo se consigue una sesión?
-2. ¿Qué diferencia hay entre un `401` y un `403`? ¿Y entre un `502` y un `503`?
-3. ¿Qué garantías da HTTPS y cuál de ellas depende de la confianza en una CA?
-4. ¿Por qué hace falta SNI para varios sitios HTTPS en una misma IP?
-5. ¿Cómo decide el servidor qué sitio responde en un host virtual basado en nombre?
-6. ¿Qué ventaja tiene FastCGI sobre CGI?
-7. ¿Por qué un servidor orientado a eventos aguanta mejor miles de conexiones lentas?
-8. ¿Qué ventajas tiene poner un proxy inverso delante de una aplicación?
-9. ¿Por qué `.htaccess` perjudica al rendimiento?
-10. Un cliente ve un aviso de certificado no válido: enumera tres causas posibles.
-:::

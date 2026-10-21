@@ -33,6 +33,14 @@ De cada uno conviene mirar tres cosas: cuánto se **usa** (utilización), cuánt
 
 Y hay dos maneras de trabajar. Puedes **observar en el momento**, cuando algo va lento y miras ahora mismo qué pasa (`top`, `iostat`...). O puedes **vigilar de forma continua**, dejando que sea un script o una plataforma quien mida y avise a todas horas. Hacen falta las dos: la primera te ayuda a diagnosticar y la segunda evita que tengas que estar delante.
 
+:::pregunta[¿Cuáles son los cuatro recursos principales que se monitorizan en un servidor?]
+CPU, memoria, disco y red. De cada uno conviene mirar cuánto se usa, cuánto trabajo espera sin ser atendido y si hay errores.
+:::
+
+:::pregunta[¿Qué diferencia hay entre observar en el momento y vigilar de forma continua?]
+Observar en el momento es mirar ahora mismo qué pasa cuando algo va lento (`top`, `iostat`...), y sirve para diagnosticar. Vigilar de forma continua deja que un script o una plataforma mida y avise a todas horas, sin que tengas que estar delante. Hacen falta las dos.
+:::
+
 ## 2. Herramientas de Linux
 
 | Herramienta | Qué muestra |
@@ -70,6 +78,14 @@ zfs list -o name,used,avail,quota
 
 Muestra el uso de cada dataset junto a su cuota. Cuando hay cuotas, el espacio libre de un dataset es el que le queda hasta su cuota, y no el del pool.
 
+:::pregunta[`free -h` muestra muy poca memoria "libre". ¿Es un problema?]
+No necesariamente. Linux aprovecha la RAM libre como caché de disco (y ZFS usa su propia caché, el ARC), y la libera cuando otros programas la necesitan. Lo que importa es la columna `available`.
+:::
+
+:::pregunta[En `zpool status`, ¿qué indican las columnas READ, WRITE y CKSUM?]
+Los errores de lectura, de escritura y de suma de comprobación de cada disco o vdev del pool.
+:::
+
 ## 3. Salud del disco: SMART
 
 [S.M.A.R.T.](https://es.wikipedia.org/wiki/S.M.A.R.T.) (*Self-Monitoring, Analysis and Reporting Technology*) es un sistema que llevan los discos para vigilar su propio estado y guardar contadores internos. En Linux se consulta con `smartctl`, del paquete `smartmontools`:
@@ -96,6 +112,14 @@ Estudios hechos con grandes flotas de discos han mostrado que muchos fallan sin 
 
 Con `smartctl -t short /dev/sda` lanzas una prueba rápida en el propio disco, y `smartd` es un servicio que vigila los discos y envía avisos. En las máquinas virtuales los discos son simulados y `smartctl` normalmente no puede leerlos, así que en las prácticas del aula no verás datos reales.
 
+:::pregunta[¿Qué significa un `FAILED` en `smartctl -H`? ¿Y un `PASSED`?]
+`FAILED` indica que el disco está en riesgo inminente y hay que sustituirlo. `PASSED` no garantiza nada: muchos discos fallan sin que SMART haya avisado, así que es una señal útil cuando avisa, pero no asegura que el disco vaya a durar.
+:::
+
+:::pregunta[¿Qué atributo SMART te preocuparía si no deja de crecer?]
+`Reallocated_Sector_Ct`: son sectores dañados que el disco ha sustituido por otros de reserva, y si el valor crece es mala señal. También preocupan `Current_Pending_Sector` y `Offline_Uncorrectable`.
+:::
+
 ## 4. Los registros del sistema
 
 Los programas dejan constancia de lo que hacen en los **registros** (*logs*). En los Ubuntu actuales casi todos van al **diario de systemd**, que se consulta con `journalctl`:
@@ -117,6 +141,14 @@ logger -t salud -p user.warning "El dataset docencia está al 90 %"
 
 Esto es lo que une tus scripts con el resto del sistema: lo que escribes con `logger` lo recoge el mismo mecanismo que usan las herramientas de alerta profesionales.
 
+:::pregunta[¿Cómo verías solo los avisos y errores de un servicio llamado `smbd` desde el último arranque?]
+Con `journalctl -b -p warning -u smbd`: `-b` limita al último arranque, `-p warning` muestra avisos y errores, y `-u smbd` filtra por el servicio.
+:::
+
+:::pregunta[¿Para qué sirve `logger` en un script de vigilancia?]
+Para escribir mensajes propios en el diario del sistema. Así lo que anota el script lo recoge el mismo mecanismo que usan las herramientas de alerta profesionales.
+:::
+
 ## 5. Un script de salud con `cron`
 
 Un script de vigilancia hace tres cosas: comprueba algo, decide si es un problema y avisa. Por ejemplo, puede mirar si todos los pools están `ONLINE`, si algún dataset supera el 80 % de su cuota y si el disco del sistema está lleno.
@@ -133,6 +165,14 @@ Los campos son, en orden, minuto, hora, día del mes, mes y día de la semana. U
 
 :::aviso[`cron` y el `PATH`]
 `cron` ejecuta las tareas con un `PATH` muy reducido (`/usr/bin:/bin`). Las herramientas de ZFS están en `/usr/sbin`, así que un script que funciona perfectamente a mano puede fallar en `cron`. Usa rutas completas (`/usr/sbin/zpool`) o declara el `PATH` al principio del script.
+:::
+
+:::pregunta[¿Qué hace la línea de `cron` `*/10 * * * * /opt/salud.sh`?]
+Ejecuta el script `/opt/salud.sh` cada 10 minutos: los cinco campos son minuto, hora, día del mes, mes y día de la semana, y `*/10` en el primero significa "cada 10 minutos".
+:::
+
+:::pregunta[Tu script funciona a mano pero no desde `cron`, y usa `zpool`. ¿Cuál es la causa más probable?]
+`cron` ejecuta las tareas con un `PATH` muy reducido (`/usr/bin:/bin`) y `zpool` está en `/usr/sbin`. Se soluciona con rutas completas (`/usr/sbin/zpool`) o declarando el `PATH` al principio del script.
 :::
 
 ## 6. Monitorización en Windows
@@ -178,21 +218,6 @@ Muchas hablan el protocolo **SNMP**, una forma estándar de que impresoras, conm
 | `cron` | Programador de tareas periódicas de Linux |
 | SNMP | Protocolo estándar para consultar el estado de dispositivos de red |
 | ZED | Demonio de eventos de ZFS |
-
-## Comprueba lo que sabes
-
-:::ejercicio[Repaso]
-1. ¿Cuáles son los cuatro recursos principales que se monitorizan en un servidor?
-2. ¿Qué diferencia hay entre observar en el momento y vigilar de forma continua?
-3. `free -h` muestra muy poca memoria "libre". ¿Es un problema?
-4. En `zpool status`, ¿qué indican las columnas READ, WRITE y CKSUM?
-5. ¿Qué significa un `FAILED` en `smartctl -H`? ¿Y un `PASSED`?
-6. ¿Qué atributo SMART te preocuparía si no deja de crecer?
-7. ¿Cómo verías solo los avisos y errores de un servicio llamado `smbd` desde el último arranque?
-8. ¿Para qué sirve `logger` en un script de vigilancia?
-9. ¿Qué hace la línea de `cron` `*/10 * * * * /opt/salud.sh`?
-10. Tu script funciona a mano pero no desde `cron`, y usa `zpool`. ¿Cuál es la causa más probable?
-:::
 
 ## Fuentes y para saber más
 

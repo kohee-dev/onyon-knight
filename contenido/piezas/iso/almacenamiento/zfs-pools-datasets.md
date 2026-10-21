@@ -81,6 +81,18 @@ Además, un pool puede tener:
 Lo normal es ampliar un pool **añadiendo otro vdev** con `zpool add`. Añadir un solo disco a un `raidz` que ya existe es algo que solo ha llegado con OpenZFS 2.3, y la versión 2.2, que es la de Ubuntu 24.04, no puede. Por eso conviene pensar el tamaño y el tipo de vdev antes de crear el pool.
 :::
 
+:::pregunta[¿Qué diferencia hay entre un vdev, un pool y un dataset?]
+Un vdev es un grupo de discos con una redundancia concreta (disco, `mirror` o `raidz`). Un pool es el conjunto de uno o más vdev y suma su capacidad. Un dataset es un sistema de ficheros dentro del pool, con propiedades propias.
+:::
+
+:::pregunta[¿Qué ocurre si en un pool con dos vdev se pierde uno de ellos por completo?]
+Se pierde todo el pool, porque los datos se reparten entre todos los vdev. Por eso cada vdev debe llevar su propia redundancia.
+:::
+
+:::pregunta[Tienes cuatro discos de 2 TB. ¿Qué capacidad útil tendrías con `raidz1`, con `raidz2` y con dos `mirror`?]
+Con `raidz1`, *N* − 1 discos: 6 TB. Con `raidz2`, *N* − 2: 4 TB. Con dos `mirror`, cada espejo da un disco: 4 TB en total.
+:::
+
 ## 3. Crear un pool
 
 Con tres discos en `raidz1` y un cuarto de repuesto, el comando es este:
@@ -114,6 +126,14 @@ Al principio te va a confundir una cosa: `zpool list` y `zfs list` no dicen lo m
 
 :::tip[Nombres de disco estables]
 En un servidor de verdad crearías el pool con rutas de `/dev/disk/by-id/...` en lugar de `sdb`, para que un cambio en el orden de los discos no confunda a ZFS.
+:::
+
+:::pregunta[¿Por qué `zpool list` y `zfs list` muestran tamaños distintos?]
+`zpool list` enseña el espacio bruto, con la paridad incluida, y `zfs list` el espacio útil, el que realmente puedes llenar de datos.
+:::
+
+:::pregunta[¿Qué significa `ashift=12` y por qué hay que decidirlo al crear el pool?]
+Indica el tamaño de sector: 2¹² son 4096 bytes (4 KiB), el que usan casi todos los discos actuales. No se puede cambiar una vez creado el pool, y si te quedas corto el rendimiento baja.
 :::
 
 ## 4. Datasets
@@ -164,6 +184,18 @@ Si activas la compresión en un dataset que ya tiene datos, los antiguos se qued
 | `acltype=posixacl` | Permite usar ACL de Linux ([[permisos-acl]]) |
 | `readonly=on` | El dataset no se puede modificar |
 
+:::pregunta[¿Qué diferencia hay entre una cuota y una reserva?]
+Una cuota es un tope: el dataset (con hijos e instantáneas) no puede ocupar más. Una reserva es una garantía: ese espacio queda apartado para el dataset aunque el resto del pool se llene.
+:::
+
+:::pregunta[¿Por qué activar la compresión puede mejorar el rendimiento?]
+Porque leer y escribir menos bytes del disco compensa de sobra el trabajo de comprimir, sobre todo con un algoritmo rápido como `lz4`.
+:::
+
+:::pregunta[¿Qué tipo de archivo se beneficia poco de la compresión?]
+Los que ya vienen comprimidos, como un vídeo, un `.zip` o un JPG. Un texto o un registro (*log*) se encoge mucho.
+:::
+
 ## 5. Fallo de un disco
 
 Lo que ocurre depende de la redundancia que tengas, y ZFS te lo cuenta en `zpool status`. Estos son los estados principales:
@@ -195,6 +227,14 @@ Un *scrub* lee todos los datos del pool y comprueba sus sumas. Si encuentra un b
 Si durante la reconstrucción de un disco en un `raidz1` falla otro, se pierde el pool. Por eso con discos grandes se usa `raidz2`, que aguanta dos fallos, y por eso nunca hay que olvidarse de las copias de seguridad.
 :::
 
+:::pregunta[Un pool aparece como `DEGRADED`. ¿Se han perdido datos? ¿Qué debes hacer?]
+No: `DEGRADED` significa que falta algún disco pero queda redundancia suficiente, y todo funciona sin protección extra. Hay que sustituir el disco con `zpool replace`, esperar al *resilver* y comprobar con `zpool status` que todo vuelve a `ONLINE`.
+:::
+
+:::pregunta[¿Qué hace un scrub y cada cuánto conviene lanzarlo?]
+Lee todos los datos del pool y comprueba sus sumas; si encuentra un bloque dañado y hay redundancia, lo repara. Conviene programarlo de forma periódica, por ejemplo una vez al mes.
+:::
+
 ---
 
 ## Glosario
@@ -211,21 +251,6 @@ Si durante la reconstrucción de un disco en un `raidz1` falla otro, se pierde e
 | Scrub | Lectura completa del pool para detectar y reparar errores |
 | Cuota | Límite máximo de espacio de un dataset |
 | Reserva | Espacio garantizado para un dataset |
-
-## Comprueba lo que sabes
-
-:::ejercicio[Repaso]
-1. ¿Qué diferencia hay entre un vdev, un pool y un dataset?
-2. ¿Qué ocurre si en un pool con dos vdev se pierde uno de ellos por completo?
-3. Tienes cuatro discos de 2 TB. ¿Qué capacidad útil tendrías con `raidz1`, con `raidz2` y con dos `mirror`?
-4. ¿Por qué `zpool list` y `zfs list` muestran tamaños distintos?
-5. ¿Qué significa `ashift=12` y por qué hay que decidirlo al crear el pool?
-6. ¿Qué diferencia hay entre una cuota y una reserva?
-7. ¿Por qué activar la compresión puede mejorar el rendimiento?
-8. ¿Qué tipo de archivo se beneficia poco de la compresión?
-9. Un pool aparece como `DEGRADED`. ¿Se han perdido datos? ¿Qué debes hacer?
-10. ¿Qué hace un scrub y cada cuánto conviene lanzarlo?
-:::
 
 ## Fuentes y para saber más
 

@@ -76,6 +76,22 @@ Una instantánea hecha a mano no te protege el día que te olvidas de hacerla. L
 Vive en el mismo pool que los datos. Si el pool se pierde, se pierden las dos cosas. Es un complemento excelente de las copias, pero no las sustituye.
 :::
 
+:::pregunta[¿Por qué una instantánea de ZFS casi no ocupa espacio al crearla?]
+Porque ZFS usa *copy-on-write* y nunca sobrescribe: la foto solo tiene que no soltar los bloques actuales. Ocupa espacio a medida que el dataset cambia y esos bloques viejos quedan retenidos.
+:::
+
+:::pregunta[Has borrado un archivo por error y tienes una instantánea de ayer. ¿Cuál es la forma menos arriesgada de recuperarlo?]
+Copiarlo con `cp` desde el directorio oculto `.zfs/snapshot/` del dataset, sin tocar el resto.
+:::
+
+:::pregunta[¿Qué hace `zfs rollback` con las instantáneas posteriores?]
+Deshace todos los cambios posteriores a la instantánea y, si hay instantáneas más recientes, obliga a borrarlas (con `-r`).
+:::
+
+:::pregunta[¿Por qué una instantánea no sustituye a una copia de seguridad?]
+Porque vive en el mismo pool que los datos: si el pool se pierde, se pierden las dos cosas.
+:::
+
 ## 3. Tipos de copia de seguridad
 
 Una **copia de seguridad** es un duplicado de los datos guardado en otro sitio, para poder recuperarlos si los originales se pierden. Según lo que se copie cada vez, hay tres tipos:
@@ -93,6 +109,14 @@ Hay dos conceptos que se usan para decidir cuánto invertir en copias:
 - **RPO** (*Recovery Point Objective*): cuántos datos puedes permitirte perder, medido en tiempo. Si haces copia cada noche, tu RPO es de 24 horas.
 - **RTO** (*Recovery Time Objective*): cuánto puedes tardar en volver a funcionar después de un desastre.
 
+:::pregunta[Haces una copia completa el domingo y una incremental cada noche. El jueves se pierde todo. ¿Qué necesitas para restaurar?]
+La copia completa del domingo y todas las incrementales posteriores, en orden.
+:::
+
+:::pregunta[Haces copia cada noche a las 2:00. ¿Cuál es tu RPO?]
+24 horas: es el máximo de datos, medido en tiempo, que puedes perder.
+:::
+
 ## 4. La regla 3-2-1
 
 Es la receta clásica, y funciona porque cada número cubre un riesgo distinto:
@@ -105,6 +129,14 @@ Existe una variante más moderna, la **3-2-1-1-0**. Una de las copias es *inmuta
 
 :::tip[Una copia que no has restaurado nunca es una esperanza]
 Muchas copias fallan justo cuando se necesitan: programadas mal, incompletas, cifradas con una clave perdida. Restaura de forma periódica en una máquina de pruebas.
+:::
+
+:::pregunta[Explica la regla 3-2-1.]
+Tres copias de los datos (el original y dos más), en dos soportes distintos, y una de ellas fuera de las instalaciones. Cada número cubre un riesgo: que una copia falle, que falle un tipo de soporte y un incendio, robo o inundación.
+:::
+
+:::pregunta[¿Para qué sirve el 0 de la regla 3-2-1-1-0?]
+Indica que se verifica que al restaurar hay cero errores. La variante añade además una copia inmutable o desconectada, para sobrevivir a un ransomware.
 :::
 
 ## 5. Herramientas
@@ -149,6 +181,14 @@ rsync -a --delete /datos/ /copia/datos/
 
 `restic` y `borg` hacen copias cifradas, comprimidas y deduplicadas (no guardan dos veces lo mismo) y conservan un historial. En Windows Server, el equivalente de serie es **Windows Server Backup**, y para recuperar versiones anteriores de un fichero desde el Explorador se usan las instantáneas de volumen (VSS), que vemos en [[compartir-windows]].
 
+:::pregunta[¿Qué ventaja tiene `zfs send` frente a `rsync` en un conjunto grande?]
+ZFS sabe qué bloques han cambiado sin compararlos, así que es muchísimo más rápido. `rsync` tiene que recorrer todos los ficheros.
+:::
+
+:::pregunta[¿Por qué `rsync --delete` hay que usarlo con cuidado?]
+Porque borra en la copia lo que ya no existe en el origen, así que un borrado accidental se propaga a la copia.
+:::
+
 ---
 
 ## Glosario
@@ -163,21 +203,6 @@ rsync -a --delete /datos/ /copia/datos/
 | RTO | Tiempo máximo admitido para recuperarse |
 | Regla 3-2-1 | Tres copias, en dos soportes, una fuera del sitio |
 | Inmutable | Copia que nadie puede modificar ni borrar durante un tiempo |
-
-## Comprueba lo que sabes
-
-:::ejercicio[Repaso]
-1. ¿Por qué una instantánea de ZFS casi no ocupa espacio al crearla?
-2. Has borrado un archivo por error y tienes una instantánea de ayer. ¿Cuál es la forma menos arriesgada de recuperarlo?
-3. ¿Qué hace `zfs rollback` con las instantáneas posteriores?
-4. ¿Por qué una instantánea no sustituye a una copia de seguridad?
-5. Haces una copia completa el domingo y una incremental cada noche. El jueves se pierde todo. ¿Qué necesitas para restaurar?
-6. Haces copia cada noche a las 2:00. ¿Cuál es tu RPO?
-7. Explica la regla 3-2-1.
-8. ¿Para qué sirve el 0 de la regla 3-2-1-1-0?
-9. ¿Qué ventaja tiene `zfs send` frente a `rsync` en un conjunto grande?
-10. ¿Por qué `rsync --delete` hay que usarlo con cuidado?
-:::
 
 ## Fuentes y para saber más
 

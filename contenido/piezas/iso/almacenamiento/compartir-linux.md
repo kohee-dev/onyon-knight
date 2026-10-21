@@ -36,6 +36,10 @@ Cuando compartes una carpeta, el servidor la ofrece a la red con un nombre y el 
 
 La regla sencilla es esta: si el cliente es Windows, Samba; si es Linux, NFS. Samba también sirve a clientes Linux, pero NFS suele integrarse mejor con los permisos de Unix.
 
+:::pregunta[¿Qué protocolo usarías para compartir una carpeta con equipos Windows y cuál para otros servidores Linux?]
+Para Windows, SMB/CIFS, que en Linux se sirve con Samba. Para otros Linux, NFS. Samba también atiende a clientes Linux, pero NFS suele encajar mejor con los permisos de Unix.
+:::
+
 ---
 
 ## 2. Samba: compartir con Windows
@@ -129,6 +133,26 @@ smbclient //192.168.50.40/archivo -U irene
 sudo mount -t cifs //192.168.50.40/archivo /mnt/archivo -o username=irene
 ```
 
+:::pregunta[¿Por qué no se debe usar SMB1?]
+Es el protocolo original de los años 90, está obsoleto y es inseguro: por él se propagó el ransomware WannaCry. Por eso Windows 10 y 11 ya no lo instalan y Samba lo trae desactivado.
+:::
+
+:::pregunta[Un usuario existe en Linux pero Samba rechaza su contraseña. ¿Qué falta?]
+Falta darlo de alta en Samba con `sudo smbpasswd -a usuario`. Samba guarda su propia contraseña, distinta de la de Linux, y es la causa más habitual de ese error.
+:::
+
+:::pregunta[En `smb.conf` un recurso tiene `valid users = @archivo @investigacion` y `write list = @archivo`. ¿Qué puede hacer un miembro de `investigacion`?]
+Puede entrar en el recurso, pero solo leer. Los usuarios de `valid users` que no están en `write list` no pueden escribir.
+:::
+
+:::pregunta[Un usuario de `archivo` entra en el recurso pero no puede escribir, aunque está en `write list`. ¿Qué miras?]
+Los permisos de Linux de la carpeta (usuario, grupo, ACL), la segunda capa de permisos. Manda el más restrictivo, así que aunque el recurso permita escribir, si la carpeta no lo permite al usuario no podrá hacerlo.
+:::
+
+:::pregunta[¿Para qué sirve `testparm`?]
+Para comprobar la sintaxis de `smb.conf` antes de reiniciar el servicio `smbd`.
+:::
+
 ---
 
 ## 3. NFS: compartir entre Linux
@@ -197,6 +221,22 @@ Si el `root` de cualquier cliente pudiera actuar como `root` en el servidor, bas
 Limitar la exportación a una red o una IP reduce el riesgo, pero quien consiga una IP permitida y cree un usuario con el UID que quiera podrá hacerse pasar por otra persona. NFS también puede autenticar con Kerberos, pero la configuración es más compleja y queda fuera de este tema.
 :::
 
+:::pregunta[En una exportación NFS, ¿qué diferencia hay entre `sync` y `async`?]
+Con `sync` el servidor confirma una escritura cuando ya está en disco: es más seguro. Con `async` es más rápido, pero se pueden perder datos si hay un corte.
+:::
+
+:::pregunta[`elena` es el UID 1004 en el servidor NFS y el 1001 en el cliente. ¿Qué pasará?]
+NFS se fía de los números y no de los nombres, así que el servidor verá a otra persona y `elena` actuará con la identidad y los permisos de otro usuario. La solución sencilla es crear los usuarios con el mismo UID y GID en ambas máquinas.
+:::
+
+:::pregunta[¿Qué hace `root_squash` y por qué es útil?]
+Convierte al `root` del cliente en el usuario anónimo `nobody`. Sin él, tener privilegios en cualquier cliente bastaría para leer o cambiar cualquier archivo exportado.
+:::
+
+:::pregunta[¿Qué ventaja tiene `x-systemd.automount` en `fstab` para un recurso de red?]
+Hace que el recurso se monte en el primer acceso y no durante el arranque, así que un servidor que no responde no bloquea el arranque del cliente.
+:::
+
 ---
 
 ## Glosario
@@ -211,21 +251,6 @@ Limitar la exportación a una red o una IP reduce el riesgo, pero quien consiga 
 | Ruta UNC | Forma de escribir una ruta de red en Windows: `\\servidor\recurso` |
 | `smbpasswd` | Orden para dar de alta a un usuario y su contraseña en Samba |
 | `root_squash` | Convierte al `root` del cliente en un usuario sin privilegios |
-
-## Comprueba lo que sabes
-
-:::ejercicio[Repaso]
-1. ¿Qué protocolo usarías para compartir una carpeta con equipos Windows y cuál para otros servidores Linux?
-2. ¿Por qué no se debe usar SMB1?
-3. Un usuario existe en Linux pero Samba rechaza su contraseña. ¿Qué falta?
-4. En `smb.conf` un recurso tiene `valid users = @archivo @investigacion` y `write list = @archivo`. ¿Qué puede hacer un miembro de `investigacion`?
-5. Un usuario de `archivo` entra en el recurso pero no puede escribir, aunque está en `write list`. ¿Qué miras?
-6. ¿Para qué sirve `testparm`?
-7. En una exportación NFS, ¿qué diferencia hay entre `sync` y `async`?
-8. `elena` es el UID 1004 en el servidor NFS y el 1001 en el cliente. ¿Qué pasará?
-9. ¿Qué hace `root_squash` y por qué es útil?
-10. ¿Qué ventaja tiene `x-systemd.automount` en `fstab` para un recurso de red?
-:::
 
 ## Fuentes y para saber más
 

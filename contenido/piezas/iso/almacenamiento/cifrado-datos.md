@@ -32,6 +32,14 @@ Pero tiene límites que conviene tener claros:
 El cifrado en reposo protege los datos guardados. El cifrado en tránsito protege los datos mientras viajan por la red, y es lo que hacen SSH, HTTPS o SMB 3 con el cifrado activado. Son cosas distintas, y casi siempre hacen falta las dos.
 :::
 
+:::pregunta[¿De qué te protege el cifrado de disco y de qué no?]
+Te protege cuando el sistema está apagado o la clave no está cargada: un disco robado o una unidad vendida sin borrar dejan de ser un problema. No protege con el volumen abierto y el sistema en marcha, ni evita que alguien borre archivos o que un ransomware los cifre, ni sustituye a las copias de seguridad.
+:::
+
+:::pregunta[¿Qué diferencia hay entre cifrado en reposo y cifrado en tránsito? Pon un ejemplo de cada uno.]
+El cifrado en reposo protege los datos guardados, como un dataset de ZFS cifrado. El cifrado en tránsito protege los datos mientras viajan por la red, como SSH, HTTPS o SMB 3 con cifrado. Casi siempre hacen falta los dos.
+:::
+
 ## 2. Cómo funciona, a grandes rasgos
 
 Casi todos los sistemas usan **cifrado simétrico**: la misma clave sirve para cifrar y para descifrar. El algoritmo más extendido es **AES** (*Advanced Encryption Standard*) con claves de 256 bits, y hoy no se conoce ningún ataque práctico contra AES-256 bien utilizado.
@@ -44,6 +52,14 @@ Lo habitual es trabajar con dos claves:
 Con este reparto puedes cambiar la contraseña sin recifrar terabytes de datos, porque solo hay que volver a proteger la clave de datos. Y de ahí sale lo más importante de todo el tema: si pierdes la clave de acceso, no hay forma de recuperar los datos. No existe el botón de "he olvidado mi contraseña".
 
 La contraseña tampoco se usa tal cual. Antes pasa por una función de derivación (como PBKDF2 o Argon2) que la hace lenta de probar, de modo que alguien que intente adivinarla solo pueda probar unas pocas por segundo.
+
+:::pregunta[¿Por qué se usan dos claves (de datos y de acceso)?]
+La clave de datos, aleatoria y larga, cifra el disco, y la de acceso la protege. Así puedes cambiar la contraseña sin recifrar terabytes de datos, porque solo hay que volver a proteger la clave de datos.
+:::
+
+:::pregunta[Has olvidado la contraseña de un dataset cifrado de ZFS. ¿Puedes recuperar los datos?]
+No. Si pierdes la clave de acceso no hay forma de recuperar los datos: no existe el botón de «he olvidado mi contraseña».
+:::
 
 ## 3. Niveles de cifrado
 
@@ -103,6 +119,26 @@ sudo zfs mount saber/direccion
 
 Con `unload-key` el dataset queda cerrado: ya no se puede montar y los datos son ilegibles. `load-key` te pide la contraseña. Con `zfs get keystatus saber/direccion` ves si la clave está cargada (`available`) o no (`unavailable`). Existe además un atajo, `zfs mount -l`, que carga la clave y monta en un solo paso.
 
+:::pregunta[¿Qué diferencia hay entre LUKS y el cifrado de ZFS?]
+LUKS cifra una partición entera, y encima pones el sistema de ficheros que quieras. El cifrado de ZFS actúa por dataset: solo cifra los que marques, cada uno con su propia clave.
+:::
+
+:::pregunta[¿Se puede activar el cifrado en un dataset de ZFS que ya existe?]
+No, hay que decidirlo al crear el dataset. Los datasets hijos heredan el cifrado del padre.
+:::
+
+:::pregunta[¿Qué sucede si ejecutas `zfs mount` sobre un dataset cifrado con la clave descargada?]
+No se puede montar: con la clave descargada el dataset queda cerrado y los datos son ilegibles. Hay que cargarla antes con `zfs load-key`.
+:::
+
+:::pregunta[Reinicias el servidor. ¿Estará montado un dataset cifrado con contraseña?]
+No por sí solo: alguien tiene que introducir la contraseña con `zfs load-key` y montar el dataset, y hasta entonces el servicio no está disponible.
+:::
+
+:::pregunta[¿Para qué sirve la clave de recuperación de BitLocker?]
+Es la clave de 48 dígitos que sirve de salida si el TPM falla o cambias la placa. Hay que guardarla fuera del equipo.
+:::
+
 ## 5. Cifrado y arranque del servidor
 
 Hay una pregunta que aparece siempre que se cifran datos: ¿cómo se abre el volumen cuando el servidor arranca? Si la clave es una contraseña, alguien tiene que escribirla. Tienes varias opciones:
@@ -119,6 +155,10 @@ No hay una opción perfecta: siempre es un equilibrio entre comodidad y segurida
 Una copia de seguridad de un dataset cifrado no sirve de nada sin la clave. Guarda la contraseña (o una copia de la clave) en un sitio seguro y distinto del servidor, como un gestor de contraseñas o una caja fuerte. Y de vez en cuando comprueba que sabes restaurar.
 :::
 
+:::pregunta[¿Por qué guardar la clave en un fichero del propio servidor reduce mucho la protección?]
+Porque quien robe el servidor entero se lleva también la clave, y el cifrado no ha servido de nada.
+:::
+
 ---
 
 ## Glosario
@@ -133,21 +173,6 @@ Una copia de seguridad de un dataset cifrado no sirve de nada sin la clave. Guar
 | EFS | Cifrado de ficheros dentro de NTFS |
 | TPM | Chip que guarda claves y comprueba que el equipo no ha sido manipulado |
 | Clave de recuperación | Clave de reserva para abrir un volumen cifrado |
-
-## Comprueba lo que sabes
-
-:::ejercicio[Repaso]
-1. ¿De qué te protege el cifrado de disco y de qué no?
-2. ¿Por qué se usan dos claves (de datos y de acceso)?
-3. Has olvidado la contraseña de un dataset cifrado de ZFS. ¿Puedes recuperar los datos?
-4. ¿Qué diferencia hay entre LUKS y el cifrado de ZFS?
-5. ¿Se puede activar el cifrado en un dataset de ZFS que ya existe?
-6. ¿Qué sucede si ejecutas `zfs mount` sobre un dataset cifrado con la clave descargada?
-7. Reinicias el servidor. ¿Estará montado un dataset cifrado con contraseña?
-8. ¿Por qué guardar la clave en un fichero del propio servidor reduce mucho la protección?
-9. ¿Para qué sirve la clave de recuperación de BitLocker?
-10. ¿Qué diferencia hay entre cifrado en reposo y cifrado en tránsito? Pon un ejemplo de cada uno.
-:::
 
 ## Fuentes y para saber más
 

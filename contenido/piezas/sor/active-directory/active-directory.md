@@ -62,6 +62,10 @@ Cuando hay muchos dominios, buscar un objeto (un usuario, por ejemplo) en todos 
 El dominio es la unidad básica y el controlador de dominio es el servidor que guarda las cuentas. Varios dominios con nombres encadenados forman un árbol, y uno o más árboles forman un bosque. Las confianzas permiten reconocer usuarios de otros dominios, y el catálogo global permite buscar en todo el bosque.
 :::
 
+:::pregunta[¿Cuál es la diferencia entre un dominio, un árbol y un bosque?]
+El dominio es la unidad básica, con su propia base de datos de cuentas. Un árbol es un conjunto de dominios con un espacio de nombres continuo (`empresa.com` y `madrid.empresa.com`). Un bosque agrupa uno o más árboles que comparten esquema y configuración, y es el límite de seguridad más alto.
+:::
+
 # 2. Cómo está organizado Active Directory por dentro
 
 Active Directory se puede mirar desde dos puntos de vista distintos: cómo lo organizas tú para administrarlo (parte lógica) y dónde está cada cosa físicamente (parte física).
@@ -107,6 +111,14 @@ Por eso nunca se deben guardar archivos personales ni cosas grandes en SYSVOL. E
 Lógicamente, un dominio contiene OU y objetos. Físicamente, se compone de controladores y sitios. Los datos importantes están en el archivo NTDS.dit (la base de datos) y en la carpeta SYSVOL (directivas y scripts).
 :::
 
+:::pregunta[¿Para qué sirve la carpeta SYSVOL y qué se guarda en ella?]
+Es una carpeta compartida que se replica entre los controladores de dominio. Guarda las directivas de grupo y los scripts de inicio de sesión, que los clientes descargan de ahí.
+:::
+
+:::pregunta[¿Por qué `Users` y `Computers` no sirven para aplicar directivas, y qué se hace en su lugar?]
+Porque son contenedores y no unidades organizativas, así que no se les pueden aplicar directivas de grupo directamente. Se crean OU propias y se mueven los objetos allí.
+:::
+
 # 3. Active Directory y el DNS
 
 Hay una frase que se repite mucho entre administradores: **"si algo falla en Active Directory, empieza mirando el DNS"**. Y es verdad la mayoría de las veces.
@@ -137,6 +149,10 @@ Cómo funciona el DNS por dentro (tipos de zona, registros, consultas recursivas
 
 :::nota[En resumen]
 Los clientes encuentran el controlador de dominio consultando registros SRV en el DNS. Por eso el DC debe ser también servidor DNS, y los clientes deben usarlo como único DNS. Los problemas de dominio suelen ser problemas de DNS.
+:::
+
+:::pregunta[¿Por qué un cliente no puede unirse al dominio si su DNS apunta a un servidor público?]
+Porque para encontrar el controlador de dominio necesita consultar los registros SRV que este publica en su DNS, y un servidor público no los conoce. Por eso el cliente debe usar como DNS el controlador de dominio, y solo ese.
 :::
 
 # 4. Instalar Active Directory
@@ -184,6 +200,10 @@ En las prácticas usarás la versión con interfaz gráfica de Windows Server. E
 
 :::nota[En resumen]
 Instalar el rol AD DS pone los archivos; promocionar convierte el servidor en controlador de dominio y crea el dominio. Antes de promocionar necesitas nombre definitivo, IP fija y un nombre de dominio decidido. Guarda bien la contraseña DSRM.
+:::
+
+:::pregunta[¿Qué diferencia hay entre instalar el rol AD DS y promocionar el servidor?]
+Instalar el rol solo pone los archivos en el disco. La promoción es lo que convierte el servidor en controlador de dominio: crea la base de datos y el dominio, registra los SRV en el DNS y crea SYSVOL.
 :::
 
 # 5. Unir equipos al dominio
@@ -234,6 +254,10 @@ No clones máquinas virtuales de Windows sin prepararlas con `sysprep` si luego 
 
 :::nota[En resumen]
 Para unir un equipo necesita conectividad, el DNS apuntando al DC y la hora sincronizada. Con la cuenta de dominio, la contraseña la valida el controlador y se aplican las directivas. Con la local, solo cuenta el propio equipo.
+:::
+
+:::pregunta[Un usuario recibe "No se puede iniciar sesión" al intentar entrar en un equipo recién unido y se ha comprobado que el DNS es correcto. ¿Qué otra causa habría que mirar?]
+La hora. Kerberos rechaza los tickets si el reloj del cliente se desvía más de cinco minutos respecto al servidor.
 :::
 
 # 6. Usuarios, equipos, grupos y OU
@@ -299,6 +323,10 @@ En el bloque 5 verás cómo se comparten carpetas y la diferencia entre permisos
 Los usuarios y equipos se ordenan en OU según cómo se administren. Los grupos se clasifican por tipo (seguridad o distribución) y por ámbito (global, local de dominio, universal). La estrategia AGDLP mete cuentas en grupos globales, estos en grupos locales de dominio, y da permisos solo a los locales.
 :::
 
+:::pregunta[Explica la estrategia AGDLP con un ejemplo.]
+Las cuentas van a grupos globales según su función, estos a grupos locales de dominio según el recurso y el permiso, y los permisos se dan solo a los locales. Por ejemplo, los usuarios de Contabilidad entran en `GG_Contabilidad`, este en `DL_Facturas_Modificar`, y a este último se le dan los permisos de modificación sobre la carpeta Facturas. Si alguien cambia de departamento, solo se cambia su grupo global.
+:::
+
 # 7. Perfiles y carpetas personales
 
 Cuando un usuario inicia sesión por primera vez en un equipo, Windows le crea un **perfil**: una carpeta (`C:\Users\andrea`) con su escritorio, documentos, descargas y configuración personal. El problema es que ese perfil está solo en ese equipo. Si Andrea se sienta en otro ordenador del aula, empieza de cero.
@@ -331,6 +359,10 @@ Lo habitual hoy es evitar los scripts siempre que se pueda y hacer lo mismo con 
 
 :::nota[En resumen]
 Un perfil es la configuración personal del usuario. Los perfiles móviles lo copian al servidor al cerrar sesión; la redirección de carpetas lo evita haciendo que las carpetas apunten directamente al servidor. También hay carpetas personales y scripts de inicio de sesión.
+:::
+
+:::pregunta[¿Qué ventaja tiene la redirección de carpetas frente a un perfil móvil?]
+No hay que copiar el perfil entero al iniciar y cerrar sesión, porque las carpetas apuntan directamente al servidor. Así el inicio de sesión es más rápido y no viajan perfiles enormes por la red.
 :::
 
 # 8. Directivas de grupo (GPO)
@@ -403,6 +435,14 @@ Los fallos más comunes son tres: la GPO no está vinculada a la OU correcta, el
 Una GPO es una colección de ajustes que se vincula a un sitio, dominio u OU. Se aplican en orden local, sitio, dominio, OU, y gana la última. Se puede bloquear la herencia, forzar con "exigido" y filtrar por seguridad. Para diagnosticar se usa `gpresult`.
 :::
 
+:::pregunta[Una OU tiene una GPO vinculada pero un equipo de esa OU no la aplica. ¿Qué tres cosas revisarías?]
+Que el equipo esté realmente en esa OU (y no en `Computers`), que la herencia no esté bloqueada ni el filtrado de seguridad lo excluya, y qué se ha aplicado de verdad, con `gpresult /r` o `gpresult /h`.
+:::
+
+:::pregunta[Se vincula una GPO al dominio y otra, distinta, a una OU. Ambas configuran el mismo ajuste con valores distintos. ¿Cuál gana?]
+La de la OU, porque la última en aplicarse gana y el orden es local, sitio, dominio, OU. Solo ganaría la del dominio si estuviera marcada como exigida.
+:::
+
 # 9. Casos de uso habituales de las GPO
 
 Para que veas la utilidad real, estas son las tareas que casi siempre se resuelven con directivas de grupo.
@@ -440,6 +480,10 @@ Este método sigue funcionando, pero hoy en muchas organizaciones se complementa
 Las GPO sirven para políticas de contraseñas y bloqueo, restricciones de usuario, unidades de red y despliegue de software. La política de contraseñas del dominio se define en la raíz, y las PSO permiten políticas distintas para grupos concretos.
 :::
 
+:::pregunta[¿Por qué la política de contraseñas del dominio no funciona si la creas en una GPO vinculada a una OU, y cómo se aplica una política distinta a un grupo?]
+Las directivas de contraseñas del dominio solo funcionan en la GPO vinculada a la raíz del dominio (la *Default Domain Policy*). Para aplicar una política distinta a usuarios o grupos concretos se usa una PSO (directiva de contraseña específica), que tiene prioridad sobre la del dominio.
+:::
+
 # 10. Delegación de control
 
 Un error muy común es hacer administrador del dominio a cualquiera que necesite algo de permisos. Un administrador del dominio puede hacer **todo**, desde borrar el directorio hasta leer cualquier información. Si basta con que alguien restablezca contraseñas de un aula, darle todo ese poder es una mala idea.
@@ -459,6 +503,10 @@ Delega siempre a **grupos**, no a personas. Cuando alguien cambia de puesto, sol
 
 :::nota[En resumen]
 Delegar control permite que un grupo realice tareas concretas sobre una OU concreta sin ser administrador del dominio. Aplica el principio de mínimo privilegio y se asigna siempre a grupos.
+:::
+
+:::pregunta[¿Qué es la delegación de control y por qué es mejor que hacer administrador a alguien?]
+Es dar a un usuario o grupo permisos concretos sobre una OU concreta (por ejemplo, restablecer contraseñas). Respeta el mínimo privilegio, mientras que un administrador del dominio puede hacer cualquier cosa sobre todo el dominio.
 :::
 
 # 11. Herramientas de administración
@@ -535,6 +583,10 @@ De los cinco, el más visible en el día a día es el **emulador de PDC**, porqu
 Los controladores de dominio replican sus cambios entre sí y todos pueden aceptar escrituras. Cinco tareas delicadas se reparten en roles FSMO, que tiene un único controlador cada uno.
 :::
 
+:::pregunta[¿Qué significa que Active Directory sea multimaster, y por qué entonces existen los roles FSMO?]
+Que cualquier controlador puede aceptar cambios, que luego se replican a los demás. Los FSMO existen porque cinco tareas no pueden hacerse a la vez desde dos sitios sin provocar conflictos, y por eso las tiene un único controlador cada una.
+:::
+
 # Glosario
 
 | Término | Significado |
@@ -564,26 +616,6 @@ Los controladores de dominio replican sus cambios entre sí y todos pueden acept
 | Delegación de control | Dar permisos concretos sobre una OU a un grupo sin que sea administrador |
 | RSAT | Herramientas de administración remota del servidor desde un cliente |
 | FSMO | Roles de operaciones únicas de un bosque o de un dominio |
-
-# Comprueba lo que sabes
-
-Contesta por tu cuenta y después comprueba tus respuestas en las soluciones, al final del tema.
-
-:::ejercicio[Preguntas]
-1. ¿Cuál es la diferencia entre un dominio, un árbol y un bosque?
-2. ¿Para qué sirve la carpeta SYSVOL y qué se guarda en ella?
-3. ¿Por qué un cliente no puede unirse al dominio si su DNS apunta a un servidor público?
-4. ¿Qué diferencia hay entre instalar el rol AD DS y promocionar el servidor?
-5. Un usuario recibe "No se puede iniciar sesión" al intentar entrar en un equipo recién unido y se ha comprobado que el DNS es correcto. ¿Qué otra causa habría que mirar?
-6. ¿Por qué `Users` y `Computers` no sirven para aplicar directivas, y qué se hace en su lugar?
-7. Explica la estrategia AGDLP con un ejemplo.
-8. ¿Qué ventaja tiene la redirección de carpetas frente a un perfil móvil?
-9. Una OU tiene una GPO vinculada pero un equipo de esa OU no la aplica. ¿Qué tres cosas revisarías?
-10. Se vincula una GPO al dominio y otra, distinta, a una OU. Ambas configuran el mismo ajuste con valores distintos. ¿Cuál gana?
-11. ¿Por qué la política de contraseñas del dominio no funciona si la creas en una GPO vinculada a una OU, y cómo se aplica una política distinta a un grupo?
-12. ¿Qué es la delegación de control y por qué es mejor que hacer administrador a alguien?
-13. ¿Qué significa que Active Directory sea multimaster, y por qué entonces existen los roles FSMO?
-:::
 
 # Fuentes y para saber más
 
