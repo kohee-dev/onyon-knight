@@ -51,7 +51,7 @@ function convertirPregunta(nodo: any, file: VFile) {
   nodo.data = { hName: 'details', hProperties: { className: ['recuadro', 'recuadro-ejercicio', 'pregunta'] } };
   // El rótulo va dentro del summary: cerrado, es lo único que se ve del desplegable.
   const texto = { type: 'paragraph', data: { hName: 'span', hProperties: { className: ['pregunta-texto'] } }, children: etiqueta };
-  nodo.children.unshift({ type: 'paragraph', data: { hName: 'summary' }, children: [rotuloEjercicio('span'), texto] });
+  nodo.children.unshift({ type: 'paragraph', data: { hName: 'summary' }, children: [rotuloEjercicio('span'), { type: 'text', value: ' ' }, texto] });
 }
 
 function rotuloEjercicio(etiquetaHtml: 'p' | 'span') {

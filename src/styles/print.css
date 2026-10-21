@@ -149,6 +149,9 @@
   .pregunta > :not(summary) {
     display: none;
   }
+  .pregunta-texto {
+    padding-left: 0;
+  }
   .pregunta-texto::before {
     content: none;
   }

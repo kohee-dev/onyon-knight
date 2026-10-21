@@ -55,7 +55,7 @@ describe('recuadros', () => {
     const h = await html(':::pregunta[¿Qué es un **vdev**?]\nUn grupo de discos.\n:::');
     expect(h).toContain('<details class="recuadro recuadro-ejercicio pregunta">');
     expect(h).toContain(
-      '<summary><span class="recuadro-titulo">Ejercicio</span><span class="pregunta-texto">¿Qué es un <strong>vdev</strong>?</span></summary>',
+      '<summary><span class="recuadro-titulo">Ejercicio</span> <span class="pregunta-texto">¿Qué es un <strong>vdev</strong>?</span></summary>',
     );
     expect(h).toContain('<p>Un grupo de discos.</p>');
     expect(h).not.toContain('open');
