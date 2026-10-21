@@ -326,6 +326,10 @@ Guarda como evidencia:
 3. Una explicación, en tres líneas, de por qué la página de `prueba` se pierde y la de `web` no.
 :::
 
+:::pregunta[¿Qué diferencia hay entre una imagen y un contenedor? ¿Por qué lo que se escribe dentro de un contenedor desaparece al eliminarlo?]
+La imagen es una plantilla de solo lectura, formada por capas; el contenedor es una instancia de esa imagen, con una capa de escritura propia. Lo que se escribe dentro va a esa capa, que se elimina junto con el contenedor, como se vio con el contenedor `prueba`.
+:::
+
 ## 5. Parte 3: Gestión con Portainer
 
 [Portainer](https://www.portainer.io/) es una aplicación web para gestionar Docker. Se ejecuta ella misma como un contenedor.
@@ -454,6 +458,14 @@ docker rm -f limitado
 ```
 
 En la columna `MEM USAGE / LIMIT` aparece `64MiB` como límite. Si el proceso intentara usar más memoria, el núcleo lo terminaría. El contenedor `limitado` no publica ningún puerto, así que no es accesible desde fuera; para esta prueba no hace falta.
+
+:::pregunta[¿Qué dos mecanismos del núcleo de Linux aíslan y limitan un contenedor? Indica en qué punto de la práctica has visto actuar cada uno.]
+Los espacios de nombres aíslan los procesos del contenedor, y los cgroups limitan los recursos que puede consumir. El aislamiento se aprecia en el apartado 6.2 (los procesos son del anfitrión, pero aislados) y los cgroups en el 6.4, donde `--memory 64m --cpus 0.5` fija el límite de `limitado`.
+:::
+
+:::pregunta[¿Por qué `uname -r` devuelve lo mismo en la máquina virtual y en el contenedor? ¿Qué consecuencia tiene para ejecutar en este anfitrión un contenedor de Windows?]
+Porque el contenedor no tiene núcleo propio: trae su espacio de usuario (programas y bibliotecas) pero usa el núcleo del anfitrión. Por tanto, un contenedor necesita un núcleo compatible con el suyo; un contenedor de Windows no podría ejecutarse sobre este anfitrión Linux, ya que no se arrancaría un segundo sistema operativo.
+:::
 
 ## 7. Parte 5: Un blog con WordPress y MariaDB
 
@@ -684,6 +696,22 @@ Recarga el sitio: vuelven tu entrada, con su captura, y tu usuario administrador
 
 Si algo sale mal, vuelve a la instantánea `03-blog`.
 
+:::pregunta[¿Cuándo usarías un montaje de directorio (como en `nginx`) y cuándo un volumen con nombre (como en MariaDB)?]
+El montaje de directorio sirve para que el contenedor use archivos del anfitrión que editas tú, como tu web. El volumen con nombre es almacenamiento gestionado por Docker que sobrevive al contenedor, adecuado para datos de la aplicación como los de MariaDB.
+:::
+
+:::pregunta[¿Por qué `db` no publica puertos y `wordpress` sí? ¿Cómo encuentra WordPress a la base de datos?]
+Solo `wordpress` debe ser accesible desde fuera; la base de datos solo se alcanza desde la red interna del proyecto, lo que es una buena práctica de seguridad. WordPress la localiza por el nombre del servicio (`WORDPRESS_DB_HOST: db`): Compose crea una red del proyecto y un DNS interno que resuelve `db` a la dirección del contenedor.
+:::
+
+:::pregunta[¿Qué diferencia hay entre `docker compose down` y `docker compose down -v`?]
+`docker compose down` elimina los contenedores y la red, pero los volúmenes siguen existiendo y los datos se conservan. Con `-v` se eliminan también los volúmenes, y con ellos la base de datos y los archivos de WordPress; no se puede deshacer.
+:::
+
+:::pregunta[El blog funciona dentro de una máquina virtual. ¿Qué inconvenientes de la virtualización, descritos en el aviso «No es gratis» del apartado 2 de «Virtualización», siguen afectándole? ¿Qué copias harías y dónde las guardarías?]
+Sigue consumiendo los recursos de la capa de virtualización y depende del equipo físico: si el anfitrión cae, cae el blog. Haría una copia lógica de la base de datos con `mariadb-dump` y otra del volumen de WordPress (`blog_wp_data`) con `tar`, y las guardaría fuera de la máquina virtual (por ejemplo con `scp`), porque un volumen no es una copia de seguridad. El aviso está en [[fundamentos-virtualizacion]].
+:::
+
 ## 8. Qué entregar
 
 1. Las evidencias de la parte 2 (apartado 4.4).
@@ -692,7 +720,6 @@ Si algo sale mal, vuelve a la instantánea `03-blog`.
 4. La entrada «Mi primer contenedor» publicada en el blog, con la captura y el `compose.yaml`.
 5. Una captura que demuestre la persistencia: la entrada visible después de `docker compose down` y `docker compose up -d`.
 6. La salida de `ls -lh copia-wordpress.sql wp-data.tar.gz` y una captura del blog recuperado tras `docker compose down -v` (apartado 7.7).
-7. Las respuestas a las preguntas del apartado 10.
 
 ## 9. Solución de problemas
 
@@ -710,19 +737,7 @@ Si algo sale mal, vuelve a la instantánea `03-blog`.
 | `variable is not set` o valores vacíos en `docker compose config` | El archivo `.env` no existe, tiene otro nombre o no está en el mismo directorio que `compose.yaml`. |
 | `no space left on device` | Revisa `docker system df`. Las imágenes y contenedores que no uses se eliminan con `docker system prune`, que pide confirmación y borra lo que no esté en uso. Léelo antes de aceptar. |
 
-## 10. Preguntas de reflexión
-
-:::ejercicio[Reflexión]
-1. ¿Qué dos mecanismos del núcleo de Linux aíslan y limitan un contenedor? Indica en qué punto de la práctica has visto actuar cada uno.
-2. ¿Por qué `uname -r` devuelve lo mismo en la máquina virtual y en el contenedor? ¿Qué consecuencia tiene para ejecutar en este anfitrión un contenedor de Windows?
-3. ¿Qué diferencia hay entre una imagen y un contenedor? ¿Por qué lo que se escribe dentro de un contenedor desaparece al eliminarlo?
-4. ¿Cuándo usarías un montaje de directorio (como en `nginx`) y cuándo un volumen con nombre (como en MariaDB)?
-5. ¿Por qué `db` no publica puertos y `wordpress` sí? ¿Cómo encuentra WordPress a la base de datos?
-6. ¿Qué diferencia hay entre `docker compose down` y `docker compose down -v`?
-7. El blog funciona dentro de una máquina virtual. ¿Qué inconvenientes de la virtualización, descritos en el aviso «No es gratis» del apartado 2 de [[fundamentos-virtualizacion]], siguen afectándole? ¿Qué copias harías y dónde las guardarías?
-:::
-
-## 11. Resumen de órdenes
+## 10. Resumen de órdenes
 
 | Orden | Función |
 | --- | --- |

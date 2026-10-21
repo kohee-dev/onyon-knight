@@ -45,11 +45,21 @@ function convertirPregunta(nodo: any, file: VFile) {
   }
   if (!nodo.children.length) {
     nodo.data = { hName: 'aside', hProperties: { className: ['recuadro', 'recuadro-ejercicio'] } };
-    nodo.children = [{ type: 'paragraph', children: etiqueta }];
+    nodo.children = [rotuloEjercicio('p'), { type: 'paragraph', children: etiqueta }];
     return;
   }
   nodo.data = { hName: 'details', hProperties: { className: ['recuadro', 'recuadro-ejercicio', 'pregunta'] } };
-  nodo.children.unshift({ type: 'paragraph', data: { hName: 'summary' }, children: etiqueta });
+  // El rótulo va dentro del summary: cerrado, es lo único que se ve del desplegable.
+  const texto = { type: 'paragraph', data: { hName: 'span', hProperties: { className: ['pregunta-texto'] } }, children: etiqueta };
+  nodo.children.unshift({ type: 'paragraph', data: { hName: 'summary' }, children: [rotuloEjercicio('span'), { type: 'text', value: ' ' }, texto] });
+}
+
+function rotuloEjercicio(etiquetaHtml: 'p' | 'span') {
+  return {
+    type: 'paragraph',
+    data: { hName: etiquetaHtml, hProperties: { className: ['recuadro-titulo'] } },
+    children: [{ type: 'text', value: RECUADROS.ejercicio }],
+  };
 }
 
 export function remarkRecuadros() {

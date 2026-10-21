@@ -215,6 +215,14 @@ lo trae de vuelta**.
 > tras el regreso) y explica con tus palabras la diferencia entre `SIGTERM` y
 > `SIGKILL` y por qué, aun así, ninguna de las dos resolvió el problema.
 
+:::pregunta[¿Por qué el intruso reaparecía con un **PID distinto** cada vez? ¿Qué nos dice eso sobre la relación entre un programa y un proceso?]
+Porque cada vez que algo lo relanza se crea un proceso nuevo, y cada proceso recibe su propio PID. El programa es el mismo, pero cada ejecución es una instancia distinta: un programa puede dar lugar a muchos procesos.
+:::
+
+:::pregunta[Si al matar al intruso su proceso hubiera quedado en estado **`Z` (zombi)**, ¿qué significaría y de quién sería la "responsabilidad" de recogerlo?]
+Significaría que el proceso ya ha terminado pero su padre aún no ha recogido su código de salida. La responsabilidad de recogerlo es de su proceso padre.
+:::
+
 ---
 
 # Capítulo V — El cómplice oculto
@@ -255,6 +263,10 @@ unidad: te dirá qué ejecuta y si está configurado para **reiniciarse solo**
 > resucita al intruso. Confirma o corrige aquí la hipótesis que escribiste en el
 > Capítulo III.
 
+:::pregunta[¿Qué ventaja tiene `systemd` con `Restart=always` para un servicio **legítimo**? ¿Por qué esa misma característica es perfecta para un intruso?]
+Para un servicio legítimo, `Restart=always` hace que se reinicie solo si cae, sin intervención manual. Esa misma característica resucita al intruso casi al instante tras matarlo, de modo que matar el proceso no basta.
+:::
+
 ---
 
 # Capítulo VI — Desmantelando la trama
@@ -287,6 +299,10 @@ las **evidencias**, analizar **cómo entró** el atacante y revisar si dejó otr
 puertas. En esta práctica nos detenemos en la neutralización, pero recuérdalo.
 :::
 
+:::pregunta[¿Por qué fue importante **desactivar la persistencia antes** de matar el proceso, y no al revés?]
+Porque, si se mata el proceso antes de desactivar su respaldo (cron o la unidad de systemd), este lo vuelve a lanzar y el intruso regresa. Primero hay que neutralizar la persistencia, después terminar el proceso y verificar que no reaparece.
+:::
+
 ---
 
 # Capítulo VII — El informe para la Policía Metropolitana
@@ -313,21 +329,6 @@ prueba**. "Observé que el proceso `kworkerd` consumía el 98 % de CPU; deduje q
 un impostor porque los `kworker` legítimos van entre corchetes y no consumen CPU de
 usuario; lo probé comprobando en `/proc` que se ejecutaba desde `/tmp`."
 :::
-
----
-
-# Preguntas para cerrar el caso
-
-Responde de forma razonada (esto evalúa que has comprendido, no solo ejecutado):
-
-1. ¿Por qué el intruso reaparecía con un **PID distinto** cada vez? ¿Qué nos dice eso
-   sobre la relación entre un programa y un proceso?
-2. Si al matar al intruso su proceso hubiera quedado en estado **`Z` (zombi)**, ¿qué
-   significaría y de quién sería la "responsabilidad" de recogerlo?
-3. ¿Qué ventaja tiene `systemd` con `Restart=always` para un servicio **legítimo**?
-   ¿Por qué esa misma característica es perfecta para un intruso?
-4. ¿Por qué fue importante **desactivar la persistencia antes** de matar el proceso, y
-   no al revés?
 
 ---
 

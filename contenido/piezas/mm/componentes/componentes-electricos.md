@@ -737,16 +737,28 @@ En Tinkercad construiremos un circuito guiado con:
 6. Detén la simulación y añade el interruptor.
 7. Comprueba qué sucede al abrirlo y cerrarlo.
 
-#### Preguntas
-
-- ¿Qué componente proporciona energía?
-- ¿Qué función cumple la resistencia?
-- ¿Por qué importa la orientación del LED?
-- ¿Qué cambia al abrir el interruptor?
-- ¿Qué puntos de la protoboard están conectados entre sí?
-
 ::: aviso
 **La simulación ayuda a comprender el circuito, pero no sustituye las instrucciones de seguridad para trabajar con material real.** Los montajes físicos se realizarán únicamente con los materiales, valores y procedimientos indicados por el docente.
+:::
+
+:::pregunta[¿Qué componente proporciona energía?]
+La pila o batería, que proporciona energía eléctrica mediante procesos químicos. En el montaje de Tinkercad, esa función la cumple la fuente de alimentación.
+:::
+
+:::pregunta[¿Qué función cumple la resistencia?]
+Presenta oposición al paso de corriente y, en este montaje, se coloca en serie con el LED para limitar la corriente.
+:::
+
+:::pregunta[¿Por qué importa la orientación del LED?]
+Porque tiene ánodo y cátodo, y hay que respetar su polaridad para que funcione. La patilla larga suele ser el ánodo y el borde plano del encapsulado ayuda a identificar el cátodo, pero debe comprobarse.
+:::
+
+:::pregunta[¿Qué cambia al abrir el interruptor?]
+Se interrumpe el recorrido conductor, por lo que el circuito queda abierto y deja de circular corriente: el LED se apaga. Al cerrarlo se completa el recorrido y el LED vuelve a encenderse.
+:::
+
+:::pregunta[¿Qué puntos de la protoboard están conectados entre sí?]
+Los orificios de un mismo grupo interno de contactos en la zona central, y las líneas laterales de alimentación. La separación central mantiene aislados los grupos de ambos lados, y algunas líneas de alimentación están divididas y no tienen continuidad de un extremo al otro.
 :::
 
 ## 4. Instrumentos de medida de magnitudes eléctricas

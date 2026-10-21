@@ -54,18 +54,19 @@ describe('recuadros', () => {
   it('convierte :::pregunta en un desplegable cerrado con la pregunta y la respuesta', async () => {
     const h = await html(':::pregunta[¿Qué es un **vdev**?]\nUn grupo de discos.\n:::');
     expect(h).toContain('<details class="recuadro recuadro-ejercicio pregunta">');
-    expect(h).toContain('<summary>¿Qué es un <strong>vdev</strong>?</summary>');
+    expect(h).toContain(
+      '<summary><span class="recuadro-titulo">Ejercicio</span> <span class="pregunta-texto">¿Qué es un <strong>vdev</strong>?</span></summary>',
+    );
     expect(h).toContain('<p>Un grupo de discos.</p>');
     expect(h).not.toContain('open');
-    expect(h).not.toContain('recuadro-titulo');
   });
 
-  it('una :::pregunta sin respuesta se muestra como recuadro normal, sin desplegable', async () => {
+  it('una :::pregunta sin respuesta se muestra como recuadro normal con su rótulo, sin desplegable', async () => {
     const h = await html(':::pregunta[¿Qué es un vdev?]\n:::');
     expect(h).toContain('<aside class="recuadro recuadro-ejercicio">');
+    expect(h).toContain('<p class="recuadro-titulo">Ejercicio</p>');
     expect(h).toContain('¿Qué es un vdev?');
     expect(h).not.toContain('<details');
-    expect(h).not.toContain('Ejercicio');
   });
 
   it('la respuesta de una :::pregunta admite código y listas', async () => {

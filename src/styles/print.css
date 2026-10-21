@@ -149,7 +149,10 @@
   .pregunta > :not(summary) {
     display: none;
   }
-  .pregunta > summary::before {
+  .pregunta-texto {
+    padding-left: 0;
+  }
+  .pregunta-texto::before {
     content: none;
   }
   h2,
