@@ -1,5 +1,6 @@
 import type { Root } from 'mdast';
 import type { VFile } from 'vfile';
+import { toString } from 'mdast-util-to-string';
 import { visit, SKIP } from 'unist-util-visit';
 import { problema } from './comun';
 
@@ -38,7 +39,7 @@ function tomarEtiqueta(nodo: any): any[] | null {
 /** `:::pregunta[texto]` + respuesta = desplegable; sin respuesta todavía se queda como pregunta normal. */
 function convertirPregunta(nodo: any, file: VFile) {
   const etiqueta = tomarEtiqueta(nodo);
-  if (!etiqueta?.length) {
+  if (!etiqueta || !toString({ type: 'paragraph', children: etiqueta } as any).trim()) {
     problema(file, nodo, 'pregunta sin texto (falta el texto entre corchetes: «:::pregunta[¿…?]»)');
     return;
   }
