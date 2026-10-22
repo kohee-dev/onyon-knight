@@ -64,6 +64,22 @@ describe('adaptador de Ollama', () => {
     await expect(crearModeloOllama({ host: 'h:1', modelo: 'x', plazoMs: 1000, fetch: caido }).completar('i', 'e')).rejects.toThrow(/http:\/\/h:1.*ECONNREFUSED/);
   });
 
+  it('un host inválido no vuelca su contenido (puede llevar credenciales), con o sin esquema', () => {
+    for (const host of ['user:secret@[bad', 'http://user:secret@[bad']) {
+      expect(() => crearModeloOllama({ host, modelo: 'x', plazoMs: 1, fetch: fetchFalso({}).fetch })).toThrow(/OLLAMA_HOST/);
+      expect(() => crearModeloOllama({ host, modelo: 'x', plazoMs: 1, fetch: fetchFalso({}).fetch })).not.toThrow(/secret/);
+    }
+  });
+
+  it('un plazo por encima del máximo de los temporizadores se rechaza nombrando la variable', () => {
+    expect(() => modeloDesdeEntorno({ OLLAMA_TIMEOUT_MS: '5000000000' })).toThrow(/OLLAMA_TIMEOUT_MS/);
+  });
+
+  it('si el plazo vence leyendo el cuerpo, el error es el del plazo', async () => {
+    const fetch = (async () => ({ ok: true, status: 200, json: () => Promise.reject(Object.assign(new Error('x'), { name: 'TimeoutError' })) })) as unknown as typeof globalThis.fetch;
+    await expect(crearModeloOllama({ host: 'h:1', modelo: 'x', plazoMs: 1000, fetch }).completar('i', 'e')).rejects.toThrow(/plazo/i);
+  });
+
   it('lee host, modelo y plazo del entorno con valores por defecto', () => {
     expect(modeloDesdeEntorno({}, fetchFalso({}).fetch)).toBeDefined();
     expect(() => modeloDesdeEntorno({ OLLAMA_TIMEOUT_MS: 'abc' })).toThrow(/OLLAMA_TIMEOUT_MS/);

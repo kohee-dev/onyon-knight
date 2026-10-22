@@ -23,6 +23,8 @@ const esquemaRespuesta = esquemaExtraccion.extend({ relaciones: z.array(z.unknow
 
 /** Tope de entidades por pieza: pasado esto un modelo pequeño solo repite o divaga. */
 const MAX_ENTIDADES = 15;
+/** Tope de relaciones por pieza: cada extremo es un nodo del grafo, así que sin él el tope de entidades se eludiría. */
+const MAX_RELACIONES = 30;
 
 function entradaDe(pieza: PiezaFuente): string {
   return JSON.stringify({
@@ -36,11 +38,16 @@ export function huella(pieza: PiezaFuente): string {
   return createHash('sha256').update(INSTRUCCION).update('\0').update(entradaDe(pieza)).digest('hex');
 }
 
+/** Aplica los topes de entidades y de relaciones de una pieza. */
+export function limitar({ entidades, relaciones }: Extraccion): Extraccion {
+  return { entidades: entidades.slice(0, MAX_ENTIDADES), relaciones: relaciones.slice(0, MAX_RELACIONES) };
+}
+
 /** Pide al modelo las entidades y relaciones de una pieza, de forma independiente al resto. */
 export async function extraer(modelo: Modelo, pieza: PiezaFuente): Promise<Extraccion> {
   const { entidades, relaciones } = leerJson(await modelo.completar(INSTRUCCION, entradaDe(pieza)), esquemaRespuesta, '«entidades» y «relaciones»');
-  return {
-    entidades: entidades.slice(0, MAX_ENTIDADES),
+  return limitar({
+    entidades,
     relaciones: relaciones.filter((r): r is [string, string] => Array.isArray(r) && r.length === 2 && r.every((x) => typeof x === 'string')),
-  };
+  });
 }

@@ -501,4 +501,26 @@ describe('scripts/curso.mjs', () => {
     expect(r.entidades).toHaveLength(15);
     expect(r.relaciones).toEqual([['E0', 'E1']]);
   });
+
+  it('las relaciones también tienen tope, porque cada extremo es un nodo del grafo', async () => {
+    const relaciones = Array.from({ length: 50 }, (_, i) => [`A${i}`, `B${i}`]);
+    const modelo: Modelo = { completar: async () => JSON.stringify({ entidades: ['A0'], relaciones }) };
+    const { extraer } = await import('../src/lib/curso/extractor');
+    const r = await extraer(modelo, { id: 'p', datos: { titulo: 'T' }, cuerpo: '' } as never);
+    expect(r.relaciones).toHaveLength(30);
+  });
+
+  it('una extracción guardada con más de 15 entidades se recorta al reutilizarla', async () => {
+    const { extraerIncremental } = await import('../src/lib/curso/indice');
+    const { huella } = await import('../src/lib/curso/extractor');
+    const pieza = { id: 'p', datos: { titulo: 'T' }, cuerpo: '' } as never;
+    const dir = cache();
+    mkdirSync(dir, { recursive: true });
+    const entidades = Array.from({ length: 20 }, (_, i) => `E${i}`);
+    writeFileSync(join(dir, 'indice.json'), JSON.stringify({ piezas: { p: { huella: huella(pieza), entidades, relaciones: Array.from({ length: 50 }, (_, i) => [`A${i}`, `B${i}`]) } } }));
+    const sinLlamadas: Modelo = { completar: () => Promise.reject(new Error('no debía llamarse')) };
+    const r = (await extraerIncremental(sinLlamadas, [pieza], dir)).get('p')!;
+    expect(r.entidades).toHaveLength(15);
+    expect(r.relaciones).toHaveLength(30);
+  });
 });
