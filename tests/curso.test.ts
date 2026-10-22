@@ -5,7 +5,6 @@ import { join, resolve } from 'node:path';
 import { load } from 'js-yaml';
 import { afterEach, describe, expect, it } from 'vitest';
 import { generarCurso, type Modelo } from '../src/lib/curso/generar';
-import { ClaveAusente } from '../src/lib/curso/modelo';
 import { ejecutarCurso, formatearJustificacion } from '../src/lib/curso/cli';
 import { esquemaModulo } from '../src/lib/esquemas';
 
@@ -175,12 +174,6 @@ describe('generarCurso', () => {
   it('un rechazo cuyo campo lanza al leerlo (getter) sigue dando el mensaje accionable', async () => {
     const caido: Modelo = { completar: () => Promise.reject({ get status(): number { throw new Error('boom'); } }) };
     await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: caido })).rejects.toThrow(/ha fallado.*vuelve a intentarlo/);
-  });
-
-  it('una clave ausente nombra la variable de entorno que hay que definir', async () => {
-    const sinClave: Modelo = { completar: () => Promise.reject(new ClaveAusente('MI_CLAVE_API')) };
-    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: sinClave })).rejects.toThrow(/define.*MI_CLAVE_API/i);
-    await expect(generarCurso({ tema: 'T', raizContenido: FIXTURES, dirCache: cache(), modelo: sinClave })).rejects.not.toThrow(/ha fallado/);
   });
 
   it('las piezas propuestas salen de la vecindad del grafo y la justificación lista las entidades', async () => {
@@ -458,7 +451,8 @@ describe('ejecutarCurso (comando)', () => {
     expect(existsSync(join(raiz, 'modulos', 'tema.yml'))).toBe(false);
   });
 
-  it.each([['proveedor caído', new Error('503')], ['clave ausente', new ClaveAusente('MI_CLAVE_API')]])('con %s no escribe nada', async (_caso, error) => {
+  it('con el proveedor caído no escribe nada', async () => {
+    const error = new Error('503');
     const raiz = copia();
     const modelo: Modelo = { completar: () => Promise.reject(error) };
     await expect(ejecutarCurso({ argumentos: ['Tema'], raizContenido: raiz, dirCache: cache(), modelo })).rejects.toThrow();
@@ -468,10 +462,6 @@ describe('ejecutarCurso (comando)', () => {
   it.each([[[]], [['a', 'b']], [['  ']]])('exige exactamente un tema (%j)', async (argumentos) => {
     const { modelo } = falso(propuestaBuena);
     await expect(ejecutarCurso({ argumentos, raizContenido: FIXTURES, dirCache: cache(), modelo })).rejects.toThrow(/tema/);
-  });
-
-  it('sin proveedor de modelo configurado lo dice claramente', async () => {
-    await expect(ejecutarCurso({ argumentos: ['Tema'], raizContenido: copia() })).rejects.toThrow(/proveedor/);
   });
 });
 
@@ -486,5 +476,67 @@ describe('scripts/curso.mjs', () => {
     const r = spawnSync(process.execPath, ['scripts/curso.mjs'], { encoding: 'utf8' });
     expect(r.status).toBe(1);
     expect(r.stderr).toContain('uso: node scripts/curso.mjs');
+  });
+
+  it('una pieza con respuesta inválida se salta con aviso y no aborta el comando', async () => {
+    const avisos: string[] = [];
+    const original = console.warn;
+    console.warn = (m: string) => { avisos.push(String(m)); };
+    try {
+      const { modelo } = falso(propuestaBuena);
+      // Se rompe la extracción de una pieza que la propuesta no cita.
+      const intermitente: Modelo = { completar: (i, e) => (JSON.parse(e).pieza?.id === 'usuarios' ? Promise.resolve('no es json') : modelo.completar(i, e)) };
+      await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: cache(), modelo: intermitente });
+    } finally {
+      console.warn = original;
+    }
+    expect(avisos.some((a) => /respuesta del modelo no válida/.test(a))).toBe(true);
+  });
+
+  it('la extracción limita a 15 entidades y descarta relaciones rotas', async () => {
+    const entidades = Array.from({ length: 20 }, (_, i) => `E${i}`);
+    const modelo: Modelo = { completar: async () => JSON.stringify({ entidades, relaciones: [['E0', 'E1'], ['E0'], 'x', ['E2', 3]] }) };
+    const { extraer } = await import('../src/lib/curso/extractor');
+    const r = await extraer(modelo, { id: 'p', datos: { titulo: 'T' }, cuerpo: '' } as never);
+    expect(r.entidades).toHaveLength(15);
+    expect(r.relaciones).toEqual([['E0', 'E1']]);
+  });
+
+  it('las relaciones también tienen tope, porque cada extremo es un nodo del grafo', async () => {
+    const relaciones = Array.from({ length: 50 }, (_, i) => [`A${i}`, `B${i}`]);
+    const modelo: Modelo = { completar: async () => JSON.stringify({ entidades: ['A0'], relaciones }) };
+    const { extraer } = await import('../src/lib/curso/extractor');
+    const r = await extraer(modelo, { id: 'p', datos: { titulo: 'T' }, cuerpo: '' } as never);
+    expect(r.relaciones).toHaveLength(30);
+  });
+
+  it('una extracción guardada con más de 15 entidades se recorta al reutilizarla', async () => {
+    const { extraerIncremental } = await import('../src/lib/curso/indice');
+    const { huella } = await import('../src/lib/curso/extractor');
+    const pieza = { id: 'p', datos: { titulo: 'T' }, cuerpo: '' } as never;
+    const dir = cache();
+    mkdirSync(dir, { recursive: true });
+    const entidades = Array.from({ length: 20 }, (_, i) => `E${i}`);
+    writeFileSync(join(dir, 'indice.json'), JSON.stringify({ piezas: { p: { huella: huella(pieza), entidades, relaciones: Array.from({ length: 50 }, (_, i) => [`A${i}`, `B${i}`]) } } }));
+    const sinLlamadas: Modelo = { completar: () => Promise.reject(new Error('no debía llamarse')) };
+    const r = (await extraerIncremental(sinLlamadas, [pieza], dir)).get('p')!;
+    expect(r.entidades).toHaveLength(15);
+    expect(r.relaciones).toHaveLength(30);
+  });
+
+  it('informa del progreso solo de las piezas que llaman al modelo', async () => {
+    const lineas: string[] = [];
+    const original = console.error;
+    console.error = (m: string) => { lineas.push(String(m)); };
+    try {
+      const dir = cache();
+      await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: dir, modelo: falso(propuestaBuena).modelo });
+      expect(lineas.filter((l) => /^extrayendo \d+\/\d+: /.test(l))).toHaveLength(4);
+      lineas.length = 0;
+      await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: dir, modelo: falso(propuestaBuena).modelo });
+      expect(lineas.filter((l) => /^extrayendo/.test(l))).toHaveLength(0);
+    } finally {
+      console.error = original;
+    }
   });
 });

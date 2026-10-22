@@ -157,3 +157,13 @@ Recuerda respetar la licencia de los apuntes: puedes adaptarlos, pero sin fines 
 - **Código de la web** (todo lo demás): [MIT](LICENSE).
 
 Los detalles están en [LICENSE](LICENSE) y en la página [Licencias y fuentes](https://kohee-dev.github.io/onyon-knight/licencias/).
+
+## Proponer un módulo con un modelo local
+
+`node scripts/curso.mjs "tema"` propone un módulo (desactivado) a partir de las piezas existentes usando un [Ollama](https://ollama.com) local. Antes hay que tenerlo en marcha (`ollama serve`) y con el modelo descargado (`ollama pull llama3.1`, unos 5 GB). No hay clave: se configura con variables de entorno opcionales. Cada pieza es una llamada al modelo y el comando va escribiendo en qué pieza está.
+
+| Variable | Por defecto |
+| --- | --- |
+| `OLLAMA_HOST` | `http://localhost:11434` |
+| `OLLAMA_MODEL` | `llama3.1` |
+| `OLLAMA_TIMEOUT_MS` | `600000` (10 min por petición) |

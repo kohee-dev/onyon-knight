@@ -3,17 +3,13 @@ import { dirname, join, resolve } from 'node:path';
 import { dump } from 'js-yaml';
 import { generarCurso, slug, type Modelo } from './generar';
 import type { Justificacion } from './grafo';
+import { modeloDesdeEntorno } from './ollama';
 
 export interface OpcionesCli {
   argumentos: string[];
   raizContenido?: string;
   dirCache?: string;
   modelo?: Modelo;
-}
-
-/** El proveedor real aún no está decidido (API de Claude o modelo local): hasta entonces el comando no puede llamar a ninguno. */
-function modeloPorDefecto(): Modelo {
-  throw new Error('no hay proveedor de modelo configurado todavía (el adaptador real está pendiente, issue #7)');
 }
 
 /** Capa fina del comando: valida el argumento, llama a generarCurso y escribe `modulos/<id>.yml` sin sobrescribir. */
@@ -26,7 +22,7 @@ export async function ejecutarCurso({ argumentos, raizContenido, dirCache, model
   const previo = join(raiz, 'modulos', `${slug(tema)}.yml`);
   if (existsSync(previo)) throw new Error(`el módulo ya existe: ${previo}`);
 
-  const { id, modulo, justificacion } = await generarCurso({ tema, raizContenido: raiz, dirCache: dirCache ?? resolve('.cache/curso'), modelo: modelo ?? modeloPorDefecto() });
+  const { id, modulo, justificacion } = await generarCurso({ tema, raizContenido: raiz, dirCache: dirCache ?? resolve('.cache/curso'), modelo: modelo ?? modeloDesdeEntorno() });
   const destino = join(raiz, 'modulos', `${id}.yml`);
   mkdirSync(dirname(destino), { recursive: true });
   // «wx»: aunque otro proceso lo cree entretanto, nunca se sobrescribe.

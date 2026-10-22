@@ -5,6 +5,9 @@ export interface Modelo {
   completar(instruccion: string, entrada: string): Promise<string>;
 }
 
+/** El modelo contestó, pero no con el JSON esperado: distinto de un fallo del proveedor. */
+export class RespuestaNoValida extends Error {}
+
 /** Interpreta la respuesta del modelo como JSON del esquema dado; si no cuadra, falla con el texto recibido. */
 export function leerJson<T extends z.ZodType>(texto: string, esquema: T, esperado: string): z.output<T> {
   try {
@@ -12,18 +15,11 @@ export function leerJson<T extends z.ZodType>(texto: string, esquema: T, esperad
     const bloque = /^```(?:json)?\s*([\s\S]*?)\s*```$/i.exec(texto.trim());
     return esquema.parse(JSON.parse(bloque ? bloque[1] : texto));
   } catch {
-    throw new Error(`respuesta del modelo no válida (se esperaba JSON con ${esperado}): ${texto.slice(0, 200)}`);
+    throw new RespuestaNoValida(`respuesta del modelo no válida (se esperaba JSON con ${esperado}): ${texto.slice(0, 200)}`);
   }
 }
 
-/** La clave de API del proveedor no está en la variable de entorno esperada. */
-export class ClaveAusente extends Error {
-  constructor(readonly variable: string) {
-    super(`falta la clave de API: define la variable de entorno ${variable} y vuelve a ejecutar el comando`);
-  }
-}
-
-/** Texto de un rechazo cualquiera. Un objeto que no es un Error no se vuelca entero: podría llevar cabeceras o la clave. */
+/** Texto de un rechazo cualquiera. Un objeto que no es un Error no se vuelca entero: podría llevar cabeceras o credenciales. */
 function detalle(e: unknown): string {
   try {
     if (e instanceof Error) return e.message;
@@ -48,8 +44,7 @@ export function conErroresClaros(modelo: Modelo): Modelo {
       try {
         return await modelo.completar(instruccion, entrada);
       } catch (e) {
-        if (e instanceof ClaveAusente) throw e;
-        throw new Error(`el proveedor del modelo ha fallado (${detalle(e)}); comprueba la conexión, la cuota y la clave, y vuelve a intentarlo`, { cause: e });
+        throw new Error(`el proveedor del modelo ha fallado (${detalle(e)}); comprueba que el proveedor está accesible y configurado, y vuelve a intentarlo`, { cause: e });
       }
     },
   };
