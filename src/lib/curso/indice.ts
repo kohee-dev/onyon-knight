@@ -34,10 +34,12 @@ export async function extraerIncremental(modelo: Modelo, piezas: PiezaFuente[], 
     writeFileSync(temporal, JSON.stringify({ piezas: entradas }, null, 2) + '\n', 'utf8');
     renameSync(temporal, ruta);
   };
-  for (const pieza of piezas) {
+  for (const [i, pieza] of piezas.entries()) {
     const actual = huella(pieza);
     const guardada = previo[pieza.id];
     const vigente = guardada?.huella === actual;
+    // Una ejecución real tarda minutos por pieza: sin esta línea no se ve en cuál va ni cuál se cuelga.
+    if (!vigente) console.error(`extrayendo ${i + 1}/${piezas.length}: ${pieza.id}`);
     let extraccion;
     try {
       extraccion = vigente ? limitar({ entidades: guardada.entidades, relaciones: guardada.relaciones }) : await extraer(modelo, pieza);

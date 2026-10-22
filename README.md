@@ -160,7 +160,7 @@ Los detalles están en [LICENSE](LICENSE) y en la página [Licencias y fuentes](
 
 ## Proponer un módulo con un modelo local
 
-`node scripts/curso.mjs "tema"` propone un módulo (desactivado) a partir de las piezas existentes usando un [Ollama](https://ollama.com) local. No hay clave: se configura con variables de entorno opcionales.
+`node scripts/curso.mjs "tema"` propone un módulo (desactivado) a partir de las piezas existentes usando un [Ollama](https://ollama.com) local. Antes hay que tenerlo en marcha (`ollama serve`) y con el modelo descargado (`ollama pull llama3.1`, unos 5 GB). No hay clave: se configura con variables de entorno opcionales. Cada pieza es una llamada al modelo y el comando va escribiendo en qué pieza está.
 
 | Variable | Por defecto |
 | --- | --- |

@@ -523,4 +523,20 @@ describe('scripts/curso.mjs', () => {
     expect(r.entidades).toHaveLength(15);
     expect(r.relaciones).toHaveLength(30);
   });
+
+  it('informa del progreso solo de las piezas que llaman al modelo', async () => {
+    const lineas: string[] = [];
+    const original = console.error;
+    console.error = (m: string) => { lineas.push(String(m)); };
+    try {
+      const dir = cache();
+      await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: dir, modelo: falso(propuestaBuena).modelo });
+      expect(lineas.filter((l) => /^extrayendo \d+\/\d+: /.test(l))).toHaveLength(4);
+      lineas.length = 0;
+      await generarCurso({ tema: 'Tema', raizContenido: FIXTURES, dirCache: dir, modelo: falso(propuestaBuena).modelo });
+      expect(lineas.filter((l) => /^extrayendo/.test(l))).toHaveLength(0);
+    } finally {
+      console.error = original;
+    }
+  });
 });
