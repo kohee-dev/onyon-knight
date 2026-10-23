@@ -9,90 +9,86 @@ fuentes:
 ---
 
 ::: aviso
-Para esta actividad trabajamos con estas reglas:
+Antes de empezar, cuatro normas del taller:
 
-+ Trabajas **en pareja**. Cada equipo del aula lo comparten **dos parejas**.
-+ El docente decide cuándo se enchufa un equipo. **Nadie enchufa ni enciende nada por su cuenta.**
-+ No abrimos la fuente de alimentación ni medimos ninguna conexión eléctrica.
-+ Si no sabes cómo se hace algo, **para y pregunta**. Forzar una pieza cuesta más que preguntar.
-+ Apunta lo que no entiendas del registro de la otra pareja: lo usarás en la puesta en común.
++ Trabajas **en pareja**, y cada equipo del aula lo comparten **dos parejas**.
++ Nadie enchufa ni enciende nada por su cuenta: eso lo decide el docente.
++ La fuente de alimentación no se abre, y tampoco se mide nada eléctrico.
++ Si dudas, para y pregunta. Forzar una pieza sale mucho más caro que una pregunta.
 :::
 
 # El encargo
 
-Acabas de entrar como **técnico de apoyo** en *Reparaciones Cobre y Tuerca*, un pequeño taller de informática. El taller trabaja con dos turnos: por la mañana desmonta y diagnostica el equipo de la clientela, y por la tarde lo deja montado y probado.
+Acabas de entrar a trabajar en *Reparaciones Cobre y Tuerca*, un taller de informática pequeño donde se trabaja a turnos. Por la mañana se desmonta y se diagnostica el equipo de la clientela. Por la tarde se deja montado y probado.
 
-Hoy el relevo no ha ido bien. La técnica de la mañana tuvo que irse corriendo y encontrarás un sobremesa **a medio abrir** y una nota en la mesa:
+Hoy el relevo ha salido fatal. Quien estaba de mañana tuvo que irse corriendo, y lo único que ha dejado es un sobremesa abierto a medias y una nota en la mesa:
 
-> *"Perdona las prisas. Está todo en la bandeja y en el móvil... creo. Cualquier duda, pregúntale a quien esté de turno."*
+> *"Perdona las prisas. Está todo en la bandeja y en el móvil... creo. Si tienes dudas, pregunta a quien esté de turno."*
 
-Nadie de la mañana está localizable y la clienta viene a recogerlo a las siete.
+Nadie de la mañana contesta al teléfono, y la clienta viene a recogerlo a las siete.
 
-Tu trabajo tiene dos caras, y las vivirás las dos:
-
-1. Como **técnico de mañana**, desmontas un equipo y dejas un **registro** tan bueno que otra persona pueda remontarlo sin hablar contigo.
-2. Como **técnico de tarde**, remontas el equipo de otra pareja usando **solo su registro**, y compruebas que funciona.
-
-Si el registro es bueno, el equipo vuelve a arrancar. Si no lo es, lo notarás en tus manos.
+Vas a vivir las dos caras de ese relevo. En el **turno de mañana** desmontas un equipo y dejas un registro tan bueno que cualquiera podría remontarlo sin hablar contigo. En el **turno de tarde** remontas el equipo de otra pareja usando solo lo que te ha dejado. Si el registro es bueno, el equipo vuelve a arrancar. Si no lo es, lo vas a notar enseguida con las manos.
 
 # Conocimientos previos
 
-- Las herramientas básicas de montaje y para qué sirve cada una.
-- El procedimiento de desconexión: **apagar no es lo mismo que desconectar**.
-- Qué es la protección frente a la electricidad estática y cómo se aplica en el puesto de trabajo.
+Para esta práctica te hace falta saber:
+
+- Qué herramientas se usan para montar y para qué sirve cada una.
+- Que **apagar no es lo mismo que desconectar**.
+- Cómo protegerte de la electricidad estática en el puesto de trabajo.
 - Reconocer las partes de un sobremesa: caja, fuente, placa base, RAM, almacenamiento, tarjetas y ventiladores.
 - Qué son las **cabeceras** de la placa y para qué sirven POWER SW, RESET SW, HDD LED, CPU_FAN y los USB frontales.
 
-# Cómo está organizada la sesión
+# Cómo va la jornada
 
-| Fase | Qué hacéis | Tiempo orientativo |
+| Momento | Qué hacéis | Tiempo orientativo |
 | --- | --- | --- |
-| 0. Preparar el puesto | Protocolo de desconexión y revisión de la mesa | 20 min |
-| 1. Ronda 1 | La pareja A desmonta y registra; la pareja B remonta; A audita | 90 min |
-| 2. Mejora la hoja | Las dos parejas mejoran la plantilla | 20 min |
-| 3. Ronda 2 | Se cambian los papeles | 90 min |
-| 4. Puesta en común | Qué registros funcionaron mejor y por qué | 20 min |
+| Antes de empezar | Desconectar el equipo y preparar la mesa | 20 min |
+| Primera ronda | La pareja A hace el turno de mañana y la pareja B el de tarde | 90 min |
+| Cambio de turno | Mejoráis juntas la hoja de registro | 20 min |
+| Segunda ronda | Cambiáis los papeles: B hace la mañana y A la tarde | 90 min |
+| Puesta en común | Contáis qué ha funcionado y qué no | 20 min |
 
-Dentro de cada equipo del aula hay una **pareja A** y una **pareja B**. En la ronda 1, A desmonta y B remonta. En la ronda 2 es al revés.
+# Antes de empezar
 
-# Parte 0. Prepara el puesto
+## Apagar y desconectar
 
-Antes de tocar el equipo, repasa el procedimiento. Un compañero dicta los pasos en voz alta y el otro los ejecuta; el docente solo marca los que se salten.
+Antes de tocar nada, repasad el procedimiento en voz alta. Una persona dicta los pasos y la otra los hace. El docente solo interviene si se salta alguno.
 
 ::: ejercicio
-**E1. Apagar y desconectar.** Con el docente delante, sigue este orden y marca cada paso:
+**E1. Apagar y desconectar.** Con el docente delante, sigue este orden y ve marcando cada paso:
 
-1. Apaga el equipo y comprueba que nada queda funcionando.
-2. Desconecta el cable de alimentación de la red y deja el cable fuera de la zona de trabajo.
-3. Coloca la protección antiestática o toca una parte metálica de la caja antes de manipular piezas.
-4. Espera a que el docente confirme que puedes empezar.
+1. Apaga el equipo y comprueba que no queda nada funcionando.
+2. Desconecta el cable de alimentación de la red y déjalo lejos de la zona de trabajo.
+3. Ponte la protección antiestática, o toca una parte metálica de la caja antes de manipular piezas.
+4. Espera a que el docente te diga que puedes empezar.
 :::
 
 ::: aviso
-**No pulses botones para «comprobar» si sigue habiendo corriente ni toques conductores.** El procedimiento lo marca el docente.
+No pulses botones para «comprobar» si todavía hay corriente, ni toques conductores. Eso lo gestiona el docente.
 :::
+
+## Revisar la mesa
 
 ::: ejercicio
-**E2. Revisa tu mesa.** Mira tu puesto de trabajo y apunta qué cambiarías antes de empezar. Fíjate, al menos, en:
+**E2. ¿Cómo está tu mesa?** Echa un vistazo a tu puesto y apunta qué cambiarías antes de empezar. Fíjate, al menos, en:
 
-- Bebidas o comida cerca.
-- Tornillos sueltos o mezclados.
-- Herramientas deterioradas.
-- Cables cruzando una zona de paso.
-- Espacio para dejar la bandeja y las piezas.
+- Si hay bebida o comida cerca.
+- Si hay tornillos sueltos o mezclados.
+- Si alguna herramienta está en mal estado.
+- Si algún cable cruza una zona de paso.
+- Si hay sitio para la bandeja y las piezas.
 :::
 
-Prepara también la **bandeja de tornillos**: una bandeja dividida (o varios vasitos) y etiquetas. Cada hueco será para los tornillos de **una procedencia** (por ejemplo, «caja», «placa», «disco 1»).
+Prepara también la **bandeja de tornillos**: una bandeja dividida, o varios vasitos con etiquetas. Cada hueco es para los tornillos de **una procedencia**, por ejemplo «caja», «placa» o «disco 1».
 
-# Parte 1. Ronda 1
+# Turno de mañana: desmontar y dejar el registro
 
-En la ronda 1, la **pareja A** es la de la mañana y la **pareja B** es la de la tarde.
+En la primera ronda, el turno de mañana lo hace la **pareja A**. Mientras desmontáis, la **pareja B no mira**: se va a otra mesa, lee el manual de la placa (o el de un modelo parecido) y repasa la lista de verificación del turno de tarde. Así descubriréis lo que pasa cuando alguien tiene que remontar sin haber visto el desmontaje.
 
-Mientras la pareja A desmonta, **la pareja B no mira**. Se va a otra mesa y se prepara: lee el manual de la placa de su equipo (o el de un modelo parecido) y repasa la lista de verificación del apartado 1.4. Así comprobaréis qué pasa cuando alguien tiene que remontar sin haber visto el desmontaje.
+## La hoja de registro
 
-## 1.1. La hoja de registro
-
-La pareja A registra el desmontaje en esta hoja. Es una plantilla **mínima**: la mejoraréis después.
+Vais a anotar todo en esta hoja. Es una plantilla **mínima**: después la mejoraréis.
 
 | Paso | Pieza o cable | Foto (número) | Tornillos (cuántos y de dónde) | Dónde va (destino o posición) |
 | --- | --- | --- | --- | --- |
@@ -102,38 +98,37 @@ La pareja A registra el desmontaje en esta hoja. Es una plantilla **mínima**: l
 | 4 | | | | |
 | 5 | | | | |
 
-Añade las filas que necesites. Haz **una foto** de cada paso con el móvil y apunta su número.
+Añade las filas que te hagan falta. En cada paso haz una **foto con el móvil** y apunta su número en la hoja.
 
 ::: tip
-Haz la foto **antes** de quitar la pieza o el cable, y otra después si hace falta. Una foto desde lejos y una de cerca suelen ser mejores que una sola.
+Haz la foto **antes** de quitar la pieza o el cable. A veces una desde lejos y otra de cerca valen más que una sola.
 :::
 
-## 1.2. Desmonta y registra (pareja A)
+## Desmontar
 
-Desmonta el equipo con estas reglas:
+Estas son las reglas del desmontaje:
 
-- Se retiran los **cables**, la **RAM**, los **discos** y las **tarjetas**. Los cables de la placa, **incluido el del ventilador de la CPU**, se desconectan.
-- **La CPU y el disipador se quedan montados.** La placa se queda en la caja.
-- La **fuente se queda fija en la caja**. Solo se desconectan sus cables de la placa y de los dispositivos. **No se abre.**
-- Los tornillos van a la bandeja, **separados por procedencia**.
-- No tires de los cables: sujeta el **conector**, no el cable.
-- Cuenta los tornillos de cada procedencia y apúntalos en la hoja.
+- Retira los cables, la RAM, los discos y las tarjetas. Los cables de la placa se desconectan todos, también el del ventilador de la CPU.
+- La CPU y el disipador se quedan montados, y la placa se queda en la caja.
+- La fuente también se queda fija en la caja. Solo desconectas sus cables de la placa y de los dispositivos, y **no se abre**.
+- Los tornillos van a la bandeja, separados por procedencia, y cuentas cuántos hay de cada una.
+- Cuando desconectes algo, sujeta el **conector** y no tires del cable.
 
-Cuando termines, deja la **hoja**, las **fotos** y la **bandeja** en la mesa de la pareja B y **no digas nada más**.
+Cuando termines, deja la hoja, las fotos y la bandeja en la mesa de la otra pareja y **no digas nada más**.
 
 ::: ejercicio
-**E3. Un registro que no necesite explicación.** Antes de entregarlo, léelo como si no hubieras visto el equipo. ¿Sabrías dónde va cada cable? ¿Y de qué pieza es cada tornillo? Corrígelo si no.
+**E3. Léelo como si no hubieras estado.** Antes de entregarlo, lee tu registro como si nunca hubieras visto el equipo. ¿Sabrías dónde va cada cable? ¿Y de qué pieza es cada tornillo? Si no, corrígelo.
 :::
 
-## 1.3. Remonta con la hoja (pareja B)
+# Turno de tarde: remontar con lo que hay
 
-La pareja B vuelve a la mesa y remonta el equipo usando **solo la hoja, las fotos y la bandeja**. La pareja A no puede ayudar, aunque vea que se equivocan.
+Ahora la **pareja B** vuelve a la mesa y hace el turno de tarde. Os toca remontar el equipo usando **solo la hoja, las fotos y la bandeja**. La pareja A no puede ayudar, aunque os vea equivocaros.
 
-Mientras remontáis, apuntad en un papel aparte **cada vez que algo no esté claro**: «qué cable es este», «de qué pieza es este tornillo», «en qué orden iba». Esa lista es oro para la fase de mejora.
+Mientras remontáis, apuntad en un papel aparte **cada vez que algo no se entienda**: «qué cable es este», «de qué pieza es este tornillo», «en qué orden iba». Ese papel os servirá mucho en el cambio de turno.
 
-## 1.4. Audita y cierra (pareja A)
+## La revisión de la pareja de mañana
 
-La pareja A revisa el remontaje **sin tocar nada**. Rellena esta lista de verificación con lo que ve. Si algún criterio falla, **lo apuntáis** y la pareja B lo corrige.
+Cuando B termina, la pareja A revisa el remontaje **sin tocar nada**. Rellenad juntas esta lista con lo que veis. Si algo falla, lo apuntáis y B lo corrige.
 
 | Grupo | Criterio | ¿Cumple? | Observaciones |
 | --- | --- | --- | --- |
@@ -145,22 +140,22 @@ La pareja A revisa el remontaje **sin tocar nada**. Rellena esta lista de verifi
 | Cables | Los cables de alimentación de la placa están conectados | | |
 | Ventiladores | El cable del ventilador de la CPU está en la cabecera CPU_FAN | | |
 | Memoria | Cada módulo de RAM está en su ranura y encajado hasta el fondo | | |
-| Panel frontal | Los cables del panel frontal están en su cabecera, con la posición correcta | | |
+| Panel frontal | Los cables del panel frontal están en su cabecera, en la posición correcta | | |
 | Panel frontal | Los USB y el audio frontales no están intercambiados | | |
-| Almacenamiento | Los discos están sujetos y con sus cables de datos y de alimentación | | |
-| Puesto | No quedan herramientas dentro de la caja | | |
+| Almacenamiento | Los discos están sujetos y tienen sus cables de datos y de alimentación | | |
+| Puesto | No hay herramientas olvidadas dentro de la caja | | |
 
 ::: nota
-**La RAM debe encajar con un «clic» en los dos extremos.** Si un lado queda levantado, el módulo no está bien sentado. Pulsa de forma pareja y sin fuerza excesiva. Si no entra, para y comprueba la muesca antes de volver a intentarlo.
+La RAM tiene que encajar con un «clic» en los dos extremos. Si un lado se queda levantado, el módulo no está bien sentado. Presiona de forma pareja y sin fuerza excesiva. Y si no entra, para y mira primero la muesca.
 :::
 
 ::: aviso
-**La cabecera USB 2.0 y la de audio se parecen mucho.** Lee el nombre impreso en la placa o mira el manual antes de dar por buena la conexión.
+La cabecera USB 2.0 y la de audio se parecen muchísimo. Lee el nombre que lleva impreso la placa o consulta el manual antes de darlas por buenas.
 :::
 
-### El cuadre de tornillos
+## El cuadre de tornillos
 
-Antes de cerrar la caja, haced el **cuadre**: los tornillos que **salieron** (los de la hoja) deben ser los que **entraron**.
+Antes de cerrar la caja toca hacer cuentas: los tornillos que **salieron** (los de la hoja) tienen que ser los mismos que **entraron**.
 
 | Procedencia | Salieron | Entraron | ¿Cuadra? |
 | --- | --- | --- | --- |
@@ -168,58 +163,58 @@ Antes de cerrar la caja, haced el **cuadre**: los tornillos que **salieron** (lo
 | | | | |
 | | | | |
 
-Si no cuadra, **buscad antes de cerrar**. Un tornillo suelto dentro de la caja puede dañar una pieza.
+Si no cuadra, buscad **antes de cerrar**. Un tornillo suelto dentro de la caja puede estropear una pieza.
 
-### El encendido de prueba
+## El encendido de prueba
 
-Cuando todo esté revisado, **cerrad la caja**. Solo entonces el **docente** enchufa el equipo y lo enciende **con la caja cerrada**.
+Cuando todo esté revisado, cerrad la caja. Es entonces cuando el **docente** enchufa el equipo y lo enciende, siempre con la caja cerrada.
 
-Se comprueba, nada más, que el equipo **arranca** y que **reconoce lo montado** (por ejemplo, la memoria y los discos en el SETUP).
+Lo único que se comprueba es que el equipo **arranca** y que **reconoce lo que habéis montado**, por ejemplo la memoria y los discos desde el SETUP.
 
 ::: aviso
-**Si el equipo no arranca, no investigues con él enchufado.** Apágalo, desconéctalo de la red, espera las indicaciones del docente y vuelve a abrir la caja. No se localiza una avería con el equipo alimentado.
+Si el equipo no arranca, no investigues con él enchufado. Apágalo, desconéctalo de la red, espera a que el docente te diga qué hacer y solo entonces vuelve a abrir la caja. Una avería no se busca con el equipo alimentado.
 :::
 
-# Parte 2. Mejora la hoja
+# Cambio de turno: mejorad la hoja
 
-Las dos parejas juntas, con el papel donde apuntasteis las dudas de la ronda 1:
+Ahora las dos parejas juntas, con el papel de dudas que apuntó la pareja B.
 
 ::: ejercicio
-**E4. Mejora la plantilla.**
+**E4. Mejorad la plantilla.**
 
-1. Mirad las dudas que apuntó la pareja B. ¿Qué información le faltaba en la hoja?
-2. Añadid **columnas o instrucciones** a la plantilla para que no vuelva a faltar. Ejemplos: «orientación del conector», «número de cable», «cuál es la ranura», «qué foto lo muestra».
-3. Decidid si cambiaríais el orden de las columnas o añadiríais una marca de comprobación.
-4. Escribid la plantilla mejorada en limpio. La usará la pareja que desmonte en la ronda 2.
+1. Repasad las dudas de B. ¿Qué información no estaba en la hoja y habría ahorrado tiempo?
+2. Añadid a la plantilla **columnas o instrucciones** para que no vuelva a faltar. Por ejemplo: «orientación del conector», «número de cable», «cuál es la ranura» o «qué foto lo muestra».
+3. Decidid si cambiaríais el orden de las columnas o si añadiríais una casilla de «comprobado».
+4. Pasad la plantilla mejorada a limpio. La usará la pareja que desmonte en la segunda ronda.
 :::
 
-# Parte 3. Ronda 2
+# Segunda ronda: cambiamos de turno
 
-Se cambian los papeles. Ahora la **pareja B** es la de la mañana y la **pareja A** es la de la tarde.
+Ahora le toca el turno de mañana a la **pareja B** y el de tarde a la **pareja A**.
 
-1. B desmonta y registra **con la plantilla mejorada**. A no mira y se prepara en otra mesa.
+1. B desmonta y registra con la plantilla mejorada. A no mira y se prepara en otra mesa.
 2. A remonta usando solo la hoja de B.
-3. B audita con la lista de verificación del apartado 1.4.
-4. Se hace el cuadre de tornillos y, con la caja cerrada, el encendido de prueba con el docente.
+3. B revisa el remontaje con la lista de verificación.
+4. Hacéis el cuadre de tornillos y, con la caja cerrada, el encendido de prueba con el docente.
 
 ::: nota
-Si el equipo ya está montado de la ronda 1, empezad desde el procedimiento de desconexión de la parte 0. **Nunca deis el equipo por apagado sin desconectarlo.**
+Si el equipo ya está montado de la primera ronda, empezad otra vez por **apagar y desconectar**. Un equipo apagado no es lo mismo que un equipo desconectado.
 :::
 
-# Parte 4. Puesta en común
+# Puesta en común
 
-Con todo el grupo:
+Para cerrar, hablamos todos juntos:
 
-- ¿Qué registros han funcionado mejor? ¿Qué tenían en común?
-- ¿Qué dudas se repitieron entre las distintas parejas?
-- ¿Qué fallos detectó la lista de verificación que nadie había visto?
-- ¿Qué cambiaríais de la hoja y de la lista antes de usarlas en un taller real?
+- ¿Qué registros han funcionado mejor y qué tenían en común?
+- ¿Qué dudas se han repetido entre las distintas parejas?
+- ¿Qué fallos ha detectado la lista de verificación que no habíais visto?
+- Si esto fuera un taller de verdad, ¿qué cambiaríais de la hoja y de la lista antes de usarlas el lunes?
 
 # Entrega
 
 Cada pareja entrega:
 
-1. La **hoja de registro** que escribió al desmontar (con sus fotos).
-2. La **plantilla mejorada** de la parte 2.
-3. La **lista de verificación** que rellenó al auditar, con el cuadre de tornillos.
-4. **Tres frases** sobre qué cambiaríais en la hoja o en la forma de trabajar después de esta sesión.
+1. La **hoja de registro** que escribió al desmontar, con sus fotos.
+2. La **plantilla mejorada** del cambio de turno.
+3. La **lista de verificación** que rellenó al revisar, junto con el cuadre de tornillos.
+4. **Tres frases** sobre qué cambiaríais en la hoja o en vuestra forma de trabajar después de esta sesión.
