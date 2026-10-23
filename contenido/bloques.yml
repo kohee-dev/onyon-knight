@@ -34,6 +34,9 @@ mm:
   microinformatica:
     tema: hardware
     dificultad: basico
+  montaje:
+    tema: hardware
+    dificultad: basico
 psp:
   multihilo:
     tema: hilos

@@ -10,3 +10,6 @@ unidades:
   - id: ut2
     titulo: Componentes de sistemas microinformáticos
     piezas: [componentes-sistemas-microinformaticos]
+  - id: ut3
+    titulo: Montaje y desmontaje de sobremesas
+    piezas: [remontaje-relevo-taller]
