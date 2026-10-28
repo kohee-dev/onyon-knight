@@ -79,7 +79,7 @@ read -p "Edad: " edad
 echo "$nombre tiene $edad años"
 ```
 
-Los fallos: falta el espacio tras las comillas del primer mensaje (`nombre` se pegaba al texto), el mensaje del segundo `read` lleva un espacio y debe ir entre comillas (sin ellas, `Tu` es el mensaje y `edad:` un nombre de variable inválido), y el `echo` usaba `$nom` en vez de `$nombre`.
+Los fallos: falta el espacio tras las comillas del primer mensaje (el mensaje pasaba a ser `Nombre: nombre` y, al no haber variable, lo escrito se guardaba en `REPLY`, así que `$nombre` quedaba vacía), el mensaje del segundo `read` lleva un espacio y debe ir entre comillas (sin ellas, `Tu` es el mensaje y `edad:` un nombre de variable inválido), y el `echo` usaba `$nom` en vez de `$nombre`.
 :::
 
 ### 4. Rellena los huecos

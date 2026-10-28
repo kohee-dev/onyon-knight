@@ -16,7 +16,7 @@ Crea un fichero `hola.sh` con este contenido:
 echo "Hola, mundo"
 ```
 
-- La primera línea, `#!/bin/bash`, indica qué programa ejecuta el script. Va siempre la primera y sin espacios.
+- La primera línea, `#!/bin/bash`, indica qué programa ejecuta el script. Va siempre en la primera línea; por costumbre se escribe pegado, sin espacios.
 - `echo` escribe en pantalla el texto que le pases.
 - Una línea que empieza por `#` es un **comentario**: bash la ignora. Sirve para explicar el script a quien lo lea. Un `#` también comenta el resto de una línea.
 - Cualquier orden que uses en la terminal (`date`, `pwd`, `whoami`, `ls`…) funciona igual dentro de un script.
@@ -135,7 +135,7 @@ Escribe un script que:
 ```bash
 #!/bin/bash
 # Saluda, muestra la fecha y lista la carpeta actual
-echo "Hola, soy Alejandro"
+echo "Hola, soy Ana"
 date
 ls
 ```
