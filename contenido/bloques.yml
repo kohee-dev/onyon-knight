@@ -66,6 +66,7 @@ som:
     tema: linea-de-comandos
     dificultad: basico
     piezas:
+      bash-funciones-arrays: intermedio
       bash-ficheros-csv: intermedio
       bash-filtros: intermedio
       bash-bucles: intermedio
