@@ -65,6 +65,8 @@ som:
   bash:
     tema: linea-de-comandos
     dificultad: basico
+    piezas:
+      bash-if: intermedio
   linux:
     tema: sistemas-operativos
     dificultad: intermedio
