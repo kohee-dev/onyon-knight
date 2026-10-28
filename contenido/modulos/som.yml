@@ -9,7 +9,7 @@ unidades:
     piezas: [intro-sistemas-operativos]
   - id: ut2
     titulo: Scripts en bash
-    piezas: [bash-echo-comentarios, bash-variables, bash-read, bash-parametros, bash-aritmetica, bash-if, bash-case-salida, bash-bucles]
+    piezas: [bash-echo-comentarios, bash-variables, bash-read, bash-parametros, bash-aritmetica, bash-if, bash-case-salida, bash-bucles, bash-filtros]
   - id: ut4
     titulo: Linux
     piezas: [anil]

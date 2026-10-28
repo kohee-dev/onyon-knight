@@ -66,6 +66,7 @@ som:
     tema: linea-de-comandos
     dificultad: basico
     piezas:
+      bash-filtros: intermedio
       bash-bucles: intermedio
       bash-case-salida: intermedio
       bash-if: intermedio
