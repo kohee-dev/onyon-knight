@@ -21,12 +21,20 @@ echo "Hola, mundo"
 - Una línea que empieza por `#` es un **comentario**: bash la ignora. Sirve para explicar el script a quien lo lea. Un `#` también comenta el resto de una línea.
 - Cualquier orden que uses en la terminal (`date`, `pwd`, `whoami`, `ls`…) funciona igual dentro de un script.
 
-Para ejecutarlo, primero se le da permiso de ejecución y luego se lanza con su ruta:
+Hay dos formas de ejecutarlo:
+
+```bash
+bash hola.sh
+```
+
+Se lo pasas como argumento al programa `bash`. No necesita permiso de ejecución ni que la primera línea sea `#!/bin/bash`, porque ya has elegido tú el intérprete.
 
 ```bash
 chmod +x hola.sh
 ./hola.sh
 ```
+
+Se le da permiso de ejecución una sola vez y después se lanza con su ruta. Aquí sí hace falta el `#!/bin/bash`, que es lo que dice qué intérprete lo ejecuta.
 
 Las comillas dobles conservan los espacios del texto. Sin comillas, bash separa las palabras y `echo` las escribe con un solo espacio entre ellas.
 
