@@ -7,6 +7,9 @@ unidades:
   - id: ut1
     titulo: Introducción a los sistemas operativos
     piezas: [intro-sistemas-operativos]
+  - id: ut2
+    titulo: Scripts en bash
+    piezas: [bash-echo-comentarios, bash-variables, bash-read]
   - id: ut4
     titulo: Linux
     piezas: [anil]
