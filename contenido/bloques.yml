@@ -67,6 +67,7 @@ som:
     dificultad: basico
     piezas:
       bash-funciones-arrays: intermedio
+      bash-robustez: intermedio
       bash-ficheros-csv: intermedio
       bash-filtros: intermedio
       bash-bucles: intermedio

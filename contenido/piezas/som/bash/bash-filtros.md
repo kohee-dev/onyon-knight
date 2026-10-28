@@ -1,9 +1,9 @@
 ---
-titulo: "Bash 9: redirecciones, pipes y filtros"
+titulo: "Bash 10: redirecciones, pipes y filtros"
 tipo: teoria
 ---
 
-# Bash 9: redirecciones, pipes y filtros
+# Bash 10: redirecciones, pipes y filtros
 
 Las órdenes escriben en pantalla y leen del teclado, pero ese comportamiento se puede cambiar: guardar lo que escriben en un fichero, leer de un fichero o pasar su salida a otra orden. Esta es la base para trabajar con ficheros y CSV en el bloque siguiente.
 

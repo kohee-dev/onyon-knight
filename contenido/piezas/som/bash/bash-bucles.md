@@ -1,9 +1,9 @@
 ---
-titulo: "Bash 8: bucles"
+titulo: "Bash 9: bucles"
 tipo: teoria
 ---
 
-# Bash 8: bucles
+# Bash 9: bucles
 
 Un **bucle** repite unas órdenes. Bash tiene dos principales: `for`, que recorre una lista, y `while`, que repite mientras se cumpla una condición.
 

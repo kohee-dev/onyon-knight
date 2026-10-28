@@ -1,9 +1,9 @@
 ---
-titulo: "Bash 11: funciones y arrays"
+titulo: "Bash 12: funciones y arrays"
 tipo: teoria
 ---
 
-# Bash 11: funciones y arrays
+# Bash 12: funciones y arrays
 
 Una **función** agrupa unas órdenes bajo un nombre para poder repetirlas sin copiarlas. Un **array** guarda varios valores en una sola variable.
 
