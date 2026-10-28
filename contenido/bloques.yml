@@ -62,6 +62,9 @@ sge:
     piezas:
       odoo-instalacion: basico
 som:
+  bash:
+    tema: linea-de-comandos
+    dificultad: basico
   linux:
     tema: sistemas-operativos
     dificultad: intermedio
