@@ -1,9 +1,9 @@
 ---
-titulo: "Bash 10: ficheros y CSV"
+titulo: "Bash 11: ficheros y CSV"
 tipo: teoria
 ---
 
-# Bash 10: ficheros y CSV
+# Bash 11: ficheros y CSV
 
 Un **CSV** es un fichero de texto donde cada línea es un registro y los campos se separan con una coma. Con lo que ya sabes (bucles, `if`, filtros y redirecciones) puedes leerlos y procesarlos desde un script.
 
