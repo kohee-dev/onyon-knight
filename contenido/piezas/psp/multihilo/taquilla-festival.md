@@ -47,7 +47,8 @@ Los fallos de concurrencia **dependen de la máquina**: el número de núcleos, 
 - Crear y arrancar hilos con `Thread`, y esperar a que terminen con `join()`.
 - Qué es una **condición de carrera** y una **sección crítica**.
 - `synchronized`, `wait()` y `notify()`.
-- Lo básico de `java.util.concurrent`: `ReentrantLock` y las colas bloqueantes.
+- La clase `java.util.concurrent.Semaphore`: `acquire()`, `release()` y `tryAcquire()`.
+- Qué es una cola bloqueante (`BlockingQueue`) y para qué sirve.
 
 # Por dónde empezar
 
@@ -182,7 +183,7 @@ public class Carrera {
 :::
 
 :::ejercicio[Arréglalo]
-Corrige el torno de **dos formas distintas** y compáralas: una con `synchronized` y otra con un `ReentrantLock` que bloquees y desbloquees tú. ¿Cuál te parece más fácil de leer? ¿Cuál es más fácil de usar mal? Después ejecuta el escenario cinco veces: la cuenta debe cuadrar siempre.
+Corrige el torno de **dos formas distintas** y compáralas: una con `synchronized` y otra con un `Semaphore(1)` que cojas y sueltes tú. ¿Cuál te parece más fácil de leer? ¿Cuál es más fácil de usar mal? Después ejecuta el escenario cinco veces: la cuenta debe cuadrar siempre.
 :::
 
 # Parte 2. Establecer hora de cierre
@@ -343,10 +344,10 @@ Un buen arreglo no cambia el resultado: `A + B` tiene que valer 2000 al terminar
 
 # Parte 4. Por favor, usted primero
 
-Para que lo de la parte 3 no se repita, la dirección propone un protocolo más educado. Cada traslado se queda con la llave de su torno y **intenta** coger la del otro con `tryLock()`. Si no puede, cede la suya, se lo piensa un momento y vuelve a probar. Así nadie espera para siempre y el interbloqueo es imposible. ¿Seguro que todo va a ir bien?
+Para que lo de la parte 3 no se repita, la dirección propone un protocolo más educado. Cada traslado se queda con la llave de su torno y **intenta** coger la del otro con `tryAcquire()`. Si no puede, cede la suya, se lo piensa un momento y vuelve a probar. Así nadie espera para siempre y el interbloqueo es imposible. ¿Seguro que todo va a ir bien?
 
 ```java
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
 
 /** Parte 4. Cada traslado se queda con la llave de su torno y pide la del otro; si no puede, cede. */
 public class Livelock {
@@ -354,33 +355,33 @@ public class Livelock {
     static final Contador fallidos = new Contador();
     static final Contador completados = new Contador();
 
-    static void trasladar(ReentrantLock propia, ReentrantLock otra) throws InterruptedException {
+    static void trasladar(Semaphore propia, Semaphore otra) throws InterruptedException {
         while (true) {
-            propia.lock();
+            propia.acquire();
             try {
                 Thread.sleep(100);                  // prepara el traslado
-                if (otra.tryLock()) {
+                if (otra.tryAcquire()) {
                     try {
                         completados.incrementar();
                         return;
                     } finally {
-                        otra.unlock();
+                        otra.release();
                     }
                 }
                 fallidos.incrementar();
                 Thread.sleep(50);                   // «por favor, usted primero»: se lo piensa un momento
             } finally {
-                propia.unlock();                    // cede la llave
+                propia.release();                   // cede la llave
             }
             Thread.sleep(100);                      // y vuelve a intentarlo
         }
     }
 
     static class Traslado extends Thread {
-        private final ReentrantLock propia;
-        private final ReentrantLock otra;
+        private final Semaphore propia;
+        private final Semaphore otra;
 
-        Traslado(String nombre, ReentrantLock propia, ReentrantLock otra) {
+        Traslado(String nombre, Semaphore propia, Semaphore otra) {
             super(nombre);
             this.propia = propia;
             this.otra = otra;
@@ -398,8 +399,8 @@ public class Livelock {
     }
 
     static void ejecutar() throws InterruptedException {
-        ReentrantLock llaveA = new ReentrantLock();
-        ReentrantLock llaveB = new ReentrantLock();
+        Semaphore llaveA = new Semaphore(1);
+        Semaphore llaveB = new Semaphore(1);
         new Traslado("traslado-A", llaveA, llaveB).start();
         new Traslado("traslado-B", llaveB, llaveA).start();
 
@@ -422,7 +423,7 @@ public class Livelock {
 :::
 
 :::ejercicio[Arréglalo]
-Cambia **una sola cosa** del protocolo para que los dos dejen de moverse al unísono, sin quitar el `tryLock()`. Piensa qué pasaría si cada uno esperase un tiempo distinto antes de reintentar. Comprueba, en tres ejecuciones, que los dos traslados se completan.
+Cambia **una sola cosa** del protocolo para que los dos dejen de moverse al unísono, sin quitar el `tryAcquire()`. Piensa qué pasaría si cada uno esperase un tiempo distinto antes de reintentar. Comprueba, en tres ejecuciones, que los dos traslados se completan.
 :::
 
 # Parte 5. VIP
@@ -695,7 +696,7 @@ Un informe con:
 | Parte 1. Un torno | Explica los pasos de `personas++` y un reparto de turnos que pierde gente; la cuenta cuadra en todas las ejecuciones. |
 | Parte 2. Establecer hora de cierre | Explica que el cambio no es visible para el otro hilo; usa `volatile` y razona por qué no basta para la parte 1. |
 | Parte 3. Dos tornos | Identifica en `jstack` quién espera qué y las cuatro condiciones; rompe la espera circular con un orden global. |
-| Parte 4. Por favor, usted primero | Distingue livelock de interbloqueo con la salida de `jstack`; rompe la simetría sin quitar `tryLock()`. |
+| Parte 4. Por favor, usted primero | Distingue livelock de interbloqueo con la salida de `jstack`; rompe la simetría sin quitar `tryAcquire()`. |
 | Parte 5. VIP | Demuestra con datos que el público general no se atiende; limita la ventaja del VIP sin eliminarla y propone una alternativa. |
 | Parte 6. Objetos perdidos | Muestra una secuencia en la que todos esperan; explica `notify` frente a `notifyAll` y `while` frente a `if`; delega en una cola bloqueante. |
 | Informe | Tabla completa, salidas reales antes y después, y reflexión final razonada. |
