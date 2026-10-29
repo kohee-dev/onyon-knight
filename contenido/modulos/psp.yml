@@ -9,4 +9,4 @@ unidades:
     piezas: [procesos-concurrencia, gestion-procesos-java]
   - id: ut2
     titulo: Programación multihilo
-    piezas: [problema-barbero]
+    piezas: [problema-barbero, taquilla-festival]
