@@ -32,6 +32,8 @@ flowchart LR
 
 ::: nota
 Necesitas un JDK (Java 17 o posterior), que incluye `javac` y `jstack`. Compila todos los archivos con `javac *.java` y ejecuta un escenario con `java Main carrera`, `java Main visibilidad`, `java Main interbloqueo`, `java Main livelock`, `java Main inanicion` o `java Main pedidos`.
+
+Los programas escriben con tres prefijos: `[+]` para el registro de lo que hace el programa, `[!]` para un aviso y `[X]` para un error.
 :::
 
 ::: aviso
@@ -55,14 +57,26 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String escenario = args.length > 0 ? args[0] : "";
         switch (escenario) {
-            case "carrera" -> Carrera.ejecutar();
-            case "visibilidad" -> Visibilidad.ejecutar();
-            case "interbloqueo" -> Interbloqueo.ejecutar();
-            case "livelock" -> Livelock.ejecutar();
-            case "inanicion" -> Inanicion.ejecutar();
-            case "pedidos" -> Pedidos.ejecutar();
-            default -> System.out.println(
-                "Uso: java Main carrera | visibilidad | interbloqueo | livelock | inanicion | pedidos");
+            case "carrera":
+                Carrera.ejecutar();
+                break;
+            case "visibilidad":
+                Visibilidad.ejecutar();
+                break;
+            case "interbloqueo":
+                Interbloqueo.ejecutar();
+                break;
+            case "livelock":
+                Livelock.ejecutar();
+                break;
+            case "inanicion":
+                Inanicion.ejecutar();
+                break;
+            case "pedidos":
+                Pedidos.ejecutar();
+                break;
+            default:
+                System.out.println("[!] Uso: java Main carrera | visibilidad | interbloqueo | livelock | inanicion | pedidos");
         }
     }
 }
@@ -97,29 +111,43 @@ public class Carrera {
         }
     }
 
+    static class Cajero extends Thread {
+        private final Taquilla taquilla;
+        private final int ventas;
+
+        Cajero(String nombre, Taquilla taquilla, int ventas) {
+            super(nombre);
+            this.taquilla = taquilla;
+            this.ventas = ventas;
+        }
+
+        @Override
+        public void run() {
+            for (int v = 0; v < ventas; v++) {
+                taquilla.venderEntrada();
+            }
+        }
+    }
+
     static void ejecutar() throws InterruptedException {
         final int cajeros = 8;
         final int ventasPorCajero = 100_000;
         Taquilla taquilla = new Taquilla();
 
-        Thread[] hilos = new Thread[cajeros];
+        Cajero[] hilos = new Cajero[cajeros];
         for (int i = 0; i < cajeros; i++) {
-            hilos[i] = new Thread(() -> {
-                for (int v = 0; v < ventasPorCajero; v++) {
-                    taquilla.venderEntrada();
-                }
-            }, "cajero-" + (i + 1));
+            hilos[i] = new Cajero("cajero-" + (i + 1), taquilla, ventasPorCajero);
             hilos[i].start();
         }
-        for (Thread hilo : hilos) {
+        for (Cajero hilo : hilos) {
             hilo.join();
         }
 
         int esperadas = cajeros * ventasPorCajero;
-        System.out.println("Entradas esperadas: " + esperadas);
-        System.out.println("Entradas contadas:  " + taquilla.vendidas());
+        System.out.println("[+] Entradas esperadas: " + esperadas);
+        System.out.println("[+] Entradas contadas:  " + taquilla.vendidas());
         if (taquilla.vendidas() != esperadas) {
-            System.out.println("¡ERROR! Se han perdido " + (esperadas - taquilla.vendidas()) + " ventas");
+            System.out.println("[X] Se han perdido " + (esperadas - taquilla.vendidas()) + " ventas");
         }
     }
 }
@@ -148,24 +176,34 @@ public class Visibilidad {
     private static boolean cerrada = false;
     private static long vendidas = 0;
 
-    static void ejecutar() throws InterruptedException {
-        Thread cajero = new Thread(() -> {
+    static class Cajero extends Thread {
+
+        Cajero() {
+            super("cajero");
+            setDaemon(true);
+        }
+
+        @Override
+        public void run() {
             while (!cerrada) {
                 vendidas++;
             }
-        }, "cajero");
-        cajero.setDaemon(true);
+        }
+    }
+
+    static void ejecutar() throws InterruptedException {
+        Cajero cajero = new Cajero();
         cajero.start();
 
         Thread.sleep(1000);
         cerrada = true;
-        System.out.println("[main] Taquilla cerrada. Espero al cajero...");
+        System.out.println("[+] Taquilla cerrada. Espero al cajero...");
 
         cajero.join(3000);
         if (cajero.isAlive()) {
-            System.out.println("¡ERROR! El cajero sigue vendiendo 3 segundos después del cierre");
+            System.out.println("[X] El cajero sigue vendiendo 3 segundos después del cierre");
         } else {
-            System.out.println("El cajero ha parado tras vender " + vendidas + " entradas");
+            System.out.println("[+] El cajero ha parado tras vender " + vendidas + " entradas");
         }
     }
 }
@@ -211,26 +249,35 @@ public class Interbloqueo {
         }
     }
 
-    static Thread cajero(String nombre, Taquilla origen, Taquilla destino) {
-        Thread hilo = new Thread(() -> {
+    static class Cajero extends Thread {
+        private final Taquilla origen;
+        private final Taquilla destino;
+
+        Cajero(String nombre, Taquilla origen, Taquilla destino) {
+            super(nombre);
+            this.origen = origen;
+            this.destino = destino;
+            setDaemon(true);
+        }
+
+        @Override
+        public void run() {
             try {
                 for (int i = 0; i < 100; i++) {
                     traspasar(origen, destino, 1);
                 }
-                System.out.println("[" + nombre + "] ha terminado sus traspasos");
+                System.out.println("[+] " + getName() + " ha terminado sus traspasos");
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        }, nombre);
-        hilo.setDaemon(true);
-        return hilo;
+        }
     }
 
     static void ejecutar() throws InterruptedException {
         Taquilla a = new Taquilla("A", 1000);
         Taquilla b = new Taquilla("B", 1000);
-        Thread deAaB = cajero("cajero-A-a-B", a, b);
-        Thread deBaA = cajero("cajero-B-a-A", b, a);
+        Cajero deAaB = new Cajero("cajero-A-a-B", a, b);
+        Cajero deBaA = new Cajero("cajero-B-a-A", b, a);
         deAaB.start();
         deBaA.start();
 
@@ -238,12 +285,13 @@ public class Interbloqueo {
         deAaB.join(5000);
         deBaA.join(Math.max(1, limite - System.currentTimeMillis()));
         if (deAaB.isAlive() || deBaA.isAlive()) {
-            System.out.println("¡ERROR! Llevan 5 segundos sin terminar. Proceso: " + ProcessHandle.current().pid());
-            System.out.println("Abre otra terminal y ejecuta: jstack " + ProcessHandle.current().pid());
-            System.out.println("(el programa se cierra solo en 60 segundos)");
+            long pid = ProcessHandle.current().pid();
+            System.out.println("[X] Llevan 5 segundos sin terminar");
+            System.out.println("[!] Abre otra terminal y ejecuta: jstack " + pid);
+            System.out.println("[!] El programa se cierra solo en 60 segundos");
             deAaB.join(60_000);
         } else {
-            System.out.println("Traspasos completados. A=" + a.entradas + " B=" + b.entradas);
+            System.out.println("[+] Traspasos completados. A=" + a.entradas + " B=" + b.entradas);
         }
     }
 }
@@ -309,29 +357,38 @@ public class Livelock {
         }
     }
 
-    static Thread cajero(String nombre, ReentrantLock propia, ReentrantLock otra) {
-        Thread hilo = new Thread(() -> {
+    static class Cajero extends Thread {
+        private final ReentrantLock propia;
+        private final ReentrantLock otra;
+
+        Cajero(String nombre, ReentrantLock propia, ReentrantLock otra) {
+            super(nombre);
+            this.propia = propia;
+            this.otra = otra;
+            setDaemon(true);
+        }
+
+        @Override
+        public void run() {
             try {
                 traspasar(propia, otra);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        }, nombre);
-        hilo.setDaemon(true);
-        return hilo;
+        }
     }
 
     static void ejecutar() throws InterruptedException {
         ReentrantLock llaveA = new ReentrantLock();
         ReentrantLock llaveB = new ReentrantLock();
-        cajero("cajero-A", llaveA, llaveB).start();
-        cajero("cajero-B", llaveB, llaveA).start();
+        new Cajero("cajero-A", llaveA, llaveB).start();
+        new Cajero("cajero-B", llaveB, llaveA).start();
 
         Thread.sleep(4000);
-        System.out.println("Traspasos completados: " + completados.get());
-        System.out.println("Intentos cedidos:      " + fallidos.get());
+        System.out.println("[+] Traspasos completados: " + completados.get());
+        System.out.println("[+] Intentos cedidos:      " + fallidos.get());
         if (completados.get() == 0) {
-            System.out.println("¡ERROR! Nadie está bloqueado, pero en 4 segundos no ha avanzado nadie");
+            System.out.println("[X] Nadie está bloqueado, pero en 4 segundos no ha avanzado nadie");
         }
     }
 }
@@ -366,16 +423,27 @@ public class Inanicion {
     static final AtomicInteger atendidosVip = new AtomicInteger();
     static final AtomicInteger atendidosGeneral = new AtomicInteger();
 
-    static void ejecutar() throws InterruptedException {
-        PriorityBlockingQueue<Cliente> cola = new PriorityBlockingQueue<>(11,
-            Comparator.comparing((Cliente c) -> !c.vip())     // los VIP primero
-                      .thenComparingLong(Cliente::llegada));  // y, entre iguales, por orden de llegada
+    /** Los VIP primero y, entre iguales, por orden de llegada. */
+    static class OrdenDeTurno implements Comparator<Cliente> {
+        @Override
+        public int compare(Cliente a, Cliente b) {
+            if (a.vip() != b.vip()) {
+                return a.vip() ? -1 : 1;
+            }
+            return Long.compare(a.llegada(), b.llegada());
+        }
+    }
 
-        for (int i = 1; i <= 20; i++) {
-            cola.add(new Cliente(i, false, System.nanoTime()));
+    static class LlegadasVip extends Thread {
+        private final PriorityBlockingQueue<Cliente> cola;
+
+        LlegadasVip(PriorityBlockingQueue<Cliente> cola) {
+            super("llegadas-vip");
+            this.cola = cola;
         }
 
-        Thread llegadasVip = new Thread(() -> {
+        @Override
+        public void run() {
             try {
                 for (int id = 1001; ; id++) {
                     Thread.sleep(5);                 // llega un VIP cada 5 ms
@@ -384,30 +452,54 @@ public class Inanicion {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        }, "llegadas-vip");
+        }
+    }
 
-        Thread ventanilla = new Thread(() -> {
+    static class Ventanilla extends Thread {
+        private final PriorityBlockingQueue<Cliente> cola;
+
+        Ventanilla(PriorityBlockingQueue<Cliente> cola) {
+            super("ventanilla");
+            this.cola = cola;
+        }
+
+        @Override
+        public void run() {
             try {
                 while (true) {
                     Cliente c = cola.take();
                     Thread.sleep(10);                // atender a un cliente tarda 10 ms
-                    (c.vip() ? atendidosVip : atendidosGeneral).incrementAndGet();
+                    if (c.vip()) {
+                        atendidosVip.incrementAndGet();
+                    } else {
+                        atendidosGeneral.incrementAndGet();
+                    }
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        }, "ventanilla");
+        }
+    }
 
+    static void ejecutar() throws InterruptedException {
+        PriorityBlockingQueue<Cliente> cola = new PriorityBlockingQueue<>(11, new OrdenDeTurno());
+
+        for (int i = 1; i <= 20; i++) {
+            cola.add(new Cliente(i, false, System.nanoTime()));
+        }
+
+        LlegadasVip llegadasVip = new LlegadasVip(cola);
+        Ventanilla ventanilla = new Ventanilla(cola);
         llegadasVip.start();
         ventanilla.start();
         Thread.sleep(4000);
         llegadasVip.interrupt();
         ventanilla.interrupt();
 
-        System.out.println("Atendidos VIP:     " + atendidosVip.get());
-        System.out.println("Atendidos general: " + atendidosGeneral.get() + " de 20 que esperaban desde el principio");
+        System.out.println("[+] Atendidos VIP:     " + atendidosVip.get());
+        System.out.println("[+] Atendidos general: " + atendidosGeneral.get() + " de 20 que esperaban desde el principio");
         if (atendidosGeneral.get() < 20) {
-            System.out.println("¡ERROR! Hay clientes que llevan 4 segundos esperando sin que les toque");
+            System.out.println("[X] Hay clientes que llevan 4 segundos esperando sin que les toque");
         }
     }
 }
@@ -470,35 +562,65 @@ public class Pedidos {
     static final AtomicInteger puestos = new AtomicInteger();
     static final AtomicInteger validados = new AtomicInteger();
 
+    static class Cajero extends Thread {
+        private final ColaDePedidos cola;
+        private final int pedidos;
+
+        Cajero(String nombre, ColaDePedidos cola, int pedidos) {
+            super(nombre);
+            this.cola = cola;
+            this.pedidos = pedidos;
+            setDaemon(true);
+        }
+
+        @Override
+        public void run() {
+            try {
+                for (int p = 0; p < pedidos; p++) {
+                    cola.poner(p);
+                    puestos.incrementAndGet();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    static class Validador extends Thread {
+        private final ColaDePedidos cola;
+        private final int pedidos;
+
+        Validador(String nombre, ColaDePedidos cola, int pedidos) {
+            super(nombre);
+            this.cola = cola;
+            this.pedidos = pedidos;
+            setDaemon(true);
+        }
+
+        @Override
+        public void run() {
+            try {
+                for (int p = 0; p < pedidos; p++) {
+                    cola.tomar();
+                    validados.incrementAndGet();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
     static void ejecutar() throws InterruptedException {
         final int pedidosPorHilo = 5000;
         ColaDePedidos cola = new ColaDePedidos(1);
 
-        Thread[] hilos = new Thread[4];
-        for (int i = 0; i < 2; i++) {
-            hilos[i] = new Thread(() -> {
-                try {
-                    for (int p = 0; p < pedidosPorHilo; p++) {
-                        cola.poner(p);
-                        puestos.incrementAndGet();
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }, "cajero-" + (i + 1));
-            hilos[i + 2] = new Thread(() -> {
-                try {
-                    for (int p = 0; p < pedidosPorHilo; p++) {
-                        cola.tomar();
-                        validados.incrementAndGet();
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }, "validador-" + (i + 1));
-        }
+        Thread[] hilos = {
+            new Cajero("cajero-1", cola, pedidosPorHilo),
+            new Cajero("cajero-2", cola, pedidosPorHilo),
+            new Validador("validador-1", cola, pedidosPorHilo),
+            new Validador("validador-2", cola, pedidosPorHilo)
+        };
         for (Thread hilo : hilos) {
-            hilo.setDaemon(true);
             hilo.start();
         }
 
@@ -507,10 +629,10 @@ public class Pedidos {
             hilo.join(Math.max(1, limite - System.currentTimeMillis()));
         }
 
-        System.out.println("Pedidos puestos:    " + puestos.get() + " de " + 2 * pedidosPorHilo);
-        System.out.println("Pedidos validados:  " + validados.get() + " de " + 2 * pedidosPorHilo);
+        System.out.println("[+] Pedidos puestos:   " + puestos.get() + " de " + 2 * pedidosPorHilo);
+        System.out.println("[+] Pedidos validados: " + validados.get() + " de " + 2 * pedidosPorHilo);
         if (validados.get() < 2 * pedidosPorHilo) {
-            System.out.println("¡ERROR! Se han atascado: todos esperan y nadie los despierta");
+            System.out.println("[X] Se han atascado: todos esperan y nadie los despierta");
         }
     }
 }
