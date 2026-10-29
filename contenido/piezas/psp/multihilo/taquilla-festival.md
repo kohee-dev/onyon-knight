@@ -427,37 +427,52 @@ Cambia **una sola cosa** del protocolo para que los dos dejen de moverse al uní
 
 # Parte 5. VIP
 
-En la ventanilla de acreditaciones hay una sola persona atendiendo, y los clientes VIP pasan siempre por delante del público general. Hay 20 personas del público general esperando desde el principio. Llega un VIP nuevo cada 5 ms, y atender a cualquiera tarda 10 ms.
+En la ventanilla de acreditaciones hay una sola persona atendiendo, y la regla es sencilla: mira primero la fila VIP y, solo si está vacía, pasa a la fila general. Hay 20 personas del público general esperando desde el principio. Llega un VIP nuevo cada 5 ms, y atender a cualquiera tarda 10 ms.
 
 ```java
-import java.util.Comparator;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /** Parte 5. Una sola ventanilla atiende a los VIP antes que al público general. */
 public class Inanicion {
 
-    record Cliente(int id, boolean vip, long llegada) { }
-
     static final Contador atendidosVip = new Contador();
     static final Contador atendidosGeneral = new Contador();
 
-    /** Los VIP primero y, entre iguales, por orden de llegada. */
-    static class OrdenDeTurno implements Comparator<Cliente> {
-        @Override
-        public int compare(Cliente a, Cliente b) {
-            if (a.vip() != b.vip()) {
-                return a.vip() ? -1 : 1;
+    static class Colas {
+        private final Queue<Integer> vip = new ArrayDeque<>();
+        private final Queue<Integer> general = new ArrayDeque<>();
+
+        synchronized void llegaVip(int id) {
+            vip.add(id);
+        }
+
+        synchronized void llegaGeneral(int id) {
+            general.add(id);
+        }
+
+        /** Atiende al siguiente cliente (los VIP primero). Devuelve false si no hay nadie. */
+        synchronized boolean atenderSiguiente() {
+            if (!vip.isEmpty()) {
+                vip.poll();
+                atendidosVip.incrementar();
+                return true;
             }
-            return Long.compare(a.llegada(), b.llegada());
+            if (!general.isEmpty()) {
+                general.poll();
+                atendidosGeneral.incrementar();
+                return true;
+            }
+            return false;
         }
     }
 
     static class LlegadasVip extends Thread {
-        private final PriorityBlockingQueue<Cliente> cola;
+        private final Colas colas;
 
-        LlegadasVip(PriorityBlockingQueue<Cliente> cola) {
+        LlegadasVip(Colas colas) {
             super("llegadas-vip");
-            this.cola = cola;
+            this.colas = colas;
         }
 
         @Override
@@ -465,7 +480,7 @@ public class Inanicion {
             try {
                 for (int id = 1001; ; id++) {
                     Thread.sleep(5);                 // llega un VIP cada 5 ms
-                    cola.add(new Cliente(id, true, System.nanoTime()));
+                    colas.llegaVip(id);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -474,23 +489,21 @@ public class Inanicion {
     }
 
     static class Ventanilla extends Thread {
-        private final PriorityBlockingQueue<Cliente> cola;
+        private final Colas colas;
 
-        Ventanilla(PriorityBlockingQueue<Cliente> cola) {
+        Ventanilla(Colas colas) {
             super("ventanilla");
-            this.cola = cola;
+            this.colas = colas;
         }
 
         @Override
         public void run() {
             try {
                 while (true) {
-                    Cliente c = cola.take();
-                    Thread.sleep(10);                // atender a un cliente tarda 10 ms
-                    if (c.vip()) {
-                        atendidosVip.incrementar();
+                    if (colas.atenderSiguiente()) {
+                        Thread.sleep(10);            // atender a un cliente tarda 10 ms
                     } else {
-                        atendidosGeneral.incrementar();
+                        Thread.sleep(1);             // no hay nadie: espera un momento
                     }
                 }
             } catch (InterruptedException e) {
@@ -500,14 +513,13 @@ public class Inanicion {
     }
 
     static void ejecutar() throws InterruptedException {
-        PriorityBlockingQueue<Cliente> cola = new PriorityBlockingQueue<>(11, new OrdenDeTurno());
-
+        Colas colas = new Colas();
         for (int i = 1; i <= 20; i++) {
-            cola.add(new Cliente(i, false, System.nanoTime()));
+            colas.llegaGeneral(i);
         }
 
-        LlegadasVip llegadasVip = new LlegadasVip(cola);
-        Ventanilla ventanilla = new Ventanilla(cola);
+        LlegadasVip llegadasVip = new LlegadasVip(colas);
+        Ventanilla ventanilla = new Ventanilla(colas);
         llegadasVip.start();
         ventanilla.start();
         Thread.sleep(4000);
@@ -528,15 +540,15 @@ public class Inanicion {
 :::ejercicio[Entiende la inanición]
 1. De las 20 personas del público general que esperaban desde el principio, ¿a cuántas se atiende? ¿Qué conclusión sacas?
 2. Ejecuta `jstack` mientras corre. ¿Ves algún hilo bloqueado? ¿En qué se diferencia esto de las partes 3 y 4?
-3. Haz la cuenta con los datos del enunciado (un VIP cada 5 ms, 10 ms por cliente): ¿llega a vaciarse alguna vez la cola VIP? ¿Qué tendría que cumplirse para que el público general consiguiera ser atendido?
+3. Haz la cuenta con los datos del enunciado (un VIP cada 5 ms, 10 ms por cliente): ¿llega a vaciarse alguna vez la fila VIP? ¿Qué tendría que cumplirse para que el público general consiguiera ser atendido?
 :::
 
 :::ejercicio[Arréglalo]
-Modifica **solo el criterio de orden** de la cola para que un VIP pueda adelantar al público general **durante un tiempo limitado**, pero que nadie del público general espere indefinidamente. Comprueba que se atiende a las 20 personas y que los VIP siguen recibiendo su trato preferente. Después, describe otra forma de evitar la inanición (por ejemplo, un cupo de VIP seguidos) y explica qué ventajas tiene cada una.
+Modifica **solo `atenderSiguiente()`** para que los VIP sigan teniendo preferencia, pero nadie del público general espere indefinidamente. Una idea: cuenta cuántos VIP se han atendido seguidos y, al llegar a un límite que elijas, atiende a una persona del público general. Comprueba que se atiende a las 20 personas y que los VIP siguen recibiendo su trato preferente. Después, describe otra forma de evitar la inanición (por ejemplo, que cada cliente cuente cuánto lleva esperando) y explica qué ventajas tiene cada una.
 :::
 
 ::: nota
-Cambiar la prioridad de un `Thread` con `setPriority()` no arregla esto. Aquí los que esperan son clientes de una cola, no hilos, y la prioridad de un hilo es solo una sugerencia que cada sistema operativo trata a su manera.
+Cambiar la prioridad de un `Thread` con `setPriority()` no arregla esto. Aquí los que esperan son clientes de una fila, no hilos, y la prioridad de un hilo es solo una sugerencia que cada sistema operativo trata a su manera.
 :::
 
 # Parte 6. Objetos perdidos
