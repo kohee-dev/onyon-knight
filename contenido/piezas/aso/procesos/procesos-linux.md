@@ -255,7 +255,9 @@ Lo que escriba por su salida estándar queda registrado en el diario del sistema
 | `[Service]` | Cómo se ejecuta | `ExecStart=` (programa), `ExecReload=` (qué hacer en `reload`), `User=`, `Restart=` |
 | `[Install]` | Cuándo se activa | `WantedBy=multi-user.target` (en el arranque normal) |
 
-Por ejemplo, la unidad de un demonio ficticio `reloj`:
+`User=` indica con qué usuario se ejecuta: conviene uno **sin privilegios** que ya
+exista (se crea uno de servicio con `useradd --system`). Por ejemplo, la unidad de
+un demonio ficticio `reloj`:
 
 ```ini
 [Unit]
@@ -265,7 +267,7 @@ Description=Reloj de ejemplo
 ExecStart=/usr/local/bin/reloj.sh
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
-User=nobody
+User=reloj
 
 [Install]
 WantedBy=multi-user.target
@@ -285,10 +287,16 @@ Si un demonio tiene `Restart=always`, **matarlo con `kill` no sirve**: `systemd`
 lo vuelve a arrancar en cuanto termina. Para pararlo hay que decírselo a `systemd`:
 
 - `systemctl stop nombre` lo detiene ahora, pero volverá en el siguiente arranque.
-- `systemctl disable nombre` evita que arranque con el sistema.
-- `systemctl mask nombre` lo bloquea del todo: ni se activa ni se puede arrancar a
-  mano hasta que lo desbloquees con `unmask`.
+- `systemctl disable nombre` evita que arranque con el sistema, pero no lo detiene
+  si ya está en marcha: hacen falta **las dos órdenes**.
+- `systemctl mask nombre` lo bloquea del todo (ni se activa ni se puede arrancar a
+  mano) hasta que lo desbloquees con `unmask`. Solo funciona con unidades que
+  instaló un paquete; si el fichero `.service` lo has creado tú en
+  `/etc/systemd/system/`, `mask` se niega.
 :::
+
+Para leer el diario de un demonio hace falta ser administrador:
+`sudo journalctl -u nombre`.
 
 
 
@@ -333,4 +341,4 @@ seguro de qué es un proceso, **investígalo antes de actuar**.
   procesos sospechosos con `top`, `/proc` y la ruta del ejecutable.
 - Un demonio propio es un programa en primer plano más una **unidad** `.service`
   (`daemon-reload` tras cada cambio). Con `Restart=always`, `kill` no lo para: hay
-  que usar `stop`, `disable` o `mask`.
+  que usar `stop` y `disable` (y `mask` si la unidad viene de un paquete).
