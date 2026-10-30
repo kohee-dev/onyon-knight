@@ -279,7 +279,8 @@ con cualquier otro demonio.
 
 **La política de reinicio.** `Restart=` indica qué hace `systemd` cuando el proceso
 termina: con `no` (por defecto) no hace nada; con `on-failure` lo relanza si
-termina con error o lo matan una señal; con `always` lo relanza **siempre**, aunque
+termina con error o lo mata una señal brusca (por ejemplo `SIGKILL`; una terminación
+ordenada con `SIGTERM` cuenta como salida limpia); con `always` lo relanza **siempre**, aunque
 haya terminado bien.
 
 ::: aviso

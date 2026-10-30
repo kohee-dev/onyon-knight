@@ -78,7 +78,7 @@ Esta es la plantilla del PDF. Escríbela en el programa que prefieras y expórta
 
 **Qué debe contener cada entrega.** La evidencia final es la salida de **un comando que elijas tú** y que demuestre lo que se pide:
 
-| Entrega | Ficheros | Además del comando | La evidencia final debe mostrar |
+| Entrega | Ficheros | Además de la evidencia | La evidencia final debe mostrar |
 |---------|----------|--------------------|---------------------------------|
 | 1 | PDF | Tus explicaciones de estados, hilos, trabajos e interrupciones | Los profesores con su estado, y el proceso zombi con su padre |
 | 2 | PDF | Los datos de `/proc` y las capturas de Windows | Los profesores activos en Linux con su PID y, en Windows, los dos procesos de PowerShell con su línea de comandos |
@@ -151,7 +151,7 @@ Lee `/proc/interrupts` dos veces con unos diez segundos de diferencia. Indica **
 
 ## Pregunta 1.6 — Un profesor hace algo ilegal *(0,25 puntos)*
 
-Provoca una **violación de segmento** en una shell hija (necesitas `kill`, la señal `SEGV` y `bash -c`). Explica qué ha pasado en términos de **excepción** de la CPU, y la diferencia entre una excepción y una interrupción.
+Provoca una **violación de segmento** en una shell hija (la herramienta es `kill`). Explica qué ha pasado en términos de **excepción** de la CPU, y la diferencia entre una excepción y una interrupción.
 
 # 2. Comandos comunes
 
@@ -432,7 +432,7 @@ Escribe el demonio **`timbre.sh`** y guárdalo en `/usr/local/bin/timbre.sh` con
 2. Al recibir la señal de **recarga**, volver a leer la configuración y escribir `Configuración cargada: intervalo de Ns`.
 3. Al recibir la señal de **terminar**, escribir `Fin de la jornada` y salir con código `0`.
 
-Pruébalo **a mano**, en primer plano, sin `systemd`: cambia el intervalo, recárgalo y termínalo, enseñando la salida de cada paso. Entrega el script.
+Las señales deben atenderse **al instante**, sin esperar a que acabe la pausa entre dos timbrazos. Pruébalo **a mano**, en primer plano, sin `systemd`: cambia el intervalo, recárgalo y termínalo, enseñando la salida de cada paso. Entrega el script.
 
 ## Pregunta 6.2 — La unidad *(0,3 puntos)*
 
@@ -448,7 +448,7 @@ Termina el proceso del demonio **con una señal**, primero de forma ordenada y d
 
 ## Pregunta 6.5 — Devolver el silencio *(0,3 puntos)*
 
-Andrea ya ha oído bastante timbre. **Páralo del todo**: que ya no suene, que no vuelva a arrancar en el próximo arranque del sistema y que no quede ningún proceso del demonio. Demuestra las tres cosas. Explica qué hace cada orden que usaste, y qué ocurre si intentas bloquear la unidad con `mask` cuando el fichero `.service` lo has creado tú.
+Andrea ya ha oído bastante timbre. **Páralo del todo**: que ya no suene, que no vuelva a arrancar en el próximo arranque del sistema y que no quede ningún proceso del demonio. Demuestra las tres cosas. Explica qué hace cada orden que usaste, y qué ocurre si intentas bloquear la unidad del todo (que ni siquiera se pueda arrancar a mano) cuando el fichero `.service` lo has creado tú.
 
 ## Cierre del caso
 
