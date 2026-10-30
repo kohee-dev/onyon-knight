@@ -12,7 +12,7 @@ unidades:
     piezas: [servicios-directorio, openldap, active-directory, caso-servicios-directorio, gatos-elpis, expediente-02-llaves-almacen]
   - id: ut2
     titulo: Procesos del sistema
-    piezas: [procesos-teoria, procesos-linux, procesos-windows, procesos-sala-maquinas, procesos-espectro]
+    piezas: [procesos-teoria, procesos-linux, procesos-windows, procesos-academia, procesos-espectro]
   - id: ut6
     titulo: Servicios de impresión
     piezas: [impresion-cups, impresion-windows]
