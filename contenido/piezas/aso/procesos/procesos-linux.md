@@ -232,6 +232,74 @@ demonios**, y administrarlos consiste, en buena parte, en arrancarlos, pararlos,
 configurarlos y vigilar su estado con `systemctl`.
 :::
 
+## Crear tu propio demonio
+
+Un demonio no es más que un programa que `systemd` mantiene en marcha. Para que
+`systemd` lo gestione necesitas dos cosas: el **programa** y una **unidad**
+(*unit*), un fichero de texto que le explica cómo arrancarlo.
+
+**El programa.** Con `systemd` no hace falta "desprenderse" de la terminal: el
+programa se queda en **primer plano** y `systemd` lo lanza en segundo plano por ti.
+Lo que escriba por su salida estándar queda registrado en el diario del sistema
+(se lee con `journalctl -u nombre`). Un demonio bien hecho responde a dos señales:
+
+- `SIGHUP`: recargar su configuración sin pararse.
+- `SIGTERM`: terminar de forma ordenada cuando se lo piden.
+
+**La unidad.** Es un fichero `nombre.service` que se guarda en
+`/etc/systemd/system/` y tiene tres secciones:
+
+| Sección | Qué cuenta | Opciones habituales |
+|---------|-----------|---------------------|
+| `[Unit]` | Qué es y de qué depende | `Description=`, `After=` |
+| `[Service]` | Cómo se ejecuta | `ExecStart=` (programa), `ExecReload=` (qué hacer en `reload`), `User=`, `Restart=` |
+| `[Install]` | Cuándo se activa | `WantedBy=multi-user.target` (en el arranque normal) |
+
+`User=` indica con qué usuario se ejecuta: conviene uno **sin privilegios** que ya
+exista (se crea uno de servicio con `useradd --system`). Por ejemplo, la unidad de
+un demonio ficticio `reloj`:
+
+```ini
+[Unit]
+Description=Reloj de ejemplo
+
+[Service]
+ExecStart=/usr/local/bin/reloj.sh
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+User=reloj
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Cada vez que **crees o cambies** una unidad, `systemd` debe volver a leerla con
+`systemctl daemon-reload`. Después ya puedes usar `start`, `reload` y `enable` como
+con cualquier otro demonio.
+
+**La política de reinicio.** `Restart=` indica qué hace `systemd` cuando el proceso
+termina: con `no` (por defecto) no hace nada; con `on-failure` lo relanza si
+termina con un código de salida distinto de `0` o lo mata una señal brusca (por
+ejemplo `SIGKILL`; `SIGTERM`, `SIGHUP` y `SIGINT` cuentan como salida limpia si el
+programa sale con `0`); con `always` lo relanza **siempre**, aunque haya terminado
+bien.
+
+::: aviso
+Si un demonio tiene `Restart=always`, **matarlo con `kill` no sirve**: `systemd`
+lo vuelve a arrancar en cuanto termina. Para pararlo hay que decírselo a `systemd`:
+
+- `systemctl stop nombre` lo detiene ahora, pero volverá en el siguiente arranque.
+- `systemctl disable nombre` evita que arranque con el sistema, pero no lo detiene
+  si ya está en marcha: hacen falta **las dos órdenes**.
+- `systemctl mask nombre` lo bloquea del todo (ni se activa ni se puede arrancar a
+  mano) hasta que lo desbloquees con `unmask`. Solo funciona con unidades que
+  instaló un paquete; si el fichero `.service` lo has creado tú en
+  `/etc/systemd/system/`, `mask` se niega.
+:::
+
+Para leer el diario de un demonio hace falta ser administrador:
+`sudo journalctl -u nombre`.
+
 
 
 # 8. Seguridad: detectar procesos sospechosos en Linux
@@ -273,3 +341,6 @@ seguro de qué es un proceso, **investígalo antes de actuar**.
 - Al arrancar: firmware → GRUB → núcleo → `systemd` → demonios.
 - Los **demonios** se gestionan con **`systemctl`**, y conviene vigilar los
   procesos sospechosos con `top`, `/proc` y la ruta del ejecutable.
+- Un demonio propio es un programa en primer plano más una **unidad** `.service`
+  (`daemon-reload` tras cada cambio). Con `Restart=always`, `kill` no lo para: hay
+  que usar `stop` y `disable` (y `mask` si la unidad viene de un paquete).
