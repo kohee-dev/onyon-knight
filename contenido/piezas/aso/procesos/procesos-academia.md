@@ -246,6 +246,7 @@ nombrar yes profe_vega
 
 # profe_terco ignora la orden de terminar (SIGTERM)
 cat > "$D/profe_terco.sh" <<'EOF'
+#!/bin/bash
 trap '' TERM
 while true; do sleep 1; done
 EOF
@@ -262,7 +263,7 @@ Lanza un proceso que dure unos quince minutos en primer plano, **suspéndelo**, 
 
 ## Pregunta 3.2 — Menos prioridad *(0,3 puntos)*
 
-Lanza un proceso que consuma CPU (sirve `yes > /dev/null &`) con una **prioridad menor que la normal**. Después, **cede aún más prioridad** y comprueba que no puedes recuperar la que tenías sin ser administrador. Explica por qué existe esa asimetría.
+Lanza un proceso cualquiera que consuma CPU (en los scripts de preparación tienes ideas) con una **prioridad menor que la normal**. Después, **cede aún más prioridad** y comprueba que no puedes recuperar la que tenías sin ser administrador. Explica por qué existe esa asimetría.
 
 ## Pregunta 3.3 — Educados y no tanto *(0,3 puntos)*
 
@@ -397,7 +398,7 @@ Escribe un script **`inventario.sh`** que imprima en **CSV** (con cabecera) un i
 
 # 6. Demonios
 
-Andrea se frota las manos: *"Último caso. Los alumnos de último curso quieren un timbre propio para la academia, así que vais a **invocar a un demonio**. Os enseñaré a hacerlo; despedirlo ya es cosa vuestra."* El timbre sonará cada pocos segundos mientras la academia esté abierta.
+Andrea se frota las manos: *"Último caso. He descubierto por qué los profesores no dan clase y el alumnado se amontona: la academia no tiene timbre y nadie sabe cuándo empieza ni acaba cada clase. Vamos a **invocar a un demonio** que lo haga sonar. Te enseñaré a invocarlo; despedirlo, cuando el director se canse, será cosa tuya."* El timbre sonará cada pocos segundos mientras la academia esté abierta.
 
 ::: aviso
 Un demonio mal despedido sigue sonando. En este apartado vas a crear un servicio de verdad en tu sistema: hazlo en una **máquina de pruebas**, no en tu equipo personal.
@@ -443,14 +444,18 @@ Cambia `INTERVALO` a `1` y haz que el demonio lo aplique **sin pararlo**. Demues
 
 ## Pregunta 6.4 — El timbre no se deja matar *(0,3 puntos)*
 
-Termina el proceso del demonio **con una señal**, primero de forma ordenada y después forzada. Demuestra qué ocurre con su PID y con su estado tras cada intento y **explica por qué**.
+Termina el proceso del demonio **con una señal**, primero de forma ordenada y después forzada (el proceso no es tuyo: necesitarás privilegios). Demuestra qué ocurre con su PID y con su estado tras cada intento y **explica por qué**.
 
 ## Pregunta 6.5 — Devolver el silencio *(0,3 puntos)*
 
 Andrea ya ha oído bastante timbre. **Páralo del todo**: que ya no suene, que no vuelva a arrancar en el próximo arranque del sistema y que no quede ningún proceso del demonio. Demuestra las tres cosas. Explica qué hace cada orden que usaste, y qué ocurre si intentas bloquear la unidad con `mask` cuando el fichero `.service` lo has creado tú.
 
+## Cierre del caso
+
+Con el timbre callado, Andrea cierra su cuaderno. *"Quedan por contar tres cosas, y las tres son tuyas: había profesores dormidos y uno zombi que nadie recogía, una suplente que nadie contrató y un timbre que no se dejaba matar. La academia ya sabe quién trabaja, quién no y quién no debería estar. Buen trabajo. — A."*
+
 ::: tip
-Andrea lo resume así: un buen informe responde siempre a tres preguntas: **¿qué pasaba?**, **¿cómo lo supe?** y **¿qué hice?**.
+Un buen informe responde siempre a tres preguntas: **¿qué pasaba?**, **¿cómo lo supe?** y **¿qué hice?**.
 :::
 
 # Criterios de evaluación cubiertos
