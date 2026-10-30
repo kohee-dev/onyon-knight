@@ -3,7 +3,7 @@ titulo: "Academia Amaurot"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 8
-borrador: true
+borrador: false
 ---
 
 ::: aviso
