@@ -279,9 +279,10 @@ con cualquier otro demonio.
 
 **La política de reinicio.** `Restart=` indica qué hace `systemd` cuando el proceso
 termina: con `no` (por defecto) no hace nada; con `on-failure` lo relanza si
-termina con error o lo mata una señal brusca (por ejemplo `SIGKILL`; una terminación
-ordenada con `SIGTERM` cuenta como salida limpia); con `always` lo relanza **siempre**, aunque
-haya terminado bien.
+termina con un código de salida distinto de `0` o lo mata una señal brusca (por
+ejemplo `SIGKILL`; `SIGTERM`, `SIGHUP` y `SIGINT` cuentan como salida limpia si el
+programa sale con `0`); con `always` lo relanza **siempre**, aunque haya terminado
+bien.
 
 ::: aviso
 Si un demonio tiene `Restart=always`, **matarlo con `kill` no sirve**: `systemd`
