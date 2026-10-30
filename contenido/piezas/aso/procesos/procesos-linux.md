@@ -232,7 +232,7 @@ demonios**, y administrarlos consiste, en buena parte, en arrancarlos, pararlos,
 configurarlos y vigilar su estado con `systemctl`.
 :::
 
-## 7.1 Crear tu propio demonio
+## Crear tu propio demonio
 
 Un demonio no es más que un programa que `systemd` mantiene en marcha. Para que
 `systemd` lo gestione necesitas dos cosas: el **programa** y una **unidad**

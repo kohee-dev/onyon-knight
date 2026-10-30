@@ -99,7 +99,7 @@ Guarda este script como `preparar-1.sh` y ejecútalo (`bash preparar-1.sh`):
 
 ```bash
 D="$HOME/academia/bin"
-pkill -KILL -f "$HOME/academia/" 2>/dev/null
+pkill -KILL -f "^(/bin/bash |python3 )?$HOME/academia/" 2>/dev/null
 mkdir -p "$D"
 
 # Cada profesor es una copia de un programa corriente con otro nombre
@@ -163,7 +163,7 @@ Guarda este script como `preparar-2.sh` y ejecútalo:
 
 ```bash
 D="$HOME/academia/bin"
-pkill -KILL -f "$HOME/academia/" 2>/dev/null
+pkill -KILL -f "^(/bin/bash |python3 )?$HOME/academia/" 2>/dev/null
 mkdir -p "$D" "$HOME/academia/aula7"
 
 nombrar() { cp "$(command -v "$1")" "$D/$2"; }
@@ -234,7 +234,7 @@ Guarda este script como `preparar-3.sh` y ejecútalo:
 
 ```bash
 D="$HOME/academia/bin"
-pkill -KILL -f "$HOME/academia/" 2>/dev/null
+pkill -KILL -f "^(/bin/bash |python3 )?$HOME/academia/" 2>/dev/null
 mkdir -p "$D"
 
 nombrar() { cp "$(command -v "$1")" "$D/$2"; }
@@ -311,7 +311,7 @@ Guarda este script como `preparar-4.sh` y ejecútalo:
 
 ```bash
 D="$HOME/academia/bin"
-pkill -KILL -f "$HOME/academia/" 2>/dev/null
+pkill -KILL -f "^(/bin/bash |python3 )?$HOME/academia/" 2>/dev/null
 mkdir -p "$D"
 
 nombrar() { cp "$(command -v "$1")" "$D/$2"; }
@@ -358,7 +358,7 @@ Guarda este script como `preparar-5.sh` y ejecútalo:
 ```bash
 D="$HOME/academia/bin"
 O="$HOME/academia/.oculto"
-pkill -KILL -f "$HOME/academia/" 2>/dev/null
+pkill -KILL -f "^(/bin/bash |python3 )?$HOME/academia/" 2>/dev/null
 mkdir -p "$D" "$O"
 
 nombrar() { cp "$(command -v "$1")" "$D/$2"; }
@@ -410,6 +410,7 @@ Guarda este script como `preparar-6.sh` y ejecútalo. Crea el usuario `bedel` (s
 
 ```bash
 # Deja el sistema limpio de un intento anterior y crea la configuración del timbre
+[ -d /run/systemd/system ] || { echo "Este sistema no usa systemd: necesitas un Ubuntu con systemd."; exit 1; }
 sudo systemctl unmask timbre.service 2>/dev/null
 sudo systemctl disable --now timbre.service 2>/dev/null
 sudo rm -f /etc/systemd/system/timbre.service /usr/local/bin/timbre.sh
