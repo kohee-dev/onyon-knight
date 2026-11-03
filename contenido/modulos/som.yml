@@ -7,6 +7,9 @@ unidades:
   - id: ut1
     titulo: Introducción a los sistemas operativos
     piezas: [intro-sistemas-operativos]
+  - id: comandos
+    titulo: Comandos básicos de Linux
+    piezas: [comandos-moverse, comandos-leer-ficheros, comandos-crear-copiar-borrar, comandos-permisos-usuarios, comandos-buscar-ficheros, comandos-buscar-texto, comandos-redirecciones-tuberias, comandos-transformar-texto, comandos-datos-codificados, comandos-comprimir-empaquetar, comandos-procesos-entorno, comandos-red-acceso-remoto]
   - id: ut2
     titulo: Scripts en bash
     piezas: [bash-echo-comentarios, bash-variables, bash-read, bash-parametros, bash-aritmetica, bash-if, bash-case-salida, bash-robustez, bash-bucles, bash-filtros, bash-ficheros-csv, bash-funciones-arrays, bash-usuarios-admin]
