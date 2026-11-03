@@ -7,3 +7,6 @@ unidades:
   - id: ut1
     titulo: Fundamentos de Python
     piezas: [fundamentos-python, tienda-rpg, aventura-rescate]
+  - id: bucles
+    titulo: Decisiones y bucles
+    piezas: [condicionales, listas, bucle-for, bucle-while, listas-y-bucles, cadenas]

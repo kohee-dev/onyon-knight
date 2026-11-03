@@ -48,6 +48,9 @@ py:
   fundamentos:
     tema: programacion
     dificultad: basico
+  bucles:
+    tema: programacion
+    dificultad: basico
 redes:
   canalizaciones:
     tema: redes
