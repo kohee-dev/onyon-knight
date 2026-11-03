@@ -45,6 +45,9 @@ psp:
     tema: procesos
     dificultad: avanzado
 py:
+  basico:
+    tema: programacion
+    dificultad: basico
   fundamentos:
     tema: programacion
     dificultad: basico
