@@ -1,5 +1,5 @@
 ---
-titulo: "Academia Amaurot"
+titulo: "Procesos en GNU/Linux y Windows"
 licencia: CC-BY-NC-SA-4.0
 tipo: caso
 horas: 8
@@ -17,13 +17,11 @@ Para la realización de esta actividad voy a tener los siguientes supuestos:
 + Si alguien hace *trampa* o *plagio*, lo sabré.
 :::
 
-# El caso
+# Planteamiento
 
-La **Academia Amaurot** es una academia de formación con unos cuantos profesores y muchas aulas. Últimamente algo falla: hay profesores que no dan clase, alumnado que se amontona en las aulas y un servidor que no sabe decir cuál es cuál. La dirección ha recurrido a **Andrea Windrose**, detective habitual de estas prácticas, y Andrea te ha llamado a ti.
+Un servidor de una academia funciona mal: no se sabe qué procesos están trabajando, cuáles consumen más de la cuenta ni cuáles no deberían estar. Tu tarea es investigarlo y corregirlo desde dentro del sistema.
 
-> *"Yo sé seguir a una persona por la calle, pero no sé seguir a un proceso por un servidor. Dime quién trabaja, quién no, y quién no debería estar ahí. — A."*
-
-En el servidor, **cada profesor es un proceso**. Andrea irá dejando una nota al empezar cada apartado; el trabajo técnico es lo que viene a continuación. Al principio te dirá qué herramienta usar; según avances, solo te dirá qué necesita saber.
+En el servidor, **cada profesor es un proceso**. Al principio de la práctica se te indica qué herramienta usar; según avances, los enunciados solo dicen qué hay que lograr.
 
 ::: nota
 **Escenario.** Necesitas una máquina **GNU/Linux con `systemd`** (vale una VM con Ubuntu Server) donde tengas `sudo`. En los apartados 2 y 3 también necesitas un **Windows** con permisos de administrador. Cada apartado trae un **script de preparación** que crea los profesores: todos son procesos inofensivos con nombre `profe_...`.
@@ -85,13 +83,13 @@ Esta es la plantilla del PDF. Escríbela en el programa que prefieras y expórta
 | 3 | PDF + `silenciar.sh` | Qué señal usaste y por qué | Los profesores que quedan, con su PID, su prioridad (*nice*) y su estado |
 | 4 | PDF + `ancestros.sh` | El árbol y tu explicación | Los profesores que quedan, con su PID y su padre |
 | 5 | PDF + `inventario.sh` | La tabla de procesos y la evidencia conservada | Los profesores que quedan, con su PID, usuario y prioridad |
-| 6 | PDF + `timbre.sh` + `timbre.service` | Tus explicaciones de cada orden | Si el servicio `timbre` está activo, si está habilitado en el arranque y si queda algún proceso del demonio |
+| 6 | PDF + `timbre.sh` + `timbre.service` | Tus explicaciones de cada orden | Si el demonio de Alex está parado, deshabilitado y sin procesos, y si el servicio `timbre` está activo y habilitado |
 
 **Cómo se califica:** cada pregunta indica sus puntos y la suma total es de 10. Una entrega no presentada en plazo puntúa 0 en sus preguntas.
 
 # 1. Conceptos
 
-Andrea llega a la academia y pide ver quién está en qué estado. *"No toques nada todavía: primero quiero saber qué es cada cosa."* En este apartado te dice qué herramienta usar.
+Primero hay que identificar el estado de cada proceso antes de modificar nada. En este apartado se te dice qué herramienta usar.
 
 ## Preparación
 
@@ -104,17 +102,17 @@ mkdir -p "$D"
 
 # Cada profesor es una copia de un programa corriente con otro nombre
 nombrar() { cp "$(command -v "$1")" "$D/$2"; }
-nombrar sleep profe_garcia
-nombrar yes profe_lozano
-nombrar sleep profe_ibarra
-nombrar sleep profe_quiroga
+nombrar sleep profe_alex
+nombrar yes profe_raul
+nombrar sleep profe_irene
+nombrar sleep profe_nuria
 
-"$D/profe_garcia" 100000 &                  # duerme
-"$D/profe_lozano" > /dev/null &             # no para de trabajar
-"$D/profe_ibarra" 100000 &                  # lo detienen en seguida
+"$D/profe_alex" 100000 &                  # duerme
+"$D/profe_raul" > /dev/null &             # no para de trabajar
+"$D/profe_irene" 100000 &                  # lo detienen en seguida
 sleep 0.5                                   # espera a que arranque antes de detenerlo
 kill -STOP $!
-bash -c "sleep 1 & exec $D/profe_quiroga 100000" &   # tiene un hijo que nadie recoge
+bash -c "sleep 1 & exec $D/profe_nuria 100000" &   # tiene un hijo que nadie recoge
 
 # El aula magna: un solo proceso con varios hilos
 cat > "$HOME/academia/aula_magna.py" <<'EOF'
@@ -131,7 +129,7 @@ echo "Academia lista. Empieza a investigar."
 
 ## Pregunta 1.1 — Cuatro profesores, cuatro estados *(0,5 puntos)*
 
-Con `ps` consulta el estado de `profe_garcia`, `profe_lozano`, `profe_ibarra` y `profe_quiroga`. Para cada uno indica la **letra de estado** y qué significa, y en qué fase del ciclo de vida de un proceso (nuevo, listo, en ejecución, bloqueado, parado, terminado) está.
+Con `ps` consulta el estado de `profe_alex`, `profe_raul`, `profe_irene` y `profe_nuria`. Para cada uno indica la **letra de estado** y qué significa, y en qué fase del ciclo de vida de un proceso (nuevo, listo, en ejecución, bloqueado, parado, terminado) está.
 
 ## Pregunta 1.2 — El hijo que no se va *(0,5 puntos)*
 
@@ -155,7 +153,7 @@ Provoca una **violación de segmento** en una shell hija (la herramienta es `kil
 
 # 2. Comandos comunes
 
-Andrea ya sabe quién es quién. *"Ahora dime qué hace cada uno y quién se lleva los recursos."* Hablarás en dos idiomas: Linux y Windows. Andrea sigue nombrando las herramientas, pero ya no las opciones.
+Ahora toca averiguar qué hace cada proceso y cuáles consumen más recursos, contrastando lo que dice su nombre con lo que muestra el sistema por dentro. Trabajarás en Linux y en Windows. Se siguen nombrando las herramientas, pero ya no las opciones.
 
 ## Preparación en Linux
 
@@ -167,28 +165,28 @@ pkill -KILL -f "^(/bin/bash |python3 )?$HOME/academia/" 2>/dev/null
 mkdir -p "$D" "$HOME/academia/aula7"
 
 nombrar() { cp "$(command -v "$1")" "$D/$2"; }
-nombrar sleep profe_garcia
-nombrar yes profe_lozano
-nombrar tail profe_marin
+nombrar sleep profe_alex
+nombrar yes profe_raul
+nombrar tail profe_alicia
 
 echo "Libro de registro de la academia" > "$HOME/academia/registro.txt"
 
-"$D/profe_garcia" 100000 &
-"$D/profe_lozano" > /dev/null &
-# profe_marin trabaja desde el aula 7 y tiene abierto el libro de registro
-( cd "$HOME/academia/aula7" && exec "$D/profe_marin" -f "$HOME/academia/registro.txt" ) &
+"$D/profe_alex" 100000 &
+"$D/profe_raul" > /dev/null &
+# profe_alicia trabaja desde el aula 7 y tiene abierto el libro de registro
+( cd "$HOME/academia/aula7" && exec "$D/profe_alicia" -f "$HOME/academia/registro.txt" ) &
 
 sleep 2
 echo "Academia lista. Empieza a investigar."
 ```
 
-## Pregunta 2.1 — El carné de profe_marin *(0,5 puntos)*
+## Pregunta 2.1 — El carné de profe_alicia *(0,5 puntos)*
 
-Sin usar `ps`, averigua leyendo el directorio de `/proc` de `profe_marin` su **línea de comandos**, la **ruta de su ejecutable** y su **directorio de trabajo**. Pega los comandos y su salida.
+Sin usar `ps`, averigua leyendo el directorio de `/proc` de `profe_alicia` su **línea de comandos**, la **ruta de su ejecutable** y su **directorio de trabajo**. Pega los comandos y su salida.
 
 ## Pregunta 2.2 — Qué tiene entre manos *(0,5 puntos)*
 
-Con `/proc` averigua qué **fichero abierto** tiene `profe_marin`, su **estado** y quién es su **padre**. Explica por qué `/proc` se considera "un sistema de archivos como medio lógico" para ver procesos aunque no ocupe espacio en disco.
+Con `/proc` averigua qué **fichero abierto** tiene `profe_alicia`, su **estado** y quién es su **padre**. Explica por qué `/proc` se considera "un sistema de archivos como medio lógico" para ver procesos aunque no ocupe espacio en disco.
 
 ## Pregunta 2.3 — Quién gasta más *(0,25 puntos)*
 
@@ -208,9 +206,9 @@ Get-CimInstance Win32_Process |
     Where-Object { $_.CommandLine -match 'profe_' -and $_.ProcessId -ne $PID } |
     ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 
-# profe_lozano no para de trabajar; profe_garcia duerme
-Start-Process powershell -WindowStyle Minimized -ArgumentList '-NoProfile','-Command','while($true){} # profe_lozano'
-Start-Process powershell -WindowStyle Minimized -ArgumentList '-NoProfile','-Command','Start-Sleep -Seconds 100000 # profe_garcia'
+# profe_raul no para de trabajar; profe_alex duerme
+Start-Process powershell -WindowStyle Minimized -ArgumentList '-NoProfile','-Command','while($true){} # profe_raul'
+Start-Process powershell -WindowStyle Minimized -ArgumentList '-NoProfile','-Command','Start-Sleep -Seconds 100000 # profe_alex'
 
 Start-Sleep -Seconds 2
 Write-Host 'Academia lista. Empieza a investigar.'
@@ -218,15 +216,15 @@ Write-Host 'Academia lista. Empieza a investigar.'
 
 ## Pregunta 2.5 — La vista gráfica *(0,25 puntos)*
 
-Abre el **Administrador de tareas**, pestaña *Detalles*, y añade la columna **Línea de comandos**. Localiza a `profe_lozano` y a `profe_garcia`. Entrega **una captura** donde se vea la columna y el uso de CPU de ambos.
+Abre el **Administrador de tareas**, pestaña *Detalles*, y añade la columna **Línea de comandos**. Localiza a `profe_raul` y a `profe_alex`. Entrega **una captura** donde se vea la columna y el uso de CPU de ambos.
 
 ## Pregunta 2.6 — La vista de comandos *(0,25 puntos)*
 
-Con PowerShell (`Get-CimInstance` sobre `Win32_Process`), obtén el **PID** de `profe_lozano` y `profe_garcia` a partir de su línea de comandos y comprueba con `Get-Process` cuál de los dos consume CPU. Explica por qué `Get-Process` por sí solo no te basta para distinguirlos.
+Con PowerShell (`Get-CimInstance` sobre `Win32_Process`), obtén el **PID** de `profe_raul` y `profe_alex` a partir de su línea de comandos y comprueba con `Get-Process` cuál de los dos consume CPU. Explica por qué `Get-Process` por sí solo no te basta para distinguirlos.
 
 # 3. Manipulación de procesos
 
-*"Ahora toca poner orden"*, dice Andrea. *"Lo que necesito es el resultado; cómo lo consigas es cosa tuya."* Desde aquí los enunciados solo dicen **qué hay que lograr**.
+Hay que controlar los procesos sin dañar el sistema: bajar la prioridad de los que consumen de más y terminar los que no responden a una orden normal. Desde aquí los enunciados solo dicen **qué hay que lograr**.
 
 ## Preparación en Linux
 
@@ -238,20 +236,20 @@ pkill -KILL -f "^(/bin/bash |python3 )?$HOME/academia/" 2>/dev/null
 mkdir -p "$D"
 
 nombrar() { cp "$(command -v "$1")" "$D/$2"; }
-nombrar yes profe_lozano
-nombrar yes profe_vega
+nombrar yes profe_raul
+nombrar yes profe_valentin
 
-"$D/profe_lozano" > /dev/null &
-"$D/profe_vega" > /dev/null &
+"$D/profe_raul" > /dev/null &
+"$D/profe_valentin" > /dev/null &
 
-# profe_terco ignora la orden de terminar (SIGTERM)
-cat > "$D/profe_terco.sh" <<'EOF'
+# profe_alex ignora la orden de terminar (SIGTERM)
+cat > "$D/profe_alex.sh" <<'EOF'
 #!/bin/bash
 trap '' TERM
 while true; do sleep 1; done
 EOF
-chmod +x "$D/profe_terco.sh"
-"$D/profe_terco.sh" &
+chmod +x "$D/profe_alex.sh"
+"$D/profe_alex.sh" &
 
 sleep 2
 echo "Academia lista. Empieza a investigar."
@@ -267,7 +265,7 @@ Lanza un proceso cualquiera que consuma CPU (en los scripts de preparación tien
 
 ## Pregunta 3.3 — Educados y no tanto *(0,3 puntos)*
 
-Termina a `profe_lozano` de la forma **ordenada**. Haz lo mismo con `profe_terco.sh` y comprueba qué ocurre; si no obedece, **fuérzalo**. Explica por qué existen dos formas de terminar un proceso y cuál debe ser el último recurso.
+Termina a `profe_raul` de la forma **ordenada**. Haz lo mismo con `profe_alex.sh` y comprueba qué ocurre; si no obedece, **fuérzalo**. Explica por qué existen dos formas de terminar un proceso y cuál debe ser el último recurso.
 
 ## Preparación en Windows
 
@@ -279,8 +277,8 @@ Get-CimInstance Win32_Process |
     ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 
 # Dos profesores que no paran de trabajar
-Start-Process powershell -WindowStyle Minimized -ArgumentList '-NoProfile','-Command','while($true){} # profe_lozano'
-Start-Process powershell -WindowStyle Minimized -ArgumentList '-NoProfile','-Command','while($true){} # profe_vega'
+Start-Process powershell -WindowStyle Minimized -ArgumentList '-NoProfile','-Command','while($true){} # profe_raul'
+Start-Process powershell -WindowStyle Minimized -ArgumentList '-NoProfile','-Command','while($true){} # profe_valentin'
 
 Start-Sleep -Seconds 2
 Write-Host 'Academia lista. Empieza a investigar.'
@@ -288,7 +286,7 @@ Write-Host 'Academia lista. Empieza a investigar.'
 
 ## Pregunta 3.4 — En Windows *(0,3 puntos)*
 
-Localiza a `profe_vega` por su línea de comandos y **baja su prioridad** a *Por debajo de lo normal*. Después **termina** a `profe_lozano`. Demuestra el estado final de ambos. No uses la clase *Tiempo real*.
+Localiza a `profe_valentin` por su línea de comandos y **baja su prioridad** a *Por debajo de lo normal*. Después **termina** a `profe_raul`. Demuestra el estado final de ambos. No uses la clase *Tiempo real*.
 
 ## Pregunta 3.5 — Un script para despedir *(0,3 puntos)*
 
@@ -299,11 +297,11 @@ Escribe un script **`silenciar.sh`** que reciba como argumento el **nombre** de 
 3. Si existe, le envía la señal para que termine de forma ordenada, espera 3 segundos y, si sigue vivo, lo fuerza.
 4. Informa de qué ha hecho falta y sale con código `0`.
 
-Pruébalo con `profe_terco.sh` y entrega el script.
+Pruébalo con `profe_alex.sh` y entrega el script.
 
 # 4. Relaciones entre procesos
 
-*"Todo profesor tiene un jefe"*, comenta Andrea, *"y la cadena llega hasta el director de todo el servidor."*
+Hay que conocer las relaciones de dependencia entre procesos, porque si falla uno, caen los que cuelgan de él. Un proceso padre lanza a un hijo y espera; cuando el padre termina antes, el hijo sigue ejecutándose sin él.
 
 ## Preparación
 
@@ -317,9 +315,9 @@ mkdir -p "$D"
 nombrar() { cp "$(command -v "$1")" "$D/$2"; }
 nombrar sleep profe_director
 nombrar sleep profe_becario
-nombrar sleep profe_garcia
+nombrar sleep profe_alex
 
-"$D/profe_garcia" 100000 &
+"$D/profe_alex" 100000 &
 # el director lanza al becario y se queda esperando
 bash -c "$D/profe_becario 100000 & exec $D/profe_director 100000" &
 
@@ -349,7 +347,7 @@ Escribe un script **`ancestros.sh`** que reciba un **PID** y muestre su cadena d
 
 # 5. Otros casos
 
-*"Ahora, lo que me quita el sueño"*, dice Andrea: hay un profesor que nadie contrató. Tendrás que reconocerlo, decidir qué hacer sin destruir las pruebas y dejar por escrito qué es normal en este servidor.
+Aparece un proceso que nadie ha lanzado: se ejecuta desde una carpeta oculta y ha borrado su ejecutable. Hay que reconocerlo, decidir qué hacer sin destruir las pruebas y dejar por escrito qué es normal en este servidor.
 
 ## Preparación
 
@@ -362,13 +360,14 @@ pkill -KILL -f "^(/bin/bash |python3 )?$HOME/academia/" 2>/dev/null
 mkdir -p "$D" "$O"
 
 nombrar() { cp "$(command -v "$1")" "$D/$2"; }
-nombrar sleep profe_garcia
-nombrar sleep profe_marin
-"$D/profe_garcia" 100000 &
-"$D/profe_marin" 100000 &
+nombrar sleep profe_alex
+nombrar sleep profe_alicia
+"$D/profe_alex" 100000 &
+"$D/profe_alicia" 100000 &
 
 # Una suplente que nadie contrató: se esconde en una carpeta oculta y borra su ejecutable
 cp "$(command -v yes)" "$O/profe_suplente"
+echo "Cubro la clase de A." > "$O/nota.txt"
 nice -n 19 "$O/profe_suplente" > /dev/null &
 sleep 1
 rm "$O/profe_suplente"
@@ -379,7 +378,7 @@ echo "Academia lista. Empieza a investigar."
 
 ## Pregunta 5.1 — Un profesor sin contrato *(0,4 puntos)*
 
-Hay un proceso `profe_*` que no es como los demás. Averigua **al menos tres evidencias** de que es sospechoso (usuario, ejecutable, estado del fichero, prioridad...) y compáralas con las de `profe_garcia`.
+Hay un proceso `profe_*` que no es como los demás. Averigua **al menos tres evidencias** de que es sospechoso (usuario, ejecutable, estado del fichero, prioridad...) y compáralas con las de `profe_alex`. Mira también qué hay en su carpeta.
 
 ## Pregunta 5.2 — Actuar sin destruir pruebas *(0,4 puntos)*
 
@@ -398,34 +397,71 @@ Escribe un script **`inventario.sh`** que imprima en **CSV** (con cabecera) un i
 
 # 6. Demonios
 
-Andrea se frota las manos: *"Último caso. He descubierto por qué los profesores no dan clase y el alumnado se amontona: la academia no tiene timbre y nadie sabe cuándo empieza ni acaba cada clase. Vamos a **invocar a un demonio** que lo haga sonar. Te enseñaré a invocarlo; despedirlo, cuando el director se canse, será cosa tuya."* El timbre sonará cada pocos segundos mientras la academia esté abierta.
+Algo consume recursos de forma continua: un demonio que alguien dejó configurado y que se relanza cuando se mata. Hay que identificarlo, pararlo del todo y, como el servidor sigue necesitando un servicio que marque las horas, escribir uno nuevo que funcione correctamente.
 
 ::: aviso
-Un demonio mal despedido sigue sonando. En este apartado vas a crear un servicio de verdad en tu sistema: hazlo en una **máquina de pruebas**, no en tu equipo personal.
+Un demonio mal despedido sigue corriendo. En este apartado vas a crear y a parar servicios de verdad en tu sistema: hazlo en una **máquina de pruebas**, no en tu equipo personal.
 :::
 
 ## Preparación
 
-Guarda este script como `preparar-6.sh` y ejecútalo. Crea el usuario `bedel` (sin privilegios) y el fichero de configuración `/etc/academia/timbre.conf`, que contiene `INTERVALO=5`:
+Guarda este script como `preparar-6.sh` y ejecútalo. Crea el usuario `bedel` (sin privilegios), el fichero de configuración `/etc/academia/timbre.conf` (que contiene `INTERVALO=5`) y deja funcionando el demonio que frena la academia:
 
 ```bash
-# Deja el sistema limpio de un intento anterior y crea la configuración del timbre
+# Deja el sistema limpio de un intento anterior, crea la configuración del timbre y deja corriendo el demonio de Alex
 [ -d /run/systemd/system ] || { echo "Este sistema no usa systemd: necesitas un Ubuntu con systemd."; exit 1; }
-sudo systemctl unmask timbre.service 2>/dev/null
-sudo systemctl disable --now timbre.service 2>/dev/null
-sudo rm -f /etc/systemd/system/timbre.service /usr/local/bin/timbre.sh
+for u in conjuro timbre; do
+    sudo systemctl unmask $u.service 2>/dev/null
+    sudo systemctl disable --now $u.service 2>/dev/null
+done
+sudo rm -f /etc/systemd/system/conjuro.service /etc/systemd/system/timbre.service /usr/local/bin/conjuro.sh /usr/local/bin/timbre.sh
 sudo systemctl daemon-reload
 
-# Usuario del sistema, sin privilegios, con el que se ejecutará el demonio
+# Usuario del sistema, sin privilegios, con el que se ejecutarán los demonios
 id bedel >/dev/null 2>&1 || sudo useradd --system --no-create-home --shell /usr/sbin/nologin bedel
 
 sudo mkdir -p /etc/academia
 echo 'INTERVALO=5' | sudo tee /etc/academia/timbre.conf > /dev/null
 
+# El demonio que invocó Alex: trabaja a base de consumir CPU y systemd lo relanza siempre
+sudo tee /usr/local/bin/conjuro.sh > /dev/null <<'FIN'
+#!/bin/bash
+while true; do :; done
+FIN
+sudo chmod +x /usr/local/bin/conjuro.sh
+sudo tee /etc/systemd/system/conjuro.service > /dev/null <<'FIN'
+[Unit]
+Description=Demonio invocado por Alex para que trabaje por él
+
+[Service]
+User=bedel
+ExecStart=/usr/local/bin/conjuro.sh
+Nice=10
+CPUQuota=50%
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+FIN
+sudo systemctl daemon-reload
+sudo systemctl enable --now conjuro.service
+
 echo "Academia lista. Empieza a investigar."
 ```
 
-## Pregunta 6.1 — Invocación a mano *(0,3 puntos)*
+## Pregunta 6.1 — Quién frena la academia *(0,25 puntos)*
+
+Averigua qué proceso consume más CPU, qué servicio de `systemd` lo gestiona, con qué usuario se ejecuta y qué dice su descripción sobre quién lo invocó. Demuéstralo con la salida de los comandos.
+
+## Pregunta 6.2 — No se deja matar *(0,25 puntos)*
+
+Termina el proceso del demonio **con una señal**, primero de forma ordenada y después forzada (el proceso no es tuyo: necesitarás privilegios). Demuestra qué ocurre con su PID y con su estado tras cada intento y **explica por qué**.
+
+## Pregunta 6.3 — Cerrar la puerta *(0,25 puntos)*
+
+**Páralo del todo**: que ya no consuma CPU, que no vuelva a arrancar en el próximo arranque del sistema y que no quede ningún proceso del demonio. Demuestra las tres cosas. Explica qué hace cada orden que usaste, y qué ocurre si intentas bloquear la unidad del todo (que ni siquiera se pueda arrancar a mano) cuando su fichero `.service` está en `/etc/systemd/system`.
+
+## Pregunta 6.4 — El demonio nuevo *(0,25 puntos)*
 
 Escribe el demonio **`timbre.sh`** y guárdalo en `/usr/local/bin/timbre.sh` con permiso de ejecución. Debe:
 
@@ -435,25 +471,13 @@ Escribe el demonio **`timbre.sh`** y guárdalo en `/usr/local/bin/timbre.sh` con
 
 Las señales deben atenderse **al instante**, sin esperar a que acabe la pausa entre dos timbrazos. Pruébalo **a mano**, en primer plano, sin `systemd`: cambia el intervalo, recárgalo y termínalo, enseñando la salida de cada paso. Entrega el script.
 
-## Pregunta 6.2 — La unidad *(0,3 puntos)*
+## Pregunta 6.5 — Bien atado *(0,25 puntos)*
 
-Escribe la unidad **`timbre.service`** para que `systemd` gestione el demonio. Debe ejecutarlo con el usuario `bedel`, permitir **recargar** su configuración, activarse en el **arranque normal** y estar siempre en pie: *"que el timbre no se caiga nunca"*, pide Andrea. Regístrala, arráncala y activa el servicio. Demuestra su estado y las últimas líneas de su diario (necesitas ser administrador). Entrega la unidad.
+Escribe la unidad **`timbre.service`** para que `systemd` gestione el demonio nuevo. Debe ejecutarlo con el usuario `bedel`, permitir **recargar** su configuración, activarse en el **arranque normal** y relanzarse **solo si falla**, no cuando se le pide terminar. Regístrala, arráncala y activa el servicio. Demuestra su estado y las últimas líneas de su diario (necesitas ser administrador). Entrega la unidad.
 
-## Pregunta 6.3 — Cambiar el intervalo sin parar *(0,3 puntos)*
+## Pregunta 6.6 — Cambiar el intervalo sin parar *(0,25 puntos)*
 
 Cambia `INTERVALO` a `1` y haz que el demonio lo aplique **sin pararlo**. Demuestra con el diario que la configuración se recargó y con el PID que es **el mismo proceso**.
-
-## Pregunta 6.4 — El timbre no se deja matar *(0,3 puntos)*
-
-Termina el proceso del demonio **con una señal**, primero de forma ordenada y después forzada (el proceso no es tuyo: necesitarás privilegios). Demuestra qué ocurre con su PID y con su estado tras cada intento y **explica por qué**.
-
-## Pregunta 6.5 — Devolver el silencio *(0,3 puntos)*
-
-Andrea ya ha oído bastante timbre. **Páralo del todo**: que ya no suene, que no vuelva a arrancar en el próximo arranque del sistema y que no quede ningún proceso del demonio. Demuestra las tres cosas. Explica qué hace cada orden que usaste, y qué ocurre si intentas bloquear la unidad del todo (que ni siquiera se pueda arrancar a mano) cuando el fichero `.service` lo has creado tú.
-
-## Cierre del caso
-
-Con el timbre callado, Andrea cierra su cuaderno. *"Quedan por contar tres cosas, y las tres son tuyas: había profesores dormidos y uno zombi que nadie recogía, una suplente que nadie contrató y un timbre que no se dejaba matar. La academia ya sabe quién trabaja, quién no y quién no debería estar. Buen trabajo. — A."*
 
 ::: tip
 Un buen informe responde siempre a tres preguntas: **¿qué pasaba?**, **¿cómo lo supe?** y **¿qué hice?**.
