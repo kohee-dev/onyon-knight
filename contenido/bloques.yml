@@ -111,6 +111,7 @@ sri:
     dificultad: intermedio
     piezas:
       dns-bind: avanzado
+      dns-practica-guiada: basico
   web:
     tema: servicios-red
     dificultad: intermedio

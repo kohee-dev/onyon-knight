@@ -9,7 +9,7 @@ unidades:
     piezas: [dhcp, kea-dhcp, dhcp-windows, amarres-innsmouth]
   - id: ut2
     titulo: DNS
-    piezas: [dns, dns-bind, dns-windows]
+    piezas: [dns, dns-bind, dns-windows, dns-practica-guiada]
   - id: ut3
     titulo: Servidores web
     piezas: [web, web-apache, web-nginx, web-iis]
