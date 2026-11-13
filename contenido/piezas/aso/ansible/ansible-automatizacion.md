@@ -28,7 +28,7 @@ Todas las soluciones se escriben en YAML/Ansible. Usa siempre los nombres comple
 
 # Conocimientos previos
 
-Antes de empezar deberías repasar la teoría de Ansible. En concreto, necesitas saber:
+Antes de empezar deberías repasar la teoría de [[ansible-teoria|Automatización con Ansible]]. En concreto, necesitas saber:
 
 - Qué es el **inventario** y cómo se agrupan los nodos.
 - Cuándo usar un comando **ad-hoc** y cuándo un **playbook**.
