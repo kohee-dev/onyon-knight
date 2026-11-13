@@ -25,3 +25,5 @@
   nombre: Programación
 - id: gestion-empresarial
   nombre: Gestión empresarial (ERP)
+- id: automatizacion
+  nombre: Automatización
