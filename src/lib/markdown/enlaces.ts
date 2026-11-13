@@ -1,5 +1,7 @@
 import type { PhrasingContent, Root, Text } from 'mdast';
 import type { VFile } from 'vfile';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { SKIP, visit } from 'unist-util-visit';
 import { estado } from './comun';
 import type { ContextoRender } from './index';
@@ -62,6 +64,7 @@ export function remarkEnlaces() {
 /**
  * Enlaces Markdown normales: solo http(s), mailto y anclas. Las rutas del sitio (/…) se hacen absolutas
  * dentro de una unidad (el PDF se imprime desde 127.0.0.1); las relativas se rechazan en favor de [[id]].
+ * `descarga:fichero.ext` enlaza un fichero de `public/descargas/` respetando la ruta base del sitio.
  */
 export function remarkEnlacesNormales() {
   return (arbol: Root, file: VFile) => {
@@ -72,6 +75,17 @@ export function remarkEnlacesNormales() {
       const fallo = (mensaje: string) =>
         e.problemas.push({ archivo: e.pieza.archivo, linea: nodo.position ? nodo.position.start.line + e.desplazamiento : undefined, mensaje });
       if (/^(https?:|mailto:|#)/i.test(url)) return;
+      const descarga = /^descarga:(.+)$/i.exec(url);
+      if (descarga) {
+        const nombre = descarga[1];
+        if (!/^[\w.-]+$/.test(nombre) || !existsSync(resolve('public/descargas', nombre))) {
+          fallo(`descarga inexistente «${nombre}» (el fichero debe estar en public/descargas/)`);
+          return;
+        }
+        const ruta = `${e.ctx.base}descargas/${nombre}`;
+        nodo.url = e.ctx.unidad ? new URL(ruta, e.ctx.sitioUrl).href : ruta;
+        return;
+      }
       if (url.startsWith('/') && !url.startsWith('//')) {
         if (e.ctx.unidad) nodo.url = new URL(url, e.ctx.sitioUrl).href;
         return;

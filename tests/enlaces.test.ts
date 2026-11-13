@@ -21,6 +21,22 @@ async function error(cuerpo: string, otras: PiezaFuente[] = [b]): Promise<string
   throw new Error('no lanzó error');
 }
 
+describe('descargas', () => {
+  it('enlaza un fichero de public/descargas con la ruta base', async () => {
+    expect((await render('[doc](descarga:ansible-entrega1.docx)')).html).toContain('href="/ok/descargas/ansible-entrega1.docx"');
+  });
+
+  it('usa una URL absoluta dentro de una unidad', async () => {
+    expect((await render('[doc](descarga:ansible-entrega1.docx)', { unidad: ['a'] })).html).toContain(
+      'href="https://ej.es/ok/descargas/ansible-entrega1.docx"',
+    );
+  });
+
+  it('falla si el fichero no existe', async () => {
+    expect(await error('[doc](descarga:no-existe.docx)')).toContain('descarga inexistente «no-existe.docx»');
+  });
+});
+
 describe('enlaces wiki', () => {
   it('enlaza a la página de la pieza con su título', async () => {
     expect((await render('Ver [[b]].')).html).toContain('<a href="/ok/apuntes/b/">Título de B</a>');

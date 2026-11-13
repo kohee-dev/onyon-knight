@@ -16,3 +16,6 @@ unidades:
   - id: ut6
     titulo: Servicios de impresión
     piezas: [impresion-cups, impresion-windows]
+  - id: ut7
+    titulo: Automatización con Ansible
+    piezas: [ansible-automatizacion]

@@ -1,5 +1,8 @@
 # Tema y dificultad de cada bloque (carpeta piezas/<módulo>/<bloque>/) y excepciones de dificultad por pieza.
 aso:
+  ansible:
+    tema: automatizacion
+    dificultad: intermedio
   impresion:
     tema: servicios-red
     dificultad: intermedio
