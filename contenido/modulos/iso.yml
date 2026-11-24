@@ -10,6 +10,9 @@ unidades:
   - id: comandos
     titulo: Comandos básicos de Linux
     piezas: [comandos-moverse, comandos-leer-ficheros, comandos-crear-copiar-borrar, comandos-permisos-usuarios, comandos-buscar-ficheros, comandos-buscar-texto, comandos-redirecciones-tuberias, comandos-transformar-texto, comandos-datos-codificados, comandos-comprimir-empaquetar, comandos-procesos-entorno, comandos-red-acceso-remoto]
+  - id: powershell
+    titulo: Comandos y scripts de Windows (PowerShell)
+    piezas: [powershell-moverse, powershell-leer-ficheros, powershell-crear-copiar-borrar, powershell-buscar, powershell-tuberias-objetos, powershell-salida-datos, powershell-usuarios-permisos, powershell-procesos-servicios, powershell-red, powershell-scripts-variables, powershell-scripts-decisiones, powershell-scripts-automatizar]
   - id: ut2
     titulo: Configuración del software de base
     piezas: [configuracion-software-base, consola-escritorio]
