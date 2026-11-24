@@ -9,8 +9,6 @@ aso:
   procesos:
     tema: procesos
     dificultad: intermedio
-    piezas:
-      procesos-espectro: avanzado
   servicios-directorio:
     tema: servicios-directorio
     dificultad: intermedio
