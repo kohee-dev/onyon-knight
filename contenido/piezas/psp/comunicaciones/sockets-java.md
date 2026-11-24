@@ -493,16 +493,3 @@ Escribe `ServidorSala.java` que cumpla el protocolo y atienda a todos los client
 :::ejercicio[Documenta tu trabajo]
 Escribe una descripción de una página con: qué hace cada una de tus clases, qué protocolo habla cada una, qué puertos usan y cómo se prueban. Debe poder seguirla alguien que no ha hecho el caso.
 :::
-
-# Criterios de evaluación cubiertos
-
-Cada parte trabaja los criterios del **RA3** (*Programa mecanismos de comunicación en red empleando sockets y analizando el escenario de ejecución*) de la programación didáctica:
-
-| Parte | Criterios | Evidencia |
-| --- | --- | --- |
-| 1. Un cliente y un servidor | RA3.b, RA3.c, RA3.d, RA3.e, RA3.f | Cliente que se comunica con el servidor; explica qué hace cada clase y cada línea clave. |
-| 2. Varios clientes a la vez | RA3.f, RA3.h | Explica por qué el segundo cliente esperaba; atiende a varios clientes con un hilo por cliente. |
-| 3. Un contador compartido | RA3.g, RA3.h | Cumple el protocolo; el total cuadra siempre; razona la pérdida de sumas sin sincronizar. |
-| 4. Cuando la red falla | RA3.e, RA3.j | Provoca y distingue los tres fallos; el cliente no se queda colgado; depura con la salida. |
-| 5. UDP | RA3.d, RA3.g | Detecta las lecturas perdidas; compara TCP y UDP con criterio y elige protocolo según el caso. |
-| 6. Una sala de mensajes | RA3.a, RA3.b, RA3.h, RA3.i, RA3.j | Sala con varios clientes; protege la lista compartida; compara cliente/servidor con entre pares; documenta. |
