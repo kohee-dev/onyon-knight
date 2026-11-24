@@ -40,54 +40,6 @@ Con redes y hilos, **no todo falla siempre igual**: un puerto puede seguir ocupa
 
 Las clases nuevas se explican donde aparecen: `Socket` y `ServerSocket` (TCP) en la parte 1, y `DatagramSocket` y `DatagramPacket` (UDP) en la parte 5.
 
-# Cómo entregar el trabajo
-
-Hay **seis entregas**, una por parte. Cada una es un **PDF** y, en las partes que lo piden, uno o más **ficheros `.java`**.
-
-- **Plazo y canal:** los indicará el profesorado.
-- **PDF:** `entregaN_apellido_nombre.pdf` (en minúsculas, sin tildes ni espacios).
-- **Ficheros:** `NombreDeLaClase_apellido_nombre.java` conservando el nombre de la clase dentro del fichero, por ejemplo `ClienteEco_garcia_ana.java`. Antes de entregarlos, renómbralos de nuevo a su nombre real para compilar.
-
-Esta es la plantilla del PDF. Escríbela en el programa que prefieras y expórtala a PDF:
-
-````markdown
-# Entrega N — <título de la parte>
-
-**Nombre:** …  **Grupo:** …  **Fecha:** …
-
-| Nº | Qué has hecho o contestado | Resultado o respuesta |
-|----|----------------------------|-----------------------|
-| N.1 | `orden` o explicación | salida o respuesta |
-| N.2 | … | … |
-
-## Evidencia final
-
-```text
-(pega aquí la salida de tu programa que demuestra lo que se pide)
-```
-````
-
-**Reglas de la entrega:**
-
-- Una fila por pregunta, con el **número del enunciado**.
-- Si no tienes resultado, escribe `—`; no borres la fila.
-- Pega las salidas **como texto**, no como capturas.
-- Las explicaciones, con tus propias palabras.
-- Un programa que no compila se corrige como no entregado.
-
-**Qué debe contener cada entrega.** La evidencia final es la salida de tu programa, de la forma que tú elijas, y debe mostrar lo que se pide:
-
-| Entrega | Ficheros | Además de la evidencia | La evidencia final debe mostrar |
-|---------|----------|------------------------|---------------------------------|
-| 1 | PDF + `ClienteEco.java` | Qué hace cada línea de tu cliente | El cliente y el servidor intercambiando al menos tres líneas |
-| 2 | PDF + `ServidorHilos.java` | Por qué el segundo cliente esperaba | Dos clientes atendidos a la vez, con el servidor atendiendo al segundo mientras el primero sigue conectado |
-| 3 | PDF + `ServidorContador.java` | Tu protocolo de errores | El total correcto tras ejecutar `ClientePrueba` varias veces, y qué ocurre si quitas la sincronización |
-| 4 | PDF + `ClienteRobusto.java` | Tu tabla de fallos | Los tres fallos de red provocados, cada uno con su mensaje |
-| 5 | PDF + `Receptor.java` | Tu comparación entre TCP y UDP | El receptor avisando de las lecturas que faltan |
-| 6 | PDF + `ServidorSala.java` | Tus respuestas sobre arquitecturas | Tres clientes en la sala y la salida de uno de ellos |
-
-**Cómo se califica:** los criterios de cada parte están al final del caso. Una entrega no presentada en plazo se corrige como no entregada.
-
 # Parte 1. Un cliente y un servidor
 
 **Herramientas de esta parte: `ServerSocket`, `Socket`, `BufferedReader` y `PrintWriter`.**
@@ -539,18 +491,5 @@ Escribe `ServidorSala.java` que cumpla el protocolo y atienda a todos los client
 :::
 
 :::ejercicio[Documenta tu trabajo]
-Escribe una descripción de una página (en el PDF de la entrega) con: qué hace cada una de tus clases, qué protocolo habla cada una, qué puertos usan y cómo se prueban. Debe poder seguirla alguien que no ha hecho el caso.
+Escribe una descripción de una página con: qué hace cada una de tus clases, qué protocolo habla cada una, qué puertos usan y cómo se prueban. Debe poder seguirla alguien que no ha hecho el caso.
 :::
-
-# Criterios de evaluación cubiertos
-
-Cada parte trabaja los criterios del **RA3** (*Programa mecanismos de comunicación en red empleando sockets y analizando el escenario de ejecución*) de la programación didáctica:
-
-| Parte | Criterios | Evidencia |
-| --- | --- | --- |
-| 1. Un cliente y un servidor | RA3.b, RA3.c, RA3.d, RA3.e, RA3.f | Cliente que se comunica con el servidor; explica qué hace cada clase y cada línea clave. |
-| 2. Varios clientes a la vez | RA3.f, RA3.h | Explica por qué el segundo cliente esperaba; atiende a varios clientes con un hilo por cliente. |
-| 3. Un contador compartido | RA3.g, RA3.h | Cumple el protocolo; el total cuadra siempre; razona la pérdida de sumas sin sincronizar. |
-| 4. Cuando la red falla | RA3.e, RA3.j | Provoca y distingue los tres fallos; el cliente no se queda colgado; depura con la salida. |
-| 5. UDP | RA3.d, RA3.g | Detecta las lecturas perdidas; compara TCP y UDP con criterio y elige protocolo según el caso. |
-| 6. Una sala de mensajes | RA3.a, RA3.b, RA3.h, RA3.i, RA3.j | Sala con varios clientes; protege la lista compartida; compara cliente/servidor con entre pares; documenta. |
