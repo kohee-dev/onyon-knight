@@ -10,3 +10,6 @@ unidades:
   - id: ut2
     titulo: Programación multihilo
     piezas: [problema-barbero, taquilla-festival]
+  - id: ut3
+    titulo: Programación de comunicaciones en red
+    piezas: [sockets-java]
