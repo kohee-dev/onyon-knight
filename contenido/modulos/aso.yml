@@ -13,6 +13,9 @@ unidades:
   - id: ut2
     titulo: Procesos del sistema
     piezas: [procesos-teoria, procesos-linux, procesos-windows, procesos-academia]
+  - id: ut4
+    titulo: Acceso y administración remota
+    piezas: [acceso-remoto]
   - id: ut6
     titulo: Servicios de impresión
     piezas: [impresion-cups, impresion-windows]
