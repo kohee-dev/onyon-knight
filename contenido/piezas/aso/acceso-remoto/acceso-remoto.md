@@ -2,7 +2,7 @@
 titulo: "Acceso y administración remota"
 licencia: CC-BY-NC-SA-4.0
 fuentes:
-  - "Criterios de evaluación (RA4, UT4) de la programación didáctica de ASO 2026-27. Los ejemplos de OpenSSH (claves, permisos, AllowUsers, scp, órdenes remotas y bucle por varios equipos) se comprobaron con un servidor de pruebas con OpenSSH 9.6; las órdenes de apt-cacher-ng y unattended-upgrades siguen su documentación y no se ejecutaron en el entorno de pruebas."
+  - "Los ejemplos de OpenSSH (claves, permisos, AllowUsers, scp, órdenes remotas y bucle por varios equipos) se comprobaron con un servidor de pruebas con OpenSSH 9.6; las órdenes de apt-cacher-ng y unattended-upgrades siguen su documentación y no se ejecutaron en el entorno de pruebas."
 ---
 
 Cuando un servidor está en otra sala, en otro edificio o en un centro de datos a cientos de kilómetros, no vas a llevarle teclado y pantalla cada vez que haya que reiniciar un servicio. Lo administras de forma **remota**: desde tu equipo abres una sesión en el suyo, ejecutas órdenes, copias ficheros y supervisas lo que ocurre, todo a través de la red.
@@ -12,22 +12,6 @@ Esa comodidad tiene un precio: si tú puedes entrar en el servidor desde fuera, 
 ::: nota
 Este tema se centra en GNU/Linux (OpenSSH) y termina con la gestión centralizada de actualizaciones. Los conceptos de la primera parte (protocolos, puertos, sesiones, cifrado) valen para cualquier sistema; en la práctica los comprobarás también entre sistemas distintos.
 :::
-
-# Qué evalúa este tema
-
-El RA4 dice: *«Administra de forma remota el sistema operativo en red valorando su importancia y aplicando criterios de seguridad»*. Estos son sus criterios de evaluación y dónde los trabajas:
-
-| CE | Criterio | Dónde se trata |
-|---|---|---|
-| a | Se han descrito métodos de acceso y administración remota de sistemas | 1 y 2 |
-| b | Se ha diferenciado entre los servicios orientados a sesión y los no orientados a sesión | 3 |
-| c | Se han utilizado herramientas de administración remota suministradas por el propio sistema operativo | 7 y 8 |
-| d | Se han instalado servicios de acceso y administración remota | 6 |
-| e | Se han utilizado comandos y herramientas gráficas para gestionar los servicios de acceso y administración remota | 6, 10 y 12 |
-| f | Se han creado cuentas de usuario para el acceso remoto | 7 |
-| g | Se han realizado pruebas de acceso y administración remota entre sistemas heterogéneos | 11 |
-| h | Se han utilizado mecanismos de encriptación de la información transferida | 4 y 9 |
-| i | Se han documentado los procesos y servicios del sistema administrados de forma remota | 13 |
 
 # 1. ¿Por qué administrar de forma remota?
 
@@ -66,6 +50,10 @@ En cada sistema operativo hay herramientas **suministradas por el propio sistema
 El terminal remoto es la opción preferida para administrar servidores: consume muy poco ancho de banda, funciona incluso con conexiones malas y se puede automatizar con scripts. El escritorio remoto se reserva para tareas que necesitan interfaz gráfica.
 :::
 
+::: pregunta[Un administrador necesita (a) reiniciar un servicio de un servidor sin monitor, (b) instalar un programa con asistente gráfico en un Windows Server y (c) copiar cada noche una carpeta a otro equipo. ¿Qué método de acceso elegirías en cada caso?]
+(a) **Terminal remoto** con SSH: basta una orden y consume poco ancho de banda. (b) **Escritorio remoto** (RDP): el asistente es gráfico y no se puede hacer solo con órdenes. (c) **Transferencia de ficheros** con `rsync` sobre SSH, que además se puede programar y solo copia lo que ha cambiado.
+:::
+
 # 3. Servicios orientados a sesión y no orientados a sesión
 
 Una **sesión** es un diálogo con principio y fin entre dos equipos: se establece, se identifica a quien se conecta, se mantiene un estado mientras dura y se cierra. Según trabajen o no así, los servicios de red se dividen en dos grupos.
@@ -92,6 +80,10 @@ Una **sesión** es un diálogo con principio y fin entre dos equipos: se estable
 
 ::: tip
 Una regla útil: si el servicio **te pide que inicies sesión**, está orientado a sesión. Si solo envía o recibe mensajes sueltos (una alerta de syslog, una petición de hora a NTP), no lo está.
+:::
+
+::: pregunta[Clasifica SSH, NTP, RDP, syslog y TFTP en servicios orientados a sesión o no, y justifica el criterio.]
+**Con sesión:** SSH y RDP, porque te identificas al empezar y el servidor recuerda tu contexto hasta que cierras. **Sin sesión:** NTP, syslog y TFTP, porque cada mensaje se envía y se responde (o no) de forma independiente y no hay inicio de sesión. La regla práctica: si el servicio te pide iniciar sesión, está orientado a sesión.
 :::
 
 # 4. Protocolos y puertos
@@ -128,9 +120,17 @@ Y para comprobar desde otro equipo si un puerto responde:
 nc -zv servidor 22      # ¿responde el puerto 22 de «servidor»?
 ```
 
+::: pregunta[Un compañero dice que Telnet y SSH «dan lo mismo». ¿En qué se parecen, en qué se diferencian y cuál usarías?]
+Se parecen en que los dos dan un **terminal remoto** sobre TCP (Telnet en el puerto 23, SSH en el 22). Se diferencian en que Telnet va **sin cifrar**: cualquiera que capture el tráfico lee usuario, contraseña y órdenes. SSH cifra toda la conexión y además verifica la identidad del servidor. Se usa siempre SSH; Telnet solo tendría sentido en un laboratorio aislado.
+:::
+
+::: pregunta[Ejecutas `ss -tlnp | grep :22` en un servidor y sale `LISTEN 0 128 127.0.0.1:22 ...`. Desde otro equipo, `ssh` da `Connection refused`. ¿Por qué?]
+El servicio escucha en `127.0.0.1`, la dirección de **bucle local**, así que solo acepta conexiones del propio servidor. Cuando escucha en todas las interfaces aparece `0.0.0.0:22`. Hay que revisar la directiva `ListenAddress` de `sshd_config`, corregirla, comprobar con `sudo sshd -t` y recargar el servicio.
+:::
+
 # 5. Seguridad en el acceso remoto
 
-Los criterios de seguridad que pide el RA4 se concretan en medidas muy repetidas en la práctica:
+Los criterios de seguridad se concretan en medidas muy repetidas en la práctica:
 
 - **Cifrar el canal**: nada de contraseñas ni datos en claro (SSH, RDP con NLA, HTTPS).
 - **Autenticación fuerte**: contraseñas largas y, mejor aún, **claves criptográficas** que no se pueden adivinar por fuerza bruta.
@@ -140,7 +140,7 @@ Los criterios de seguridad que pide el RA4 se concretan en medidas muy repetidas
 - **Registrar y vigilar**: revisar los registros de acceso y bloquear los intentos repetidos.
 - **Documentar**: saber qué se administra, quién puede entrar y cómo.
 
-# 6. Instalar y comprobar el servicio SSH (CE d, e)
+# 6. Instalar y comprobar el servicio SSH
 
 **OpenSSH** es la implementación libre de SSH y la que usan casi todos los sistemas Linux. Tiene dos partes:
 
@@ -185,7 +185,11 @@ sudo ufw status           # ver las reglas
 Si activas el cortafuegos con `sudo ufw enable` **antes** de permitir SSH, te quedas fuera de un servidor que solo administras por red. Añade siempre la regla primero.
 :::
 
-# 7. Conectarse y crear cuentas para el acceso remoto (CE c, f)
+::: pregunta[Administras un servidor solo por SSH. Escribes `sudo ufw enable` y después `sudo ufw allow 22/tcp`. ¿Qué puede pasar y cómo se evita?]
+Al activar el cortafuegos sin ninguna regla que permita el puerto 22 puede cortarse la conexión y quedarte **fuera del servidor**, sin forma de arreglarlo por red. Se evita permitiendo SSH **antes** de activar el cortafuegos: primero `sudo ufw allow 22/tcp` (o `sudo ufw limit ssh`) y después `sudo ufw enable`, comprobando el resultado con `sudo ufw status`.
+:::
+
+# 7. Conectarse y crear cuentas para el acceso remoto
 
 ## 7.1 Primera conexión
 
@@ -232,14 +236,28 @@ AllowGroups sshusers
 ```
 
 ::: aviso
-Si creas la cuenta con `useradd` en lugar de `adduser`, la contraseña queda **bloqueada** (marcada con `!`). En un servidor configurado sin PAM (`UsePAM no`) eso impide incluso la entrada por clave, aunque la clave sea correcta. Para tener una cuenta sin contraseña pero que sí admita clave, usa `sudo usermod -p '*' usuario`. Se comprueba fácilmente en un servidor de pruebas sin PAM: con la contraseña bloqueada se rechaza la entrada; con `*`, entra con la clave.
+Si creas la cuenta con `useradd` en lugar de `adduser`, la contraseña queda **bloqueada** (marcada con `!`). En un servidor configurado sin PAM (`UsePAM no`) eso impide incluso la entrada por clave, aunque la clave sea correcta. Para tener una cuenta sin contraseña pero que sí admita clave, usa `sudo usermod -p '*' usuario`.
 :::
 
 ::: aviso
 Al crear una cuenta administrativa, dale permisos de `sudo` (grupo `sudo` en Ubuntu) solo si de verdad los necesita. Trabajar como `root` por SSH es una mala práctica: no deja rastro de quién fue y un error cuesta mucho más.
 :::
 
-# 8. Configurar el servidor SSH (CE d, e)
+::: pregunta[Quieres crear una cuenta, `juan`, y limitar el acceso por SSH al grupo `sshusers`. Escribe las órdenes para crear la cuenta y meterla en el grupo, y la línea de `sshd_config` que limita el acceso.]
+```bash
+sudo adduser juan
+sudo groupadd sshusers          # solo si el grupo no existe todavía
+sudo usermod -aG sshusers juan
+```
+
+```text
+AllowGroups sshusers
+```
+
+Después se comprueba con `sudo sshd -t` y se recarga con `sudo systemctl reload ssh`. Si en `usermod` se olvida la opción `-a`, `juan` **pierde** el resto de sus grupos suplementarios y queda solo en `sshusers`.
+:::
+
+# 8. Configurar el servidor SSH
 
 El comportamiento del servidor se define en `/etc/ssh/sshd_config`. Las directivas más importantes para un acceso seguro:
 
@@ -282,7 +300,15 @@ En las versiones recientes de Ubuntu (a partir de la 22.10, incluida la 24.04) `
 Cambiar el puerto 22 por otro reduce el ruido de los bots en los registros, pero **no es una medida de seguridad real**: un atacante detecta el nuevo puerto con un escaneo. La seguridad la dan las claves, la restricción de usuarios y el cortafuegos.
 :::
 
-# 9. Autenticación por clave y cifrado (CE h)
+::: pregunta[Has aplicado `PasswordAuthentication no` pero aún no has copiado ninguna clave. ¿Qué ocurre al recargar y qué habría evitado el problema?]
+Nadie podrá entrar: las contraseñas se rechazan y no hay clave autorizada, así que si solo se administra por red no hay forma de arreglarlo. Se evita **instalando y probando primero la clave** (`ssh-copy-id`), comprobando que se entra con ella desde **otra** terminal, y solo entonces desactivando la contraseña con `sudo sshd -t && sudo systemctl reload ssh`, sin cerrar la sesión abierta.
+:::
+
+::: pregunta[¿Por qué es mejor `reload` que `restart` al cambiar la configuración de SSH y por qué hay que mantener abierta la sesión actual?]
+Con `reload` el servicio relee la configuración **sin cortar** las sesiones ya abiertas. Con `restart` se reinicia el demonio y, si la nueva configuración tiene un fallo, puede no volver a arrancar y se pierde el acceso. La sesión abierta es la red de seguridad: si la nueva configuración falla al probar con otra conexión, aún se puede entrar para corregirla.
+:::
+
+# 9. Autenticación por clave y cifrado
 
 ## 9.1 Qué cifra SSH
 
@@ -329,7 +355,7 @@ ssh-copy-id ana@servidor            # (usa -p 2222 si el puerto no es el 22)
 Eso añade tu clave pública al fichero `~/.ssh/authorized_keys` de la cuenta `ana` en el servidor. A partir de ahí, `ssh ana@servidor` entra con la clave (te pide la frase de paso, no la contraseña de la cuenta).
 
 ::: aviso
-Los permisos importan. El servidor rechaza la clave si los ficheros son accesibles por otros usuarios (`StrictModes`): `~/.ssh` debe ser `700` y `authorized_keys` debe ser `600`. Se comprueba fácilmente en un servidor de pruebas: con `authorized_keys` en `666`, la entrada por clave se rechaza.
+Los permisos importan. El servidor rechaza la clave si los ficheros son accesibles por otros usuarios (`StrictModes`): `~/.ssh` debe ser `700` y `authorized_keys` debe ser `600`.
 :::
 
 ```bash
@@ -343,7 +369,15 @@ Cuando compruebes que entras con clave, ya puedes poner `PasswordAuthentication 
 Para no escribir la frase de paso en cada conexión, usa el **agente SSH** (`ssh-agent` y `ssh-add`), que la guarda en memoria durante la sesión de tu equipo. Es la combinación de comodidad y seguridad más habitual.
 :::
 
-# 10. Transferir ficheros y ejecutar órdenes remotas (CE e)
+::: pregunta[Un compañero te pide tu fichero `id_ed25519` para entrar en el servidor con tu cuenta. ¿Qué haces?]
+**No se lo das**: la clave privada nunca sale del equipo de su dueño. Si necesita acceso, genera **su propio par** con `ssh-keygen -t ed25519` y se instala su clave **pública** (`id_ed25519.pub`) en su cuenta con `ssh-copy-id`. Cada persona tiene su cuenta y sus claves, para saber quién hizo cada cosa.
+:::
+
+::: pregunta[`ssh-copy-id` funcionó, pero el servidor sigue pidiendo la contraseña en lugar de usar la clave. Nombra dos causas posibles y cómo las comprobarías.]
+(1) **Permisos incorrectos**: `~/.ssh` debe ser `700` y `authorized_keys` `600`; se revisa con `ls -ld ~/.ssh` y `ls -l ~/.ssh/authorized_keys` y se corrige con `chmod`. (2) **`PubkeyAuthentication no`** (o un `AllowUsers`/`AllowGroups` que no incluye la cuenta) en `sshd_config`. Para ver el motivo exacto, se mira `sudo journalctl -u ssh -n 20` en el servidor o se prueba con `ssh -v` desde el cliente.
+:::
+
+# 10. Transferir ficheros y ejecutar órdenes remotas
 
 Con SSH no solo abres un terminal. El mismo canal cifrado sirve para más cosas:
 
@@ -386,7 +420,18 @@ ssh -X ana@servidor                        # reenvío de ventanas gráficas (X11
 
 Con el primer ejemplo, un cliente VNC apuntando a `localhost:5901` en tu equipo llega al VNC del servidor, pero el tráfico viaja cifrado por SSH.
 
-# 11. Pruebas entre sistemas heterogéneos (CE g)
+::: pregunta[Escribe la orden para (a) subir `copia.tar.gz` al directorio `/home/ana/` del servidor, que escucha en el puerto 2222, y (b) ver el espacio libre del disco del servidor sin abrir una sesión interactiva.]
+```bash
+scp -P 2222 copia.tar.gz ana@servidor:/home/ana/    # (a) -P mayúscula en scp
+ssh -p 2222 ana@servidor 'df -h /'                  # (b) -p minúscula en ssh
+```
+:::
+
+::: pregunta[El servidor web de `servidor` solo escucha en `localhost:80` y no está abierto en el cortafuegos. ¿Cómo ves su página desde tu equipo sin abrir ningún puerto?]
+Con un **túnel SSH**: `ssh -L 8080:localhost:80 ana@servidor`. Mientras la sesión esté abierta, el puerto 8080 de tu equipo apunta al puerto 80 del servidor, y al abrir `http://localhost:8080` en el navegador llegas a su página, con el tráfico cifrado dentro de SSH.
+:::
+
+# 11. Pruebas entre sistemas heterogéneos
 
 En una red real conviven sistemas distintos: administradores con Windows que manejan servidores Linux, o al revés. Lo importante es que **SSH es un estándar**: cualquier cliente que lo cumpla se conecta a cualquier servidor que lo cumpla.
 
@@ -404,7 +449,13 @@ Cuando pruebes un acceso entre sistemas distintos, sigue siempre el mismo orden 
 
 Los mensajes de error orientan: `Connection refused` (nada escucha o lo bloquea), `Connection timed out` (no se llega, normalmente cortafuegos o red) y `Permission denied (publickey)` (el servicio responde pero no te acepta: usuario, clave o permisos).
 
-# 12. Escritorio remoto y herramientas gráficas (CE e)
+::: pregunta[Explica qué significa cada mensaje y qué revisarías primero: `Connection refused`, `Connection timed out` y `Permission denied (publickey)`.]
+- **`Connection refused`**: se llega al equipo, pero nada escucha en ese puerto o algo lo rechaza. Se revisa si el servicio está en marcha (`systemctl status ssh`) y el puerto (`ss -tlnp`).
+- **`Connection timed out`**: no se llega al equipo o el tráfico se descarta. Se revisa la conectividad (`ping`), la dirección y el cortafuegos.
+- **`Permission denied (publickey)`**: el servicio responde, pero no acepta la autenticación. Se revisa el usuario, la clave instalada y los permisos de `~/.ssh` y `authorized_keys`.
+:::
+
+# 12. Escritorio remoto y herramientas gráficas
 
 Cuando se necesita interfaz gráfica, hay dos caminos habituales:
 
@@ -415,7 +466,7 @@ Cuando se necesita interfaz gráfica, hay dos caminos habituales:
 Aunque el escritorio remoto es cómodo, en un servidor es casi siempre peor que el terminal: consume recursos, amplía la superficie de ataque y no se automatiza. Úsalo solo cuando no haya otra opción.
 :::
 
-# 13. Documentar la administración remota (CE i)
+# 13. Documentar la administración remota
 
 Un acceso remoto que no está documentado es un problema esperando a ocurrir: cuando falla algo o se va un administrador, nadie sabe qué hay montado. La documentación mínima de un servicio administrado de forma remota debería recoger:
 
@@ -439,6 +490,17 @@ Cortafuegos: ufw, 22/tcp permitido solo desde 192.168.1.0/24
 Cambios: 25/11/2026 · ana · desactivada la contraseña tras instalar las claves
 Comprobación: systemctl status ssh · ss -tlnp | grep :22
 ```
+
+::: pregunta[Completa la ficha de un servidor nuevo con estos datos: `srv-db01`, 192.168.1.30, Ubuntu Server 24.04, SSH en el 22, entran Ana y Luis del grupo `sshusers`, solo con clave, root desactivado, `ufw` permite el 22 solo desde 192.168.1.0/24.]
+```text
+Servidor: srv-db01 · 192.168.1.30 · Ubuntu Server 24.04
+Acceso remoto: OpenSSH, puerto 22, solo grupo sshusers (ana, luis)
+Autenticación: solo clave pública; PasswordAuthentication no; root deshabilitado
+Cortafuegos: ufw, 22/tcp permitido solo desde 192.168.1.0/24
+Cambios: (fecha) · (quién) · (qué se cambió y cómo volver atrás)
+Comprobación: systemctl status ssh · ss -tlnp | grep :22
+```
+:::
 
 # 14. Gestión centralizada de actualizaciones
 
@@ -527,6 +589,10 @@ Para que funcione sin intervención la cuenta debe tener **clave SSH** instalada
 
 ::: tip
 Esto enlaza con la automatización con scripts de Bash del módulo: el bucle de arriba es el punto de partida de un script que, además, compruebe si cada equipo responde, anote los fallos y escriba un informe al final.
+:::
+
+::: pregunta[Tienes 40 equipos iguales con Ubuntu y poca conexión a Internet. ¿Qué estrategia de actualización elegirías y por qué?]
+Una **caché de paquetes** (`apt-cacher-ng`) o un espejo local: cada paquete se descarga de Internet **una sola vez** y los 40 equipos lo reciben de la red local. Además, todos quedan en la misma versión. Para los parches de seguridad se puede combinar con `unattended-upgrades`, y para lanzar una actualización en el momento que decida el administrador, con un bucle de `ssh` sobre la lista de equipos.
 :::
 
 # 15. Resumen
