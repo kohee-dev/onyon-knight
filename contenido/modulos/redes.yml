@@ -10,3 +10,6 @@ unidades:
   - id: ut2
     titulo: Montaje de canalizaciones, soportes y armarios
     piezas: [montaje-canalizaciones-soportes-armarios]
+  - id: par-trenzado
+    titulo: Par trenzado, T568A/B y crimpado
+    piezas: [par-trenzado-t568-crimpado]
