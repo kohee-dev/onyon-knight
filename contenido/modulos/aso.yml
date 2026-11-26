@@ -20,5 +20,5 @@ unidades:
     titulo: Servicios de impresión
     piezas: [impresion-cups, impresion-windows]
   - id: ut7
-    titulo: Automatización con Ansible
-    piezas: [ansible-teoria, ansible-automatizacion]
+    titulo: Automatización con Ansible y Terraform
+    piezas: [ansible-teoria, ansible-automatizacion, convoy-marte]
