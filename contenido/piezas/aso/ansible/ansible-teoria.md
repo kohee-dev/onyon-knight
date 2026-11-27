@@ -666,7 +666,7 @@ Enable-PSRemoting -Force          # arranca WinRM y crea el «listener» HTTP en
 winrm enumerate winrm/config/listener
 ```
 
-Al terminar de trabajar se puede cerrar con `Disable-PSRemoting -Force`, parando el servicio y quitando la regla del cortafuegos.
+Para cerrarlo al terminar no basta con `Disable-PSRemoting -Force`: ese cmdlet no para el servicio ni quita el *listener* ni las reglas del cortafuegos. Hay que hacerlo aparte (`Stop-Service WinRM`, `Set-Service WinRM -StartupType Disabled`, borrar el *listener* y desactivar las reglas «Windows Remote Management»).
 
 **El inventario de un nodo Windows.** Se cambia la conexión y se indica cómo autenticarse:
 

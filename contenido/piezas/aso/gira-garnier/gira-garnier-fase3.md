@@ -40,7 +40,7 @@ Herme anota en un papel qué ha cambiado y no lo dice hasta el final.
 
 a) Encontrad **cada uno** de los fallos. Para cada uno, indicad qué herramienta lo ha delatado y pegad la salida que lo demuestra.
 
-b) Uno de los fallos haría que el playbook terminara **sin ningún error** y, aun así, la orquesta no sonaría. ¿Cuál? ¿Por qué no lo detecta una ejecución normal?
+b) Uno de los fallos haría que el playbook terminara **sin ningún error** y, aun así, en un servidor **recién reconstruido** la orquesta no sonaría. ¿Cuál? ¿Por qué no lo detecta una ejecución normal, y por qué en los servidores que ya teníais parece que todo sigue funcionando?
 
 c) Rechazad la PR con un comentario en GitHub que explique los fallos. Si Herme llegó a fusionar algo, revertidlo.
 
@@ -62,7 +62,7 @@ c) Una segunda ejecución de `site.yml` con `changed=0`.
 
 Una hora antes del estreno, un servidor ha quedado inservible. No hay tiempo para arreglarlo a mano.
 
-a) Escribid `reconstruir.sh` en la raíz del repositorio. Se ejecuta dentro de la estación, destruye **solo los servidores**, los vuelve a crear y los configura enteros. **No** debe tocar la red `garnier`, el volumen `garnier-datos`, la estación ni, en la fase 4, la consola de regiduría. Si cualquier paso falla, el script debe pararse en ese momento.
+a) Escribid `reconstruir.sh` en la raíz del repositorio. Se ejecuta dentro de la estación, destruye **solo los servidores**, los vuelve a crear y los configura enteros. **No** debe tocar la red `garnier`, el volumen `garnier-datos`, la estación ni, en la fase 4, la consola de regiduría. Si cualquier paso falla, el script debe pararse en ese momento. Si lo creáis en Windows, Git no le pondrá permiso de ejecución y en un Mac o Linux fallará con `Permission denied`: marcadlo con `git update-index --chmod=+x reconstruir.sh` antes del commit.
 
 b) Ejecutadlo. Después, ejecutad `site.yml` otra vez.
 

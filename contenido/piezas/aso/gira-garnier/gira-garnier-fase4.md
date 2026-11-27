@@ -49,7 +49,7 @@ c) Semaphore lee los playbooks de vuestro repositorio, montado **en solo lectura
 
 d) Consultad la documentación de la imagen de Semaphore para saber qué variables de entorno necesita para usar PostgreSQL y crear el administrador.
 
-**Evidencias:** la línea `Apply complete!`, la salida de `curl -s localhost:3000/api/ping` desde el anfitrión, la de `docker port garnier-archivo` y la prueba de que la contraseña no está en el repositorio (`git grep`).
+**Evidencias:** la línea `Apply complete!`, la salida de `curl.exe -s localhost:3000/api/ping` desde el anfitrión (en PowerShell, `curl` a secas es otra orden), la de `docker port garnier-archivo` y la prueba de que la contraseña no está en el repositorio (`git grep`).
 
 ## 4.4 — Lanzar y programar desde el navegador
 

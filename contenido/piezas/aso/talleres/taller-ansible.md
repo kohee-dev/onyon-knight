@@ -17,7 +17,7 @@ Desde tu terminal, arranca dos servidores y dales la clave pública del taller 3
 ```bash
 docker run -d --name prueba-1 --hostname prueba-1 --network garnier garnier-nodo:taller
 docker run -d --name prueba-2 --hostname prueba-2 --network garnier garnier-nodo:taller
-docker exec estacion cat /datos/claves/taller.pub > taller.pub
+docker cp estacion:/datos/claves/taller.pub taller.pub
 docker cp taller.pub prueba-1:/home/admin/.ssh/authorized_keys
 docker cp taller.pub prueba-2:/home/admin/.ssh/authorized_keys
 docker exec prueba-1 sh -c "chown admin:admin /home/admin/.ssh/authorized_keys && chmod 600 /home/admin/.ssh/authorized_keys"
@@ -146,19 +146,9 @@ La primera vez cambia dos cosas; la segunda, **ninguna**. Un playbook bien escri
 Muestra la diferencia entre el `/etc/motd` actual y el nuevo (líneas con `-` y `+`) y marca la tarea como `changed`, pero **no cambia nada**: `--check` simula. Es lo que se hace antes de aplicar un cambio en servidores reales.
 :::
 
-# 5. Recoger
-
-Desde tu terminal:
-
-```bash
-docker rm -f prueba-1 prueba-2
-```
-
-Borra la carpeta `pruebas/` del repositorio (o deja que la ignore el `.gitignore`).
-
 # Comprueba que lo tienes
 
-Con los dos servidores en marcha, en la estación y dentro de `pruebas/ansible-taller` con `ANSIBLE_CONFIG` exportada:
+Antes de recoger, con los dos servidores en marcha, en la estación y dentro de `pruebas/ansible-taller` con `ANSIBLE_CONFIG` exportada:
 
 ```bash
 ansible --version | grep "config file"
@@ -184,3 +174,13 @@ Servidor de pruebas de la Orquesta de la Garnier. Gestionado por Ansible.
 ```
 
 `changed=0` en el `PLAY RECAP` es lo importante: el playbook ya se había aplicado y no queda nada por hacer.
+
+# Recoger
+
+Desde tu terminal:
+
+```bash
+docker rm -f prueba-1 prueba-2
+```
+
+Borra la carpeta `pruebas/` del repositorio (o deja que la ignore el `.gitignore`).

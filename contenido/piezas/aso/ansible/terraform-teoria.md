@@ -122,12 +122,15 @@ variable "secciones" {
 
 Se usan como `var.secciones`. El bloque `validation` rechaza valores absurdos **antes** de tocar nada, con un mensaje claro.
 
-Dónde se da valor a una variable, de menor a mayor prioridad:
+Dónde se da valor a una variable, de menor a mayor prioridad (cada una gana a las anteriores):
 
 1. El `default` de la propia variable.
-2. Un fichero `terraform.tfvars` en la carpeta (se lee solo).
-3. Variables de entorno `TF_VAR_<nombre>`: `export TF_VAR_ampliacion=true`.
-4. En la orden: `terraform apply -var 'ampliacion=true'`.
+2. Variables de entorno `TF_VAR_<nombre>`: `export TF_VAR_ampliacion=true`.
+3. Un fichero `terraform.tfvars` en la carpeta (se lee solo).
+4. Ficheros `*.auto.tfvars`.
+5. En la orden: `terraform apply -var 'ampliacion=true'`.
+
+Ojo con el orden: si una variable está en `terraform.tfvars`, una `TF_VAR_` con otro valor **no tiene efecto**.
 
 Las **salidas** (*outputs*) muestran datos al terminar y permiten consultarlos después:
 
@@ -236,8 +239,10 @@ resource "tls_private_key" "garnier" {
 }
 ```
 
+Si además se guarda en un fichero con `local_sensitive_file`, el contenido de ese fichero también queda en el estado. En la infraestructura del encargo:
+
 ```bash
-grep -c "BEGIN OPENSSH PRIVATE KEY" terraform.tfstate   # 2: la clave está ahí (dos veces, en dos atributos)
+grep -c "BEGIN OPENSSH PRIVATE KEY" /datos/terraform.tfstate   # 2: la del recurso de clave y la del fichero
 ```
 
 Por eso:

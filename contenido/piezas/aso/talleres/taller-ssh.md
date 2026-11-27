@@ -76,11 +76,13 @@ ls -l /datos/claves/
 El servidor no acepta contraseñas, así que no sirve `ssh-copy-id`. Desde **fuera** de la estación (en tu terminal), copia la clave pública dentro del servidor:
 
 ```bash
-docker exec estacion cat /datos/claves/taller.pub > taller.pub
+docker cp estacion:/datos/claves/taller.pub taller.pub
 docker cp taller.pub prueba-ssh:/home/admin/.ssh/authorized_keys
 docker exec prueba-ssh chown admin:admin /home/admin/.ssh/authorized_keys
 docker exec prueba-ssh chmod 600 /home/admin/.ssh/authorized_keys
 ```
+
+Se copia con `docker cp` y no con `docker exec ... cat > taller.pub` a propósito: en el PowerShell que trae Windows, `>` guarda el fichero en UTF-16 y con finales de línea de Windows, y SSH no reconoce la clave.
 
 Borra después `taller.pub` de tu carpeta: aunque una clave pública no es secreta, no es parte del repositorio.
 
@@ -113,6 +115,8 @@ ssh-keygen -lf ~/.ssh/known_hosts
 El contenedor nuevo ha generado **otras claves de host** al arrancar, así que su huella no coincide con la guardada en `known_hosts`. SSH no puede distinguir eso de un ataque *man in the middle*. En el laboratorio, donde los servidores se recrean continuamente, se borra la entrada antigua (`ssh-keygen -R prueba-ssh`) o se desactiva la comprobación (`host_key_checking = False` en Ansible). En producción, se investiga antes de conectar: un cambio de huella inesperado puede ser un ataque.
 :::
 
+Si has hecho la prueba, el servidor nuevo tampoco tiene tu clave pública: repite el apartado 3 y borra la huella antigua con `ssh-keygen -R prueba-ssh` antes de seguir.
+
 # 5. Simplificar con `~/.ssh/config`
 
 Escribir `-i /datos/claves/taller admin@...` cada vez es incómodo. Crea en la estación `~/.ssh/config`:
@@ -131,19 +135,9 @@ ssh prueba-ssh 'hostname; sudo -n whoami'
 
 El patrón `garnier-*` servirá para todos los servidores del encargo. Este fichero vive en la estación y se pierde si la recreas: en el encargo, Ansible tomará estos datos del inventario.
 
-# 6. Recoger
-
-Desde tu terminal:
-
-```bash
-docker rm -f prueba-ssh
-```
-
-La clave del taller puede quedarse en el volumen: en el encargo, Terraform generará una propia.
-
 # Comprueba que lo tienes
 
-Con `prueba-ssh` en marcha y desde la estación:
+Antes de recoger, con `prueba-ssh` en marcha y desde la estación:
 
 ```bash
 ssh prueba-ssh 'hostname; sudo -n whoami'
@@ -163,3 +157,13 @@ root@prueba-ssh: Permission denied (publickey).
 ```
 
 Las dos últimas líneas demuestran que el servidor **rechaza** entrar sin clave y como `root`. Si alguna de las dos te deja entrar, revisa `/etc/ssh/sshd_config.d/garnier.conf` en la imagen.
+
+# Recoger
+
+Desde tu terminal:
+
+```bash
+docker rm -f prueba-ssh
+```
+
+La clave del taller puede quedarse en el volumen: en el encargo, Terraform generará una propia.
