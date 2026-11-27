@@ -34,6 +34,8 @@ a) Explicad qué parte del encargo hace Terraform y qué parte hace Ansible. Usa
 
 b) ¿Por qué no basta con una de las dos? Dad un ejemplo de algo que sería incómodo o inseguro hacer con Terraform y otro con Ansible.
 
+c) Alguien del grupo propone hacerlo todo con **Docker Compose**. ¿Qué partes del encargo podríais hacer con Compose y cuáles no? Si los cuatro servidores fueran máquinas virtuales o servidores de una empresa, ¿qué parte de vuestro trabajo seguiría sirviendo y qué tendríais que cambiar?
+
 ## 1.3 — Cómo se llega a cada máquina
 
 En vuestra infraestructura se administra a distancia de varias formas.
