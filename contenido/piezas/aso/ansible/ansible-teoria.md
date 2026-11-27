@@ -42,7 +42,7 @@ Ansible trabaja en modo *push*: desde un único equipo se envía el trabajo a to
 
 **Las piezas principales:**
 
-- **Nodo de control:** el equipo donde se instala Ansible y desde el que se lanzan las órdenes. Tiene que ser Linux o macOS (en Windows se recurre a WSL).
+- **Nodo de control:** el equipo donde se instala Ansible y desde el que se lanzan las órdenes. Tiene que ser Linux o macOS: en Windows se recurre a WSL o, como en la práctica de la unidad, a un **contenedor** con Ansible instalado.
 - **Nodos gestionados:** los equipos que se administran. Para la mayoría de los módulos basta con que tengan acceso por SSH y Python.
 - **Inventario:** la lista de nodos, ordenados en grupos, sobre los que se va a actuar.
 - **Módulos:** pequeños programas, cada uno con una misión concreta: instalar un paquete, crear un usuario, copiar un fichero.
@@ -123,6 +123,17 @@ host_key_checking = False
 ```
 
 `host_key_checking = False` evita la pregunta de confianza que hace SSH en el primer acceso. En un laboratorio resulta cómodo, pero en producción conviene no desactivarlo porque reduce la seguridad.
+
+**Dónde busca Ansible su configuración.** Usa el primero que encuentra de esta lista:
+
+1. El fichero que indique la variable de entorno `ANSIBLE_CONFIG`.
+2. `ansible.cfg` en el directorio actual.
+3. `~/.ansible.cfg` en la carpeta personal.
+4. `/etc/ansible/ansible.cfg`.
+
+Con `ansible --version` se ve cuál está usando (línea `config file`). Por seguridad, Ansible **ignora el `ansible.cfg` del directorio actual si cualquiera puede escribir en él**. Pasa, por ejemplo, con una carpeta de Windows montada en un contenedor. En ese caso se fija la ruta con `ANSIBLE_CONFIG`.
+
+Otras opciones habituales de `[defaults]`: `roles_path` (dónde instalar y buscar roles), `vault_password_file` (fichero con la clave de Vault, siempre fuera del repositorio) e `interpreter_python` (qué Python usar en los nodos).
 
 **Patrones de nodos.** El primer argumento de `ansible` y el campo `hosts` de un playbook admiten patrones para elegir a qué nodos se aplica la orden:
 
@@ -495,6 +506,25 @@ Ansible busca los roles en la carpeta `roles/` junto al playbook. Un rol puede e
 
 Antes de usar un rol o una colección de terceros conviene revisar su origen, su mantenimiento y su código, porque se ejecutará con privilegios en tus servidores.
 
+**Dependencias con versión fijada: `requirements.yml`.** En un proyecto real no se instala un rol «a mano» y se olvida, porque quien clone el repositorio no sabría qué necesita. Las dependencias se declaran en un fichero, con la versión exacta, igual que el `package.json` de una aplicación:
+
+```yaml
+---
+# requirements.yml — Roles y colecciones de terceros del proyecto.
+roles:
+  - name: geerlingguy.git
+    version: 3.0.1
+collections:
+  - name: community.windows
+    version: ">=2.0.0"
+```
+
+```bash
+ansible-galaxy install -r requirements.yml
+```
+
+Fijar la versión evita que un cambio del autor del rol rompa tu despliegue de un día para otro. Los roles descargados (la carpeta `roles/` o la que indique `roles_path`) no se suben a Git: se vuelven a instalar desde `requirements.yml`.
+
 # 8. Ansible Vault: gestión de secretos
 
 Ansible Vault cifra ficheros o valores concretos para que contraseñas, claves y tokens puedan guardarse en el repositorio sin quedar en claro. Los playbooks se versionan en Git, y un secreto escrito en texto plano en un repositorio es un secreto filtrado.
@@ -572,9 +602,17 @@ Un playbook se prueba por capas: primero la sintaxis, después la simulación y,
 | `-v`, `-vv`, `-vvv` | Detalle creciente de la ejecución; `-vvv` incluye la conexión SSH |
 | `ansible.builtin.debug` | Muestra el valor de una variable durante la ejecución |
 | `--step` y `--start-at-task` | Ejecutar tarea a tarea o empezar en una tarea concreta |
-| `ansible-lint` | Revisa el estilo y las malas prácticas del código (se instala aparte) |
+| `ansible-lint` | Revisa el estilo y las malas prácticas del código (se instala aparte con `pip install ansible-lint`) |
 
 La simulación con `--check` es fiable en la mayoría de módulos, pero no en todos: las tareas que dependen del resultado de otras anteriores pueden fallar en modo simulación aunque la ejecución real funcione.
+
+**`ansible-lint`.** Revisa todo el proyecto y avisa de nombres de módulo incompletos, tareas sin nombre, `shell` donde hay un módulo, permisos sin indicar, YAML mal formateado y muchas reglas más. Se lanza en la carpeta del proyecto:
+
+```bash
+ansible-lint
+```
+
+Un fichero `.ansible-lint` fija el nivel de exigencia (`profile: production` es el más estricto) y qué carpetas se ignoran, como los roles descargados. En un equipo de trabajo se ejecuta antes de cada *pull request*, junto con `--syntax-check`. Si no pasa, el cambio no entra.
 
 **Errores frecuentes:**
 
@@ -617,24 +655,92 @@ Ejemplo de cabecera:
   ...
 ```
 
-# 10. Chuleta de comandos y relación con la actividad
+# 10. Gestionar Windows: WinRM y módulos `win_*`
 
-Esta tabla indica qué apartados de estos apuntes necesitas para cada pregunta de la actividad [[ansible-automatizacion|Automatización de servidores con Ansible]], y la siguiente reúne los comandos que más usarás.
+Ansible también administra Windows, pero **no por SSH ni con Python**: usa **WinRM** (*Windows Remote Management*), el servicio de administración remota del propio Windows, y módulos escritos en PowerShell. El nodo de control sigue siendo Linux.
 
-**Qué leer para cada pregunta:**
+**Preparar el nodo Windows.** WinRM viene instalado, pero desactivado. En PowerShell como administrador:
 
-| Pregunta de la actividad | Tema | Apartados de los apuntes |
-|---|---|---|
-| 1 | Inventario, `ansible.cfg`, `ping` y facts | 2, 3 |
-| 2 | Comandos ad-hoc con `apt` y `service`; idempotencia | 2, 3 |
-| 3 | Primer playbook: `apt`, `service`, `uri` | 4 |
-| 4 | Cuentas con `user` y `group`; bucles | 4, 5 |
-| 5 | Tareas programadas con `cron` | 4 |
-| 6 | Variables, plantillas Jinja2, `when`, handlers y `flush_handlers` | 5, 6 |
-| 7 | Adaptar un playbook: de `shell` a módulos; `--check --diff` | 4, 6, 9 |
-| 8 | Roles, `defaults`, `ansible-doc` | 5, 7 |
-| 9 | Ansible Vault, `no_log`, permisos | 8 |
-| 10 | README, comentarios y comprobación de sintaxis | 9 |
+```powershell
+Enable-PSRemoting -Force          # arranca WinRM y crea el «listener» HTTP en el puerto 5985
+winrm enumerate winrm/config/listener
+```
+
+Para cerrarlo al terminar no basta con `Disable-PSRemoting -Force`: ese cmdlet no para el servicio ni quita el *listener* ni las reglas del cortafuegos. Hay que hacerlo aparte (`Stop-Service WinRM`, `Set-Service WinRM -StartupType Disabled`, borrar el *listener* y desactivar las reglas «Windows Remote Management»).
+
+**El inventario de un nodo Windows.** Se cambia la conexión y se indica cómo autenticarse:
+
+```ini
+[windows]
+taquilla ansible_host=192.168.1.50
+
+[windows:vars]
+ansible_connection=winrm
+ansible_port=5985
+ansible_winrm_transport=ntlm
+ansible_winrm_message_encryption=always
+ansible_user=administrador
+ansible_password="{{ vault_clave_windows }}"
+```
+
+| Opción | Qué significa |
+|---|---|
+| `ansible_connection=winrm` | Conectar por WinRM en vez de SSH |
+| `ansible_port` | 5985 para HTTP, 5986 para HTTPS |
+| `ansible_winrm_transport` | Cómo se autentica: `ntlm` (cuentas locales), `kerberos` (dominio), `basic` (no recomendable) |
+| `ansible_winrm_message_encryption` | Con NTLM o Kerberos el mensaje viaja cifrado aunque el puerto sea HTTP |
+
+El nodo de control necesita la librería de Python `pywinrm` (`pip install pywinrm`) y las colecciones de Windows (`ansible-galaxy collection install ansible.windows community.windows`).
+
+**Módulos más usados.** Tienen la forma `ansible.windows.win_*` o `community.windows.win_*`:
+
+| Módulo | Equivale en Linux a |
+|---|---|
+| `ansible.windows.win_ping` | `ansible.builtin.ping` |
+| `ansible.windows.win_user`, `win_group` | `user`, `group` |
+| `ansible.windows.win_file`, `win_copy` | `file`, `copy` |
+| `ansible.windows.win_service` | `service` |
+| `ansible.windows.win_powershell` | `shell`, pero con PowerShell |
+| `community.windows.win_scheduled_task` | `cron` (Programador de tareas) |
+
+```yaml
+---
+# taquilla.yml — Crea una cuenta y una tarea programada en Windows.
+- name: Taquilla
+  hosts: windows
+  tasks:
+    - name: Crear la cuenta del Impresario
+      ansible.windows.win_user:
+        name: impresario
+        password: "{{ vault_clave_impresario }}"
+        groups: [Users]
+
+    - name: Programar el recuento diario
+      community.windows.win_scheduled_task:
+        name: Recuento de entradas
+        actions:
+          - path: powershell.exe
+            arguments: -NoProfile -Command "Add-Content C:\Garnier\recuento.log (Get-Date)"
+        triggers:
+          - type: daily
+            start_boundary: "2027-01-01T20:00:00"
+        username: SYSTEM
+```
+
+En Windows no hay `become` con `sudo`: la cuenta con la que se conecta ya debe tener los permisos necesarios.
+
+# 11. Chuleta de comandos y relación con la actividad
+
+Esta tabla indica qué apartados de estos apuntes necesitas en cada fase del encargo [[gira-garnier|La gira de la Garnier]], y la siguiente reúne los comandos que más usarás.
+
+**Qué leer para cada fase:**
+
+| Fase del encargo | Apartados de los apuntes |
+|---|---|
+| 1 · Infraestructura (inventario generado, primer contacto con los nodos) | 2, 3 |
+| 2 · Configuración (cuentas, plantillas, handlers, `cron`, rol de Galaxy, Vault) | 4, 5, 6, 7, 8 |
+| 3 · Operación (incidente, `ansible-lint`, documentación) | 9 |
+| 4 · Ampliación (Windows por WinRM) | 10 |
 
 **Chuleta de comandos:**
 
@@ -653,6 +759,9 @@ Esta tabla indica qué apartados de estos apuntes necesitas para cada pregunta d
 | Pasar una variable en la ejecución | `ansible-playbook play.yml -e web_puerto=9000` |
 | Ver la ayuda de un módulo | `ansible-doc ansible.builtin.template` |
 | Crear el esqueleto de un rol | `ansible-galaxy role init roles/nombre` |
+| Instalar las dependencias del proyecto | `ansible-galaxy install -r requirements.yml` |
+| Revisar el proyecto | `ansible-lint` |
+| Ver qué `ansible.cfg` se usa | `ansible --version` |
 | Cifrar un fichero con Vault | `ansible-vault encrypt fichero.yml` |
 | Ver un fichero cifrado | `ansible-vault view fichero.yml` |
 | Ejecutar con la clave de Vault | `ansible-playbook play.yml --vault-password-file .vault_pass` |

@@ -23,12 +23,12 @@ async function error(cuerpo: string, otras: PiezaFuente[] = [b]): Promise<string
 
 describe('descargas', () => {
   it('enlaza un fichero de public/descargas con la ruta base', async () => {
-    expect((await render('[doc](descarga:ansible-entrega1.docx)')).html).toContain('href="/ok/descargas/ansible-entrega1.docx"');
+    expect((await render('[doc](descarga:gira-garnier-hoja-control.docx)')).html).toContain('href="/ok/descargas/gira-garnier-hoja-control.docx"');
   });
 
   it('usa una URL absoluta dentro de una unidad', async () => {
-    expect((await render('[doc](descarga:ansible-entrega1.docx)', { unidad: ['a'] })).html).toContain(
-      'href="https://ej.es/ok/descargas/ansible-entrega1.docx"',
+    expect((await render('[doc](descarga:gira-garnier-hoja-control.docx)', { unidad: ['a'] })).html).toContain(
+      'href="https://ej.es/ok/descargas/gira-garnier-hoja-control.docx"',
     );
   });
 

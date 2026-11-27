@@ -420,6 +420,33 @@ ssh -X ana@servidor                        # reenvío de ventanas gráficas (X11
 
 Con el primer ejemplo, un cliente VNC apuntando a `localhost:5901` en tu equipo llega al VNC del servidor, pero el tráfico viaja cifrado por SSH.
 
+**El fichero `~/.ssh/config`.** Cuando administras muchos equipos, escribir cada vez usuario, puerto y clave es lento y da errores. El cliente SSH lee este fichero y aplica los valores de cada bloque `Host`:
+
+```text
+# ~/.ssh/config — permisos 600
+Host garnier-*
+    User admin
+    IdentityFile ~/.ssh/garnier
+    IdentitiesOnly yes
+
+Host bastion
+    HostName 203.0.113.10
+    Port 2222
+    User ana
+```
+
+Con eso, `ssh garnier-cuerdas` ya entra como `admin` con la clave `~/.ssh/garnier`, y `ssh bastion` usa la dirección, el puerto y el usuario indicados. `scp`, `rsync` y Ansible (que usa el cliente SSH del sistema) leen el mismo fichero. `IdentitiesOnly yes` evita que SSH pruebe todas tus claves una tras otra: hay servidores que cortan la conexión tras varios intentos fallidos.
+
+**`known_hosts` cuando todo está automatizado.** La primera vez que te conectas a un servidor, SSH muestra la huella de su clave y pregunta si confías en ella. Al aceptarla, la guarda en `~/.ssh/known_hosts` y en adelante comprueba que sea la misma: así detecta que alguien se haga pasar por el servidor (*man in the middle*). Esa pregunta bloquea un script o un playbook. Hay tres maneras de resolverlo, de más a menos segura:
+
+| Opción | Cómo | Cuándo |
+|---|---|---|
+| Registrar las huellas por adelantado | `ssh-keyscan servidor >> ~/.ssh/known_hosts`, comprobando la huella por otro canal | Servidores estables, producción |
+| Aceptar solo la primera vez | `StrictHostKeyChecking accept-new` en `~/.ssh/config` | Equipos nuevos que luego no cambian |
+| No comprobar | `StrictHostKeyChecking no` o, en Ansible, `host_key_checking = False` | Laboratorios donde los equipos se destruyen y recrean con claves nuevas |
+
+En un laboratorio con contenedores que se recrean a cada rato, la huella cambia cada vez y la tercera opción es razonable. En producción, desactivar la comprobación elimina justo la protección que da SSH.
+
 ::: pregunta[Escribe la orden para (a) subir `copia.tar.gz` al directorio `/home/ana/` del servidor, que escucha en el puerto 2222, y (b) ver el espacio libre del disco del servidor sin abrir una sesión interactiva.]
 ```bash
 scp -P 2222 copia.tar.gz ana@servidor:/home/ana/    # (a) -P mayúscula en scp
@@ -438,6 +465,8 @@ En una red real conviven sistemas distintos: administradores con Windows que man
 - **Desde Windows a Linux**: las versiones actuales de Windows incluyen el cliente OpenSSH, así que `ssh ana@servidor` funciona igual en PowerShell. También existen clientes externos como PuTTY.
 - **De Linux a Windows**: se puede usar el servidor OpenSSH que Windows ofrece como característica opcional, o el escritorio remoto (RDP) con un cliente como Remmina o `xfreerdp`.
 - **De Linux a Linux** y entre distribuciones distintas: funciona igual; solo cambia el nombre del servicio (`ssh` o `sshd`) y el sistema de cortafuegos.
+
+- **De Linux a Windows para administrar, no para abrir una sesión**: **WinRM** (*Windows Remote Management*) es el servicio de administración remota del propio Windows. Escucha en el puerto 5985 (HTTP) o 5986 (HTTPS), no es orientado a sesión (cada orden es una petición independiente) y es el que usan PowerShell Remoting y herramientas como Ansible para gestionar Windows desde Linux. Se activa con `Enable-PSRemoting` y se comprueba con `winrm enumerate winrm/config/listener`. Con autenticación NTLM o Kerberos el contenido viaja cifrado incluso por HTTP.
 
 Cuando pruebes un acceso entre sistemas distintos, sigue siempre el mismo orden para localizar los fallos:
 
