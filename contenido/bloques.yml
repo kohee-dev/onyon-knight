@@ -3,6 +3,9 @@ aso:
   acceso-remoto:
     tema: servicios-red
     dificultad: intermedio
+  gira-garnier:
+    tema: automatizacion
+    dificultad: avanzado
   ansible:
     tema: automatizacion
     dificultad: intermedio
